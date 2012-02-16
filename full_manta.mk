@@ -14,11 +14,11 @@
 
 #
 # This file is the build configuration for a full Android
-# build for toro hardware. This cleanly combines a set of
+# build for manta hardware. This cleanly combines a set of
 # device-specific aspects (drivers) with a device-agnostic
 # product configuration (apps). Except for a few implementation
 # details, it only fundamentally contains two inherit-product
-# lines, full and toro, hence its name.
+# lines, full and manta, hence its name.
 #
 
 # Live Wallpapers
@@ -40,5 +40,6 @@ $(call inherit-product, device/samsung/manta/device.mk)
 PRODUCT_NAME := full_manta
 PRODUCT_DEVICE := manta
 PRODUCT_BRAND := Android
-PRODUCT_MODEL := Manta
+PRODUCT_MODEL := Full AOSP on Manta
 PRODUCT_MANUFACTURER := Samsung
+PRODUCT_RESTRICT_VENDOR_FILES := owner path
