@@ -20,7 +20,10 @@ else
 LOCAL_KERNEL := $(TARGET_PREBUILT_KERNEL)
 endif
 
-PRODUCT_COPY_FILES :=
+PRODUCT_COPY_FILES := \
+	device/samsung/manta/init.smdk5250.rc:root/init.smdk5250.rc \
+	device/samsung/manta/init.smdk5250.usb.rc:root/init.smdk5250.usb.rc \
+	device/samsung/manta/ueventd.smdk5250.rc:root/ueventd.smdk5250.rc
 
 #PRODUCT_COPY_FILES += \
 #	$(LOCAL_KERNEL):kernel

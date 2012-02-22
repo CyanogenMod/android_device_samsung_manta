@@ -1,0 +1,47 @@
+import init.smdk5250.usb.rc
+
+on early-init
+    export EXTERNAL_STORAGE /mnt/sdcard
+    export SECONDARY_STORAGE /mnt/ext_sd
+    mkdir /mnt/sdcard 0000 system system
+    symlink /mnt/sdcard /sdcard
+    mkdir /mnt/ext_sd 0000 system system
+    mkdir /mnt/usb 0000 system system
+
+on post-fs-data
+    # we will remap this as /mnt/sdcard with the sdcard fuse tool
+    mkdir /data/media 0775 media_rw media_rw
+    chown media_rw media_rw /data/media
+
+on boot
+    setprop ro.build.product smdk5250
+    setprop ro.product.device smdk5250
+    setprop ro.radio.noril yes
+
+on fs
+    mount ext4 /dev/block/mmcblk0p2 /system ro wait
+    mount ext4 /dev/block/mmcblk0p3 /data nosuid nodev noatime wait crypt discard,noauto_da_alloc
+    mount ext4 /dev/block/mmcblk0p4 /cache nosuid nodev noatime
+    setprop ro.crypto.fuse_sdcard true
+
+# Permissions for backlight
+    chmod 0666 /sys/class/backlight/pwm-backlight.0/brightness
+    chown system system /sys/class/backlight/pwm-backlight.0/brightness
+
+# Permissions for Gscaler log level
+    chmod 0666 /sys/module/gsc/parameters/gsc_dbg
+
+# create filesystem if necessary
+service setup_fs /system/bin/setup_fs \
+            /dev/block/mmcblk0p3 \
+            /dev/block/mmcblk0p4
+    class core
+    user root
+    group root
+    oneshot
+
+# create virtual SD card at /mnt/sdcard, based on the /data/media directory
+# daemon will drop to user/group system/media_rw after initializing
+# underlying files in /data/media will be created with user and group media_rw (1023)
+service sdcard /system/bin/sdcard /data/media 1023 1023
+    class late_start
