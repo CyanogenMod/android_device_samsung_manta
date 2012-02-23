@@ -17,6 +17,8 @@ on boot
     setprop ro.build.product smdk5250
     setprop ro.product.device smdk5250
     setprop ro.radio.noril yes
+    # HACK, suspend is broken. remove me when it's fixed
+    write /sys/power/wake_lock taken_from_init_smdk5250_rc
 
 on fs
     mount ext4 /dev/block/mmcblk0p2 /system ro wait
