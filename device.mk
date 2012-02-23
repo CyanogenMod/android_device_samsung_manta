@@ -28,6 +28,12 @@ PRODUCT_COPY_FILES := \
 #PRODUCT_COPY_FILES += \
 #	$(LOCAL_KERNEL):kernel
 
+# Input device files for smdk5250
+PRODUCT_COPY_FILES += \
+	device/samsung/manta/egalax_i2c.idc:system/usr/idc/egalax_i2c.idc \
+	device/samsung/manta/smdk5250-keypad.kl:system/usr/keylayout/smdk5250-keypad.kl \
+	device/samsung/manta/smdk5250-keypad.kcm:system/usr/keychars/smdk5250-keypad.kcm
+
 PRODUCT_PACKAGES := \
         make_ext4fs
 
