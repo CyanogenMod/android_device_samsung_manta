@@ -42,9 +42,9 @@ PRODUCT_CHARACTERISTICS := tablet,nosdcard
 DEVICE_PACKAGE_OVERLAYS := \
     device/samsung/manta/overlay
 
-#HWC Hal
-#PRODUCT_PACKAGES += \
-#    hwcomposer.<your arch here>
+# for now include gralloc here. should come from hardware/samsung_slsi/exynos5
+PRODUCT_PACKAGES += \
+    gralloc.exynos5
 
 PRODUCT_TAGS += dalvik.gc.type-precise
 
