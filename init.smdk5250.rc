@@ -2,23 +2,26 @@ import init.smdk5250.usb.rc
 
 on early-init
     export EXTERNAL_STORAGE /mnt/sdcard
-    export SECONDARY_STORAGE /mnt/ext_sd
     mkdir /mnt/sdcard 0000 system system
     symlink /mnt/sdcard /sdcard
-    mkdir /mnt/ext_sd 0000 system system
-    mkdir /mnt/usb 0000 system system
 
 on post-fs-data
     # we will remap this as /mnt/sdcard with the sdcard fuse tool
     mkdir /data/media 0775 media_rw media_rw
     chown media_rw media_rw /data/media
+    setprop vold.post_fs_data_done 1
 
 on boot
-    setprop ro.build.product smdk5250
-    setprop ro.product.device smdk5250
+    mount debugfs /sys/kernel/debug /sys/kernel/debug
     setprop ro.radio.noril yes
+
     # HACK, suspend is broken. remove me when it's fixed
     write /sys/power/wake_lock taken_from_init_smdk5250_rc
+
+    # Set up kernel tracing, but disable it by default
+    chmod 0222 /sys/kernel/debug/tracing/trace_marker
+    write /sys/kernel/debug/tracing/tracing_on 0
+
 
 on fs
     mount ext4 /dev/block/mmcblk0p2 /system ro wait
