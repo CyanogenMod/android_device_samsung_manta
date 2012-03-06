@@ -1,0 +1,8 @@
+# mount point	fstype		device
+
+/system		ext4		/dev/block/platform/dw_mmc/by-name/system
+/cache		ext4		/dev/block/platform/dw_mmc/by-name/cache
+/data		ext4		/dev/block/platform/dw_mmc/by-name/userdata
+/boot		emmc		/dev/block/platform/dw_mmc/by-name/boot
+/recovery	emmc		/dev/block/platform/dw_mmc/by-name/recovery
+/radio		emmc		/dev/block/platform/dw_mmc/by-name/radio
