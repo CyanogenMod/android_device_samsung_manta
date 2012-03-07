@@ -22,6 +22,12 @@ endif
 
 PRODUCT_COPY_FILES := \
 	$(LOCAL_KERNEL):kernel \
+	device/samsung/manta/init.manta.rc:root/init.manta.rc \
+	device/samsung/manta/init.manta.usb.rc:root/init.manta.usb.rc \
+	device/samsung/manta/ueventd.manta.rc:root/ueventd.manta.rc
+
+# Init files for booting smdk5250 with a manta image
+PRODUCT_COPY_FILES += \
 	device/samsung/manta/init.smdk5250.rc:root/init.smdk5250.rc \
 	device/samsung/manta/init.smdk5250.usb.rc:root/init.smdk5250.usb.rc \
 	device/samsung/manta/ueventd.smdk5250.rc:root/ueventd.smdk5250.rc
