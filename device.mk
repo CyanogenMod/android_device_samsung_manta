@@ -45,8 +45,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES := \
         make_ext4fs
 
-PRODUCT_AAPT_CONFIG := normal hdpi
-PRODUCT_AAPT_PREF_CONFIG := hdpi
+PRODUCT_AAPT_CONFIG := xlarge hdpi xhdpi
+PRODUCT_AAPT_PREF_CONFIG := xhdpi
 
 PRODUCT_CHARACTERISTICS := tablet,nosdcard
 
