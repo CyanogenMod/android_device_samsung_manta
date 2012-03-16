@@ -47,7 +47,11 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_COPY_FILES += \
 	frameworks/base/data/etc/tablet_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml \
-	frameworks/base/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml
+	frameworks/base/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
+	frameworks/base/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml
+
+PRODUCT_COPY_FILES += \
+	device/samsung/manta/bcmdhd.cal:system/etc/wifi/bcmdhd.cal
 
 PRODUCT_PACKAGES := \
         make_ext4fs \
@@ -82,3 +86,8 @@ PRODUCT_PACKAGES += \
 $(call inherit-product-if-exists, vendor/samsung_slsi/exynos5/exynos5-vendor.mk)
 $(call inherit-product-if-exists, vendor/samsung/manta/device-vendor.mk)
 $(call inherit-product, frameworks/base/build/tablet-dalvik-heap.mk)
+
+PRODUCT_PROPERTY_OVERRIDES := \
+	wifi.interface=wlan0
+
+$(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4324/device-bcm.mk)
