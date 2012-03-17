@@ -79,6 +79,9 @@ PRODUCT_PACKAGES += \
 	audio.primary.default \
 	audio.a2dp.default
 
+PRODUCT_PACKAGES += \
+	power.manta
+
 # Filesystem management tools
 PRODUCT_PACKAGES += \
 	make_ext4fs
