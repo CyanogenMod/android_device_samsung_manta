@@ -59,3 +59,8 @@ service iprenew_wlan0 /system/bin/dhcpcd -n
     class main
     disabled
     oneshot
+
+# on userdebug and eng builds, enable kgdb on the serial console
+on property:ro.debuggable=1
+    write /sys/module/kgdboc/parameters/kgdboc ttyFIQ2
+    write /sys/module/fiq_debugger/parameters/kgdb_enable 1
