@@ -86,12 +86,12 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     make_ext4fs
 
-$(call inherit-product-if-exists, vendor/samsung_slsi/exynos5/exynos5-vendor.mk)
-$(call inherit-product-if-exists, vendor/samsung/manta/device-vendor.mk)
-$(call inherit-product, frameworks/native/build/tablet-dalvik-heap.mk)
-
 PRODUCT_PROPERTY_OVERRIDES := \
     wifi.interface=wlan0 \
     ro.sf.lcd_density=320
+
+$(call inherit-product-if-exists, vendor/samsung_slsi/exynos5/exynos5-vendor.mk)
+$(call inherit-product-if-exists, vendor/samsung/manta/device-vendor.mk)
+$(call inherit-product, frameworks/native/build/tablet-dalvik-heap.mk)
 
 $(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4324/device-bcm.mk)
