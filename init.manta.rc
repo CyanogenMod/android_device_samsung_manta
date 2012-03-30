@@ -1,4 +1,4 @@
-import init.smdk5250.usb.rc
+import init.manta.usb.rc
 
 on early-init
     export EXTERNAL_STORAGE /mnt/sdcard
