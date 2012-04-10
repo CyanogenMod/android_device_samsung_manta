@@ -1,13 +1,15 @@
 import init.smdk5250.usb.rc
 
 on early-init
-    export EXTERNAL_STORAGE /mnt/sdcard
-    mkdir /mnt/sdcard 0000 system system
-    symlink /mnt/sdcard /sdcard
+    export EXTERNAL_STORAGE /storage/sdcard0
+    mkdir /storage 0550 system sdcard_r
+    mkdir /storage/sdcard0 0000 system system
+    symlink /storage/sdcard0 /sdcard
+    symlink /storage/sdcard0 /mnt/sdcard
 
 on post-fs-data
-    # we will remap this as /mnt/sdcard with the sdcard fuse tool
-    mkdir /data/media 0775 media_rw media_rw
+    # we will remap this as /storage/sdcard with the sdcard fuse tool
+    mkdir /data/media 0770 media_rw media_rw
     chown media_rw media_rw /data/media
     setprop vold.post_fs_data_done 1
 
@@ -45,7 +47,7 @@ service setup_fs /system/bin/setup_fs \
     group root
     oneshot
 
-# create virtual SD card at /mnt/sdcard, based on the /data/media directory
+# create virtual SD card at /storage/sdcard, based on the /data/media directory
 # daemon will drop to user/group system/media_rw after initializing
 # underlying files in /data/media will be created with user and group media_rw (1023)
 service sdcard /system/bin/sdcard /data/media 1023 1023
