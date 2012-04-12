@@ -26,9 +26,7 @@ on boot
     write /sys/kernel/debug/tracing/tracing_on 0
 
 on fs
-    mount ext4 /dev/block/platform/dw_mmc.0/by-name/system /system ro wait
-    mount ext4 /dev/block/platform/dw_mmc.0/by-name/userdata /data wait nosuid nodev noatime nomblk_io_submit
-    mount ext4 /dev/block/platform/dw_mmc.0/by-name/cache /cache wait nosuid nodev noatime nomblk_io_submit
+    mount_all /fstab.manta
     setprop ro.crypto.fuse_sdcard true
 
 # Permissions for backlight
