@@ -59,6 +59,14 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/samsung/manta/bcmdhd.cal:system/etc/wifi/bcmdhd.cal
 
+# audio mixer paths
+PRODUCT_COPY_FILES += \
+    device/samsung/manta/mixer_paths.xml:system/etc/mixer_paths.xml
+
+# audio policy configuration
+PRODUCT_COPY_FILES += \
+    device/samsung/manta/audio_policy.conf:system/etc/audio_policy.conf
+
 PRODUCT_PACKAGES := \
     make_ext4fs \
     lights.manta
@@ -82,7 +90,7 @@ PRODUCT_PACKAGES += \
     com.android.future.usb.accessory
 
 PRODUCT_PACKAGES += \
-    audio.primary.default \
+    audio.primary.manta \
     audio.a2dp.default
 
 PRODUCT_PACKAGES += \
