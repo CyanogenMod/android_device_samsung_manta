@@ -161,6 +161,17 @@ static void power_set_interactive(struct power_module *module, int on)
     ALOGV("power_set_interactive: %d done\n", on);
 }
 
+static void manta_power_hint(struct power_module *module, power_hint_t hint,
+                             void *data)
+{
+    switch (hint) {
+    case POWER_HINT_VSYNC:
+        break;
+
+    default:
+            break;
+    }
+}
 
 static struct hw_module_methods_t power_module_methods = {
     .open = NULL,
@@ -179,5 +190,6 @@ struct power_module HAL_MODULE_INFO_SYM = {
 
     .init = power_init,
     .setInteractive = power_set_interactive,
+    .powerHint = manta_power_hint,
 };
 
