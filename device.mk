@@ -105,6 +105,11 @@ PRODUCT_PROPERTY_OVERRIDES += \
     dalvik.vm.heapgrowthlimit=64m \
     dalvik.vm.heapsize=256m
 
+# for off charging mode
+PRODUCT_PACKAGES += \
+    charger \
+    charger_res_images
+
 $(call inherit-product, hardware/samsung_slsi/exynos5/exynos5.mk)
 $(call inherit-product-if-exists, vendor/samsung_slsi/exynos5/exynos5-vendor.mk)
 $(call inherit-product-if-exists, vendor/samsung/manta/device-vendor.mk)
