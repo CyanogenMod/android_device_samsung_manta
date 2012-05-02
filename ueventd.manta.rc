@@ -3,3 +3,14 @@
 /dev/ion                  0666   system     system
 /dev/video6               0660   media      media
 
+# gscalers
+/dev/video23              0660   media      media
+/dev/video26              0660   media      media
+/dev/video29              0660   media      media
+/dev/video32              0660   media      media
+
+# camera
+/dev/video41              0660   media      media
+/dev/video42              0660   media      media
+/dev/video43              0660   media      media
+/dev/media2               0660   media      media
