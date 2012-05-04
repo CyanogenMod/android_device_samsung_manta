@@ -19,8 +19,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <pthread.h>
-#include <semaphore.h>
 #include <unistd.h>
 //#define LOG_NDEBUG 0
 
@@ -30,113 +28,8 @@
 #include <hardware/hardware.h>
 #include <hardware/power.h>
 
-#define SYS_POWER_STATE "/sys/power/state"
-#define SYS_POWER_WAKEUP_COUNT "/sys/power/wakeup_count"
-
-static int state_fd;
-static int wakeup_count_fd;
-static int interactive_state;
-static pthread_t suspend_thread;
-static sem_t suspend_lockout;
-static const char *sleep_state = "mem";
-
-static void *suspend_thread_func(void *arg)
-{
-    char buf[80];
-    char wakeup_count[20];
-    int wakeup_count_len;
-    int ret;
-
-    while (1) {
-        usleep(100000);
-        ALOGV("%s: read wakeup_count\n", __func__);
-        lseek(wakeup_count_fd, 0, SEEK_SET);
-        wakeup_count_len = read(wakeup_count_fd, wakeup_count, sizeof(wakeup_count));
-        if (wakeup_count_len < 0) {
-            strerror_r(errno, buf, sizeof(buf));
-            ALOGE("Error reading from %s: %s\n", SYS_POWER_WAKEUP_COUNT, buf);
-            wakeup_count_len = 0;
-            continue;
-        }
-        if (!wakeup_count_len) {
-            ALOGE("Empty wakeup count\n");
-            continue;
-        }
-
-        ALOGV("%s: wait\n", __func__);
-        ret = sem_wait(&suspend_lockout);
-        if (ret < 0) {
-            strerror_r(errno, buf, sizeof(buf));
-            ALOGE("Error waiting on semaphore: %s\n", buf);
-            continue;
-        }
-
-        ALOGV("%s: write %*s to wakeup_count\n", __func__, wakeup_count_len, wakeup_count);
-        ret = write(wakeup_count_fd, wakeup_count, wakeup_count_len);
-        if (ret < 0) {
-            strerror_r(errno, buf, sizeof(buf));
-            ALOGE("Error writing to %s: %s\n", SYS_POWER_WAKEUP_COUNT, buf);
-        } else {
-            ALOGV("%s: write %s to %s\n", __func__, sleep_state, SYS_POWER_STATE);
-            ret = write(state_fd, sleep_state, strlen(sleep_state));
-            if (ret < 0) {
-                strerror_r(errno, buf, sizeof(buf));
-                ALOGE("Error writing to %s: %s\n", SYS_POWER_STATE, buf);
-            }
-        }
-
-        ALOGV("%s: release sem\n", __func__);
-        ret = sem_post(&suspend_lockout);
-        if (ret < 0) {
-            strerror_r(errno, buf, sizeof(buf));
-            ALOGE("Error releasing semaphore: %s\n", buf);
-        }
-    }
-    return NULL;
-}
-
 static void power_init(struct power_module *module)
 {
-    int ret;
-    char buf[80];
-
-    state_fd = open(SYS_POWER_STATE, O_RDWR);
-    if (state_fd < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error opening %s: %s\n", SYS_POWER_STATE, buf);
-        goto err_open_state;
-    }
-
-    wakeup_count_fd = open(SYS_POWER_WAKEUP_COUNT, O_RDWR);
-    if (wakeup_count_fd < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error opening %s: %s\n", SYS_POWER_WAKEUP_COUNT, buf);
-        goto err_open_wakeup_count;
-    }
-
-    interactive_state = 1;
-    ret = sem_init(&suspend_lockout, 0, 0);
-    if (ret < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error creating semaphore: %s\n", buf);
-        goto err_sem_init;
-    }
-    ret = pthread_create(&suspend_thread, NULL, suspend_thread_func, NULL);
-    if (ret) {
-        strerror_r(ret, buf, sizeof(buf));
-        ALOGE("Error creating thread: %s\n", buf);
-        goto err_pthread_create;
-    }
-    return;
-
-err_pthread_create:
-    sem_destroy(&suspend_lockout);
-err_sem_init:
-    close(wakeup_count_fd);
-err_open_wakeup_count:
-    close(state_fd);
-err_open_state:
-    return;
 }
 
 static void power_set_interactive(struct power_module *module, int on)
@@ -145,19 +38,7 @@ static void power_set_interactive(struct power_module *module, int on)
     int ret;
 
     ALOGV("power_set_interactive: %d\n", on);
-    if (interactive_state == !!on)
-        return;
 
-    interactive_state = !!on;
-    if (on)
-        ret = sem_wait(&suspend_lockout);
-    else
-        ret = sem_post(&suspend_lockout);
-
-    if (ret < 0) {
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error changing semaphore: %s\n", buf);
-    }
     ALOGV("power_set_interactive: %d done\n", on);
 }
 
