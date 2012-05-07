@@ -52,6 +52,8 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
     frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
     device/samsung/manta/media_codecs.xml:system/etc/media_codecs.xml \
+    frameworks/native/data/etc/android.hardware.camera.xml:system/etc/permissions/android.hardware.camera.xml \
+    frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml \
 
 
 PRODUCT_COPY_FILES += \
@@ -85,6 +87,9 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PACKAGES += \
     power.manta
+
+PRODUCT_PACKAGES += \
+    camera.exynos5
 
 # Filesystem management tools
 PRODUCT_PACKAGES += \
