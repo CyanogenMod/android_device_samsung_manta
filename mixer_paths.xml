@@ -53,5 +53,6 @@
     <ctl name="MIXINL IN1L Switch" value="1" />
     <ctl name="MIXINL IN1L Volume" value="1" />
     <ctl name="IN1L Switch" value="1" />
+    <ctl name="MIXINL IN1LP Volume" value="7" />
   </path>
 </mixer>
