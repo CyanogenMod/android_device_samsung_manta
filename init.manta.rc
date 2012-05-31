@@ -30,7 +30,7 @@ on fs
     setprop ro.crypto.fuse_sdcard true
 
 # Permissions for backlight
-    chmod 0666 /sys/class/backlight/pwm-backlight.0/brightness
+    chmod 0660 /sys/class/backlight/pwm-backlight.0/brightness
     chown system system /sys/class/backlight/pwm-backlight.0/brightness
 
 # create virtual SD card at /storage/sdcard0, based on the /data/media directory
