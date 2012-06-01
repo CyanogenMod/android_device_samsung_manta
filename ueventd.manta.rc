@@ -3,6 +3,15 @@
 /dev/ion                  0666   system     system
 /dev/video6               0660   media      media
 
+# iio devices
+/dev/iio:device*          0660   system     system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0077/iio:device*    events/in_pressure0_thresh_either_en      0660    system   system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0077/iio:device*    sampling_frequency        0660    system    system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0077/iio:device*    in_pressure0_input        0660    system    system
+/sys/devices/platform/s3c2440-i2c.2/i2c-2/2-0023/iio:device*    events/in_illuminance0_thresh_either_en   0660    system   system
+/sys/devices/platform/s3c2440-i2c.2/i2c-2/2-0023/iio:device*    sampling_frequency        0660    system    system
+/sys/devices/platform/s3c2440-i2c.2/i2c-2/2-0023/iio:device*    in_illuminance0_input     0660    system    system
+
 # gscalers
 /dev/video23              0660   media      media
 /dev/video26              0660   media      media

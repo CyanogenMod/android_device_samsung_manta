@@ -69,7 +69,8 @@ PRODUCT_COPY_FILES += \
 
 PRODUCT_PACKAGES := \
     make_ext4fs \
-    lights.manta
+    lights.manta \
+    sensors.manta
 
 PRODUCT_AAPT_CONFIG := xlarge hdpi xhdpi
 PRODUCT_AAPT_PREF_CONFIG := xhdpi
