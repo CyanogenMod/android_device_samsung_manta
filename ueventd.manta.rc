@@ -52,6 +52,7 @@
 /dev/media1               0660   system     system
 
 # camera
+/dev/video40              0660   media      media
 /dev/video41              0660   media      media
 /dev/video42              0660   media      media
 /dev/video43              0660   media      media
