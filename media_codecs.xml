@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <!-- Copyright (C) 2012 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
@@ -106,11 +106,9 @@ Only the three quirks included above are recognized at this point:
     </Decoders>
 
     <Encoders>
-<!--
-        <MediaCodec name="OMX.Exynos5.MPEG4.Encoder" type="video/mp4v-es" />
-        <MediaCodec name="OMX.Exynos5.H263.Encoder" type="video/3gpp" />
-        <MediaCodec name="OMX.Exynos5.AVC.Encoder" type="video/avc" />
--->
+        <MediaCodec name="OMX.Exynos.MPEG4.Encoder" type="video/mp4v-es" />
+        <MediaCodec name="OMX.Exynos.H263.Encoder" type="video/3gpp" />
+        <MediaCodec name="OMX.Exynos.AVC.Encoder" type="video/avc" />
 
         <MediaCodec name="OMX.google.amrnb.encoder" type="audio/3gpp" />
         <MediaCodec name="OMX.google.amrwb.encoder" type="audio/amr-wb" />
