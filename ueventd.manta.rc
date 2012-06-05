@@ -56,6 +56,7 @@
 /dev/video41              0660   media      media
 /dev/video42              0660   media      media
 /dev/video43              0660   media      media
+/dev/video44              0660   media      media
 /dev/media2               0660   media      media
 
 # mixer
