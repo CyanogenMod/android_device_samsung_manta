@@ -7,6 +7,9 @@ on early-init
     symlink /storage/sdcard0 /sdcard
     symlink /storage/sdcard0 /mnt/sdcard
 
+on init
+    start watchdogd
+
 on post-fs-data
     # we will remap this as /storage/sdcard0 with the sdcard fuse tool
     mkdir /data/media 0770 media_rw media_rw
@@ -62,6 +65,10 @@ service iprenew_wlan0 /system/bin/dhcpcd -n
 
 service battery_charger /charger
     class charger
+
+# Set watchdog timer to 30 seconds and pet it every 10 seconds to get a 20 second margin
+service watchdogd /sbin/watchdogd 10 20
+    class core
 
 # on userdebug and eng builds, enable kgdb on the serial console
 on property:ro.debuggable=1
