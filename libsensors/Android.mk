@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+ifneq ($(filter manta, $(TARGET_DEVICE)),)
 LOCAL_PATH := $(call my-dir)
 
 # HAL module implemenation stored in
@@ -25,8 +26,9 @@ LOCAL_PRELINK_MODULE := false
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
 
 LOCAL_MODULE_TAGS := optional
-
 LOCAL_CFLAGS := -DLOG_TAG=\"Sensors\"
+LOCAL_CFLAGS += -DINVENSENSE_COMPASS_CAL
+LOCAL_C_INCLUDES += hardware/invensense/libsensors_iio
 LOCAL_SRC_FILES := \
     sensors.cpp \
     IioSensorBase.cpp \
@@ -35,6 +37,8 @@ LOCAL_SRC_FILES := \
     PressureSensor.cpp \
     SensorBase.cpp
 
-LOCAL_SHARED_LIBRARIES := liblog libutils libdl
+LOCAL_SHARED_LIBRARIES := libinvensense_hal liblog libutils libdl
 
 include $(BUILD_SHARED_LIBRARY)
+
+endif # is a manta TARGET_DEVICE

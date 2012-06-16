@@ -32,6 +32,7 @@
 
 #include "sensors.h"
 
+#include "MPLSensor.h"
 #include "LightSensor.h"
 #include "PressureSensor.h"
 
@@ -69,7 +70,7 @@
 
 /* The SENSORS Module */
 #define LOCAL_SENSORS (2)
-static struct sensor_t sSensorList[LOCAL_SENSORS] = {
+static struct sensor_t sSensorList[LOCAL_SENSORS + MPLSensor::numSensors] = {
       { "BH1721fvc Light sensor",
           "Rohm",
           1, SENSORS_LIGHT_HANDLE,
@@ -122,7 +123,9 @@ struct sensors_poll_context_t {
 
 private:
     enum {
-        light = 0,
+        mpl = 0,
+        compass,
+        light,
         pressure,
         numSensorDrivers,       // wake pipe goes here
         numFds,
@@ -136,6 +139,14 @@ private:
 
     int handleToDriver(int handle) const {
         switch (handle) {
+            case ID_RV:
+            case ID_LA:
+            case ID_GR:
+            case ID_GY:
+            case ID_A:
+            case ID_M:
+            case ID_O:
+                return mpl;
             case ID_L:
                 return light;
             case ID_PR:
@@ -150,7 +161,23 @@ private:
 sensors_poll_context_t::sensors_poll_context_t()
 {
     FUNC_LOG;
-    numSensors = LOCAL_SENSORS;
+    CompassSensor *p_compasssensor = new CompassSensor();
+    MPLSensor *p_mplsen = new MPLSensor(p_compasssensor);
+    setCallbackObject(p_mplsen); //setup the callback object for handing mpl callbacks
+    numSensors =
+        LOCAL_SENSORS +
+        p_mplsen->populateSensorList(sSensorList + LOCAL_SENSORS,
+                                     sizeof(sSensorList[0]) * (ARRAY_SIZE(sSensorList) - LOCAL_SENSORS));
+
+    mSensors[mpl] = p_mplsen;
+    mPollFds[mpl].fd = mSensors[mpl]->getFd();
+    mPollFds[mpl].events = POLLIN;
+    mPollFds[mpl].revents = 0;
+
+    mSensors[compass] = p_mplsen;
+    mPollFds[compass].fd =  ((MPLSensor*)mSensors[mpl])->getCompassFd();
+    mPollFds[compass].events = POLLIN;
+    mPollFds[compass].revents = 0;
 
     mSensors[light] = new LightSensor();
     mPollFds[light].fd = mSensors[light]->getFd();
@@ -218,7 +245,18 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
         for (int i=0 ; count && i<numSensorDrivers ; i++) {
             SensorBase* const sensor(mSensors[i]);
             if ((mPollFds[i].revents & POLLIN) || (sensor->hasPendingEvents())) {
-                int nb = sensor->readEvents(data, count);
+                int nb;
+                if (i == compass) {
+                    nb = ((MPLSensor*) sensor)->readCompassEvents(data, count);
+                    continue;
+                }
+                else if (i == mpl) {
+                    nb = sensor->readEvents(data, count);
+                    continue;
+                }
+                else {
+                    nb = sensor->readEvents(data, count);
+                }
                 if (nb < count) {
                     // no more data for this sensor
                     mPollFds[i].revents = 0;
@@ -227,6 +265,14 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
                 nbEvents += nb;
                 data += nb;
             }
+        }
+        int nb = ((MPLSensor*) mSensors[mpl])->executeOnData(data, count);
+        if (nb > 0) {
+            count -= nb;
+            nbEvents += nb;
+            data += nb;
+            mPollFds[mpl].revents = 0;
+            mPollFds[compass].revents = 0;
         }
 
         if (count) {
