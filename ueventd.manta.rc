@@ -45,8 +45,20 @@
 /dev/video29              0660   media      media
 /dev/video32              0660   media      media
 
+/dev/video33              0660   system     system
+/dev/video34              0660   system     system
+/dev/v4l-subdev*          0660   system     system
+/dev/media0               0660   system     system
+/dev/media1               0660   system     system
+
 # camera
 /dev/video41              0660   media      media
 /dev/video42              0660   media      media
 /dev/video43              0660   media      media
 /dev/media2               0660   media      media
+
+# mixer
+/dev/video16              0660   system     system
+/dev/video17              0660   system     system
+/dev/video18              0660   system     system
+/dev/video19              0660   system     system
