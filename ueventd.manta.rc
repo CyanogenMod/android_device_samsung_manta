@@ -63,3 +63,6 @@
 /dev/video17              0660   system     system
 /dev/video18              0660   system     system
 /dev/video19              0660   system     system
+
+# GPS
+/dev/ttySAC1              0660   root      system
