@@ -41,7 +41,7 @@ SensorBase::SensorBase(
     : mDevName(dev_name), mDataName(data_name),
       mDevFd(-1), mDataFd(-1)
 {
-    ALOGD("%s(): dev_name=%s", __func__, dev_name);
+    ALOGV("%s(): dev_name=%s", __func__, dev_name);
     if (mDataName) {
         mDataFd = openInput(mDataName);
     }

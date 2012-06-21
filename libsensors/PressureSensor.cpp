@@ -35,6 +35,6 @@ PressureSensor::PressureSensor()
 }
 
 void PressureSensor::handleData(int value) {
-    ALOGD("PressureSensor::handleData value %d", value);
+    ALOGV("PressureSensor::handleData value %d", value);
     mPendingEvent.pressure = value * PRESSURE_HECTO_PA;
 }

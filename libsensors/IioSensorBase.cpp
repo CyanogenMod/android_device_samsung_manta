@@ -51,7 +51,7 @@ IioSensorBase::IioSensorBase(const char *dev_name,
       mIioSysfsChanFp(NULL),
       mLock(PTHREAD_MUTEX_INITIALIZER)
 {
-    ALOGD("%s(): dev_name=%s", __func__, dev_name);
+    ALOGV("%s(): dev_name=%s", __func__, dev_name);
     mPendingEvent.version = sizeof(sensors_event_t);
     memset(mPendingEvent.data, 0, sizeof(mPendingEvent.data));
     if (!mDataFd)

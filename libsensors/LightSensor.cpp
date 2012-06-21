@@ -29,6 +29,6 @@ LightSensor::LightSensor()
 }
 
 void LightSensor::handleData(int value) {
-    ALOGI("LightSensor::handleData value %d", value);
+    ALOGV("LightSensor::handleData value %d", value);
     mPendingEvent.light = value;
 }

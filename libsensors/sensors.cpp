@@ -239,20 +239,21 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
     int nbEvents = 0;
     int n = 0;
     int polltime = -1;
-
     do {
-        // see if we have some leftover from the last poll()
         for (int i=0 ; count && i<numSensorDrivers ; i++) {
             SensorBase* const sensor(mSensors[i]);
+            // See if we have some pending events from the last poll()
             if ((mPollFds[i].revents & POLLIN) || (sensor->hasPendingEvents())) {
                 int nb;
                 if (i == compass) {
-                    nb = ((MPLSensor*) sensor)->readCompassEvents(data, count);
-                    continue;
+                    /* result is hardcoded to 0 */
+                    ((MPLSensor*) sensor)->readCompassEvents(NULL, count);
+                    nb = ((MPLSensor*) mSensors[mpl])->executeOnData(data, count);
                 }
                 else if (i == mpl) {
-                    nb = sensor->readEvents(data, count);
-                    continue;
+                    /* result is hardcoded to 0 */
+                    sensor->readEvents(NULL, count);
+                    nb = ((MPLSensor*) mSensors[mpl])->executeOnData(data, count);
                 }
                 else {
                     nb = sensor->readEvents(data, count);
@@ -266,25 +267,11 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
                 data += nb;
             }
         }
-        int nb = ((MPLSensor*) mSensors[mpl])->executeOnData(data, count);
-        if (nb > 0) {
-            count -= nb;
-            nbEvents += nb;
-            data += nb;
-            mPollFds[mpl].revents = 0;
-            mPollFds[compass].revents = 0;
-        }
-
         if (count) {
-            // we still have some room, so try to see if we can get
-            // some events immediately or just wait if we don't have
-            // anything to return
-            int i;
-
             do {
                 n = poll(mPollFds, numFds, nbEvents ? 0 : polltime);
             } while (n < 0 && errno == EINTR);
-            if (n<0) {
+            if (n < 0) {
                 ALOGE("poll() failed (%s)", strerror(errno));
                 return -errno;
             }
