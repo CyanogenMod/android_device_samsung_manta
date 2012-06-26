@@ -121,7 +121,13 @@ struct sensors_poll_context_t {
     int setDelay(int handle, int64_t ns);
     int pollEvents(sensors_event_t* data, int count);
 
+    // Will return true if the constructor completed
+    bool isValid() { return mInitialized; };
+
 private:
+    // Will be true if the constructor completed
+    bool mInitialized;
+
     enum {
         mpl = 0,
         compass,
@@ -163,6 +169,15 @@ sensors_poll_context_t::sensors_poll_context_t()
     FUNC_LOG;
     CompassSensor *p_compasssensor = new CompassSensor();
     MPLSensor *p_mplsen = new MPLSensor(p_compasssensor);
+    mInitialized = false;
+    // Must clean this up early or else the destructor will make a mess.
+    memset(mSensors, 0, sizeof(mSensors));
+
+    if (!p_mplsen->isValid()) {
+        delete p_compasssensor;
+        return;
+    }
+
     setCallbackObject(p_mplsen); //setup the callback object for handing mpl callbacks
     numSensors =
         LOCAL_SENSORS +
@@ -199,6 +214,7 @@ sensors_poll_context_t::sensors_poll_context_t()
     mPollFds[wake].fd = wakeFds[0];
     mPollFds[wake].events = POLLIN;
     mPollFds[wake].revents = 0;
+    mInitialized = true;
 }
 
 sensors_poll_context_t::~sensors_poll_context_t()
@@ -209,6 +225,7 @@ sensors_poll_context_t::~sensors_poll_context_t()
     }
     close(mPollFds[wake].fd);
     close(mWritePipeFd);
+    mInitialized = false;
 }
 
 int sensors_poll_context_t::activate(int handle, int enabled)
@@ -334,6 +351,11 @@ static int open_sensors(const struct hw_module_t* module, const char* id,
     FUNC_LOG;
     int status = -EINVAL;
     sensors_poll_context_t *dev = new sensors_poll_context_t();
+
+    if (!dev->isValid()) {
+        ALOGE("Failed to open the sensors");
+        return status;
+    }
 
     memset(&dev->device, 0, sizeof(sensors_poll_device_t));
 
