@@ -30,5 +30,7 @@ LightSensor::LightSensor()
 
 void LightSensor::handleData(int value) {
     ALOGV("LightSensor::handleData value %d", value);
-    mPendingEvent.light = value;
+
+    /* Measured raw values are 8.9 times lower than actual values*/
+    mPendingEvent.light = value * 8.9;
 }
