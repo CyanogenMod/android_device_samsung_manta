@@ -283,7 +283,7 @@ static size_t out_get_buffer_size(const struct audio_stream *stream)
                audio_stream_frame_size((struct audio_stream *)stream);
 }
 
-static uint32_t out_get_channels(const struct audio_stream *stream)
+static audio_channel_mask_t out_get_channels(const struct audio_stream *stream)
 {
     return AUDIO_CHANNEL_OUT_STEREO;
 }
@@ -449,7 +449,7 @@ static size_t in_get_buffer_size(const struct audio_stream *stream)
                                  pcm_config.channels);
 }
 
-static uint32_t in_get_channels(const struct audio_stream *stream)
+static audio_channel_mask_t in_get_channels(const struct audio_stream *stream)
 {
     struct stream_in *in = (struct stream_in *)stream;
 
