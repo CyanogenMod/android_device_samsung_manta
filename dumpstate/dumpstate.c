@@ -19,5 +19,5 @@
 void dumpstate_board()
 {
     dump_file("manta power", "/d/manta-power");
-    dump_file("bq24191 charger", "/d/bq24191");
+    dump_file("smb347 charger regs", "/d/smb347-regs");
 };
