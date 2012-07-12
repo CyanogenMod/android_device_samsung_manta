@@ -135,6 +135,10 @@ PRODUCT_PROPERTY_OVERRIDES += \
     dalvik.vm.heapgrowthlimit=64m \
     dalvik.vm.heapsize=256m
 
+# set default USB configuration
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    persist.sys.usb.config=mtp
+
 # for off charging mode
 PRODUCT_PACKAGES += \
     charger \
