@@ -57,6 +57,9 @@ struct audio_device {
     bool standby;
     bool mic_mute;
     struct audio_route *ar;
+    audio_source_t input_source;
+    int cur_route_id;     /* current route ID: combination of input source
+                           * and output device IDs */
 };
 
 struct stream_out {
@@ -65,6 +68,7 @@ struct stream_out {
     pthread_mutex_t lock; /* see note below on mutex acquisition order */
     struct pcm *pcm;
     bool standby;
+    unsigned int device;
 
     struct audio_device *dev;
 };
@@ -82,8 +86,190 @@ struct stream_in {
     int16_t *buffer;
     size_t frames_in;
     int read_status;
+    unsigned int device;
+    audio_source_t input_source;
 
     struct audio_device *dev;
+};
+
+enum {
+    OUT_DEVICE_SPEAKER,
+    OUT_DEVICE_HEADSET,
+    OUT_DEVICE_HEADPHONES,
+    OUT_DEVICE_BT_SCO,
+    OUT_DEVICE_SPEAKER_AND_HEADSET,
+    OUT_DEVICE_TAB_SIZE,           /* number of rows in route_configs[][] */
+    OUT_DEVICE_NONE,
+    OUT_DEVICE_INVALID,
+    OUT_DEVICE_CNT
+};
+
+enum {
+    IN_SOURCE_MIC,
+    IN_SOURCE_CAMCORDER,
+    IN_SOURCE_VOICE_RECOGNITION,
+    IN_SOURCE_VOICE_COMMUNICATION,
+    IN_SOURCE_TAB_SIZE,            /* number of lines in route_configs[][] */
+    IN_SOURCE_NONE,
+    IN_SOURCE_INVALID,
+    IN_SOURCE_CNT
+};
+
+int get_output_device_id(unsigned int device)
+{
+    device &= AUDIO_DEVICE_OUT_ALL;
+
+    if (device == 0)
+        return OUT_DEVICE_NONE;
+
+    if (popcount(device) == 2) {
+        if ((device == (AUDIO_DEVICE_OUT_SPEAKER |
+                       AUDIO_DEVICE_OUT_WIRED_HEADSET)) ||
+                (device == (AUDIO_DEVICE_OUT_SPEAKER |
+                        AUDIO_DEVICE_OUT_WIRED_HEADPHONE)))
+            return OUT_DEVICE_SPEAKER_AND_HEADSET;
+        else
+            return OUT_DEVICE_INVALID;
+    }
+
+    if (popcount(device) != 1)
+        return OUT_DEVICE_INVALID;
+
+    switch (device) {
+    case AUDIO_DEVICE_OUT_SPEAKER:
+        return OUT_DEVICE_SPEAKER;
+    case AUDIO_DEVICE_OUT_WIRED_HEADSET:
+        return OUT_DEVICE_HEADSET;
+    case AUDIO_DEVICE_OUT_WIRED_HEADPHONE:
+        return OUT_DEVICE_HEADPHONES;
+    case AUDIO_DEVICE_OUT_BLUETOOTH_SCO:
+    case AUDIO_DEVICE_OUT_BLUETOOTH_SCO_HEADSET:
+    case AUDIO_DEVICE_OUT_BLUETOOTH_SCO_CARKIT:
+        return OUT_DEVICE_BT_SCO;
+    default:
+        return OUT_DEVICE_INVALID;
+    }
+}
+
+int get_input_source_id(audio_source_t source)
+{
+    switch (source) {
+    case AUDIO_SOURCE_DEFAULT:
+        return IN_SOURCE_NONE;
+    case AUDIO_SOURCE_MIC:
+        return IN_SOURCE_MIC;
+    case AUDIO_SOURCE_CAMCORDER:
+        return IN_SOURCE_CAMCORDER;
+    case AUDIO_SOURCE_VOICE_RECOGNITION:
+        return IN_SOURCE_VOICE_RECOGNITION;
+    case AUDIO_SOURCE_VOICE_COMMUNICATION:
+        return IN_SOURCE_VOICE_COMMUNICATION;
+    default:
+        return IN_SOURCE_INVALID;
+    }
+}
+
+struct route_config {
+    const char * const output_route;
+    const char * const input_route;
+    /* TODO add other properties here: es305 presets... */
+};
+
+const struct route_config media_speaker = {
+    "media-speaker",
+    "media-main-mic"
+};
+
+const struct route_config media_headphones = {
+    "media-headphones",
+    "media-main-mic"
+};
+
+const struct route_config media_headset = {
+    "media-headphones",
+    "media-headset-mic"
+};
+
+const struct route_config camcorder_speaker = {
+    "media-speaker",
+    "media-second-mic"
+};
+
+const struct route_config camcorder_headphones = {
+    "media-headphones",
+    "media-second-mic"
+};
+
+const struct route_config voice_rec_speaker = {
+    "voice-rec-speaker",
+    "voice-rec-main-mic"
+};
+
+const struct route_config voice_rec_headphones = {
+    "voice-rec-headphones",
+    "voice-rec-main-mic"
+};
+
+const struct route_config voice_rec_headset = {
+    "voice-rec-headphones",
+    "voice-rec-headset-mic"
+};
+
+const struct route_config communication_speaker = {
+    "communication-speaker",
+    "communication-main-mic"
+};
+
+const struct route_config communication_headphones = {
+    "communication-headphones",
+    "communication-main-mic"
+};
+
+const struct route_config communication_headset = {
+    "communication-headphones",
+    "communication-headset-mic"
+};
+
+const struct route_config speaker_and_headphones = {
+    "speaker-and-headphones",
+    "main-mic"
+};
+
+const struct route_config bluetooth_sco = {
+    "bt-sco-headset",
+    "bt-sco-mic"
+};
+
+const struct route_config * const route_configs[IN_SOURCE_TAB_SIZE]
+                                               [OUT_DEVICE_TAB_SIZE] = {
+    {   /* IN_SOURCE_MIC */
+        &media_speaker,             /* OUT_DEVICE_SPEAKER */
+        &media_headset,             /* OUT_DEVICE_HEADSET */
+        &media_headphones,          /* OUT_DEVICE_HEADPHONES */
+        &bluetooth_sco,             /* OUT_DEVICE_BT_SCO */
+        &speaker_and_headphones     /* OUT_DEVICE_SPEAKER_AND_HEADSET */
+    },
+    {   /* IN_SOURCE_CAMCORDER */
+        &camcorder_speaker,         /* OUT_DEVICE_SPEAKER */
+        &camcorder_headphones,      /* OUT_DEVICE_HEADSET */
+        &camcorder_headphones,      /* OUT_DEVICE_HEADPHONES */
+        &bluetooth_sco,             /* OUT_DEVICE_BT_SCO */
+        &speaker_and_headphones     /* OUT_DEVICE_SPEAKER_AND_HEADSET */
+    },
+    {   /* IN_SOURCE_VOICE_RECOGNITION */
+        &voice_rec_speaker,         /* OUT_DEVICE_SPEAKER */
+        &voice_rec_headset,         /* OUT_DEVICE_HEADSET */
+        &voice_rec_headphones,      /* OUT_DEVICE_HEADPHONES */
+        &bluetooth_sco,             /* OUT_DEVICE_BT_SCO */
+        &speaker_and_headphones     /* OUT_DEVICE_SPEAKER_AND_HEADSET */
+    },
+    {   /* IN_SOURCE_VOICE_COMMUNICATION */
+        &communication_speaker,     /* OUT_DEVICE_SPEAKER */
+        &communication_headset,     /* OUT_DEVICE_HEADSET */
+        &communication_headphones,  /* OUT_DEVICE_HEADPHONES */
+        &bluetooth_sco,             /* OUT_DEVICE_BT_SCO */
+        &speaker_and_headphones     /* OUT_DEVICE_SPEAKER_AND_HEADSET */
+    }
 };
 
 /**
@@ -95,28 +281,51 @@ struct stream_in {
 
 static void select_devices(struct audio_device *adev)
 {
-    int headphone_on;
-    int speaker_on;
-    int main_mic_on;
+    int output_device_id = get_output_device_id(adev->devices);
+    int input_source_id = get_input_source_id(adev->input_source);
+    const char *output_route = "playback-idle";
+    const char *input_route = "capture-idle";
+    int new_route_id;
 
-    headphone_on = adev->devices & (AUDIO_DEVICE_OUT_WIRED_HEADSET |
-                                    AUDIO_DEVICE_OUT_WIRED_HEADPHONE);
-    speaker_on = adev->devices & AUDIO_DEVICE_OUT_SPEAKER;
-    main_mic_on = adev->devices & AUDIO_DEVICE_IN_BUILTIN_MIC;
+    if (output_device_id == OUT_DEVICE_INVALID ||
+            input_source_id == IN_SOURCE_INVALID) {
+        ALOGV("select_devices() invalid device %#x or source %d",
+              adev->devices, adev->input_source);
+        return;
+    }
 
-    reset_mixer_state(adev->ar);
+    new_route_id = (1 << (input_source_id + OUT_DEVICE_CNT)) + (1 << output_device_id);
+    if (new_route_id == adev->cur_route_id)
+        return;
+    adev->cur_route_id = new_route_id;
 
-    if (headphone_on)
-        audio_route_apply_path(adev->ar, "headphone");
-    if (speaker_on)
-        audio_route_apply_path(adev->ar, "speaker");
-    if (main_mic_on)
-        audio_route_apply_path(adev->ar, "main-mic");
+    if (input_source_id != IN_SOURCE_NONE) {
+        if (output_device_id != OUT_DEVICE_NONE) {
+            input_route =
+                    route_configs[input_source_id][output_device_id]->input_route;
+            output_route =
+                    route_configs[input_source_id][output_device_id]->output_route;
+        } else {
+            input_route =
+                    route_configs[input_source_id][OUT_DEVICE_SPEAKER]->input_route;
+        }
+    } else {
+        if (output_device_id != OUT_DEVICE_NONE) {
+            output_route =
+                    route_configs[IN_SOURCE_MIC][output_device_id]->output_route;
+        }
+    }
+
+    ALOGV("select_devices() devices %#x input src %d output route %s input route %s",
+          adev->devices, adev->input_source,
+          output_route,
+          input_route);
+
+    audio_route_apply_path(adev->ar, output_route);
+    audio_route_apply_path(adev->ar, input_route);
 
     update_mixer_state(adev->ar);
 
-    ALOGV("hp=%c speaker=%c main-mic=%c", headphone_on ? 'y' : 'n',
-          speaker_on ? 'y' : 'n', main_mic_on ? 'y' : 'n');
 }
 
 /* must be called with hw device and output stream mutexes locked */
@@ -131,6 +340,10 @@ static int start_output_stream(struct stream_out *out)
         pcm_close(out->pcm);
         return -ENOMEM;
     }
+
+    adev->devices &= ~AUDIO_DEVICE_OUT_ALL;
+    adev->devices |= out->device;
+    select_devices(adev);
 
     return 0;
 }
@@ -151,6 +364,11 @@ static int start_input_stream(struct stream_in *in)
     /* if no supported sample rate is available, use the resampler */
     if (in->resampler)
         in->resampler->reset(in->resampler);
+
+    adev->devices &= ~AUDIO_DEVICE_IN_ALL;
+    adev->devices |= in->device;
+    adev->input_source = in->input_source;
+    select_devices(adev);
 
     return 0;
 }
@@ -308,6 +526,10 @@ static int out_standby(struct audio_stream *stream)
     if (!out->standby) {
         pcm_close(out->pcm);
         out->pcm = NULL;
+
+        out->dev->devices &= ~AUDIO_DEVICE_OUT_ALL;
+        select_devices(out->dev);
+
         out->standby = true;
     }
 
@@ -336,14 +558,19 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
     ret = str_parms_get_str(parms, AUDIO_PARAMETER_STREAM_ROUTING,
                             value, sizeof(value));
     pthread_mutex_lock(&adev->lock);
+    pthread_mutex_lock(&out->lock);
     if (ret >= 0) {
         val = atoi(value);
-        if (((adev->devices & AUDIO_DEVICE_OUT_ALL) != val) && (val != 0)) {
-            adev->devices &= ~AUDIO_DEVICE_OUT_ALL;
-            adev->devices |= val;
-            select_devices(adev);
+        if ((out->device != val) && (val != 0)) {
+            out->device = val;
+            if (!out->standby) {
+                adev->devices &= ~AUDIO_DEVICE_OUT_ALL;
+                adev->devices |= out->device;
+                select_devices(adev);
+            }
         }
     }
+    pthread_mutex_unlock(&out->lock);
     pthread_mutex_unlock(&adev->lock);
 
     str_parms_destroy(parms);
@@ -476,6 +703,9 @@ static int in_standby(struct audio_stream *stream)
     if (!in->standby) {
         pcm_close(in->pcm);
         in->pcm = NULL;
+        in->dev->devices &= ~AUDIO_DEVICE_IN_ALL;
+        in->dev->input_source = AUDIO_SOURCE_DEFAULT;
+        select_devices(in->dev);
         in->standby = true;
     }
 
@@ -498,20 +728,42 @@ static int in_set_parameters(struct audio_stream *stream, const char *kvpairs)
     char value[32];
     int ret;
     unsigned int val;
+    bool apply_now = false;
 
     parms = str_parms_create_str(kvpairs);
 
-    ret = str_parms_get_str(parms, AUDIO_PARAMETER_STREAM_ROUTING,
+    ret = str_parms_get_str(parms, AUDIO_PARAMETER_STREAM_INPUT_SOURCE,
                             value, sizeof(value));
+
     pthread_mutex_lock(&adev->lock);
+    pthread_mutex_lock(&in->lock);
     if (ret >= 0) {
         val = atoi(value);
-        if (((adev->devices & AUDIO_DEVICE_IN_ALL) != val) && (val != 0)) {
-            adev->devices &= ~AUDIO_DEVICE_IN_ALL;
-            adev->devices |= val;
-            select_devices(adev);
+        /* no audio source uses val == 0 */
+        if ((in->input_source != val) && (val != 0)) {
+            in->input_source = val;
+            apply_now = !in->standby;
         }
     }
+
+    ret = str_parms_get_str(parms, AUDIO_PARAMETER_STREAM_ROUTING,
+                            value, sizeof(value));
+    if (ret >= 0) {
+        val = atoi(value);
+        if ((in->device != val) && (val != 0)) {
+            in->device = val;
+            apply_now = !in->standby;
+        }
+    }
+
+    if (apply_now) {
+        adev->devices &= ~AUDIO_DEVICE_IN_ALL;
+        adev->devices |= in->device;
+        adev->input_source = in->input_source;
+        select_devices(adev);
+    }
+
+    pthread_mutex_unlock(&in->lock);
     pthread_mutex_unlock(&adev->lock);
 
     str_parms_destroy(parms);
@@ -754,6 +1006,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     in->dev = adev;
     in->standby = true;
     in->requested_rate = config->sample_rate;
+    in->input_source = AUDIO_SOURCE_DEFAULT;
 
     in->buffer = malloc(pcm_config.period_size *
                         audio_stream_frame_size(&in->stream.common));
@@ -868,6 +1121,9 @@ static int adev_open(const hw_module_t* module, const char* name,
     adev->hw_device.dump = adev_dump;
 
     adev->ar = audio_route_init();
+    adev->input_source = AUDIO_SOURCE_DEFAULT;
+    /* adev->cur_route_id initial value is 0 and such that first device
+     * selection is always applied by select_devices() */
 
     *device = &adev->hw_device.common;
 
