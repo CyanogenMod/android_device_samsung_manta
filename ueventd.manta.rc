@@ -67,3 +67,6 @@
 
 # GPS
 /dev/ttySAC1              0660   root      system
+
+# NFC
+/dev/bcm2079x             0660   nfc        nfc
