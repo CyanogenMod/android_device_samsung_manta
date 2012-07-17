@@ -28,8 +28,53 @@
 #include <hardware/hardware.h>
 #include <hardware/power.h>
 
+#define BOOSTPULSE_PATH "/sys/devices/system/cpu/cpufreq/interactive/boostpulse"
+
+struct manta_power_module {
+    struct power_module base;
+    pthread_mutex_t lock;
+    int boostpulse_fd;
+    int boostpulse_warned;
+};
+
+static void sysfs_write(char *path, char *s)
+{
+    char buf[80];
+    int len;
+    int fd = open(path, O_WRONLY);
+
+    if (fd < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error opening %s: %s\n", path, buf);
+        return;
+    }
+
+    len = write(fd, s, strlen(s));
+    if (len < 0) {
+        strerror_r(errno, buf, sizeof(buf));
+        ALOGE("Error writing to %s: %s\n", path, buf);
+    }
+
+    close(fd);
+}
+
 static void power_init(struct power_module *module)
 {
+    /*
+     * cpufreq interactive governor: timer 20ms, min sample 60ms,
+     * hispeed 1G at load 60%.
+     */
+
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/timer_rate",
+                "20000");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/min_sample_time",
+                "60000");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/hispeed_freq",
+                "1000000");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load",
+                "60");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay",
+                "40000");
 }
 
 static void power_set_interactive(struct power_module *module, int on)
@@ -39,14 +84,59 @@ static void power_set_interactive(struct power_module *module, int on)
 
     ALOGV("power_set_interactive: %d\n", on);
 
+    /*
+     * Lower maximum frequency when screen is off.  CPU 0 and 1 share a
+     * cpufreq policy.
+     */
+    sysfs_write("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq",
+                on ? "1700000" : "800000");
+
     ALOGV("power_set_interactive: %d done\n", on);
+}
+
+static int boostpulse_open(struct manta_power_module *manta)
+{
+    char buf[80];
+
+    pthread_mutex_lock(&manta->lock);
+
+    if (manta->boostpulse_fd < 0) {
+        manta->boostpulse_fd = open(BOOSTPULSE_PATH, O_WRONLY);
+
+        if (manta->boostpulse_fd < 0) {
+            if (!manta->boostpulse_warned) {
+                strerror_r(errno, buf, sizeof(buf));
+                ALOGE("Error opening %s: %s\n", BOOSTPULSE_PATH, buf);
+                manta->boostpulse_warned = 1;
+            }
+        }
+    }
+
+    pthread_mutex_unlock(&manta->lock);
+    return manta->boostpulse_fd;
 }
 
 static void manta_power_hint(struct power_module *module, power_hint_t hint,
                              void *data)
 {
+    struct manta_power_module *manta = (struct manta_power_module *) module;
+    char buf[80];
+    int len;
+
     switch (hint) {
-    case POWER_HINT_VSYNC:
+     case POWER_HINT_INTERACTION:
+        if (boostpulse_open(manta) >= 0) {
+            len = write(manta->boostpulse_fd, "1", 1);
+
+            if (len < 0) {
+                strerror_r(errno, buf, sizeof(buf));
+                ALOGE("Error writing to %s: %s\n", BOOSTPULSE_PATH, buf);
+            }
+        }
+
+        break;
+
+   case POWER_HINT_VSYNC:
         break;
 
     default:
@@ -58,19 +148,25 @@ static struct hw_module_methods_t power_module_methods = {
     .open = NULL,
 };
 
-struct power_module HAL_MODULE_INFO_SYM = {
-    .common = {
-        .tag = HARDWARE_MODULE_TAG,
-        .module_api_version = POWER_MODULE_API_VERSION_0_2,
-        .hal_api_version = HARDWARE_HAL_API_VERSION,
-        .id = POWER_HARDWARE_MODULE_ID,
-        .name = "Manta Power HAL",
-        .author = "The Android Open Source Project",
-        .methods = &power_module_methods,
+struct manta_power_module HAL_MODULE_INFO_SYM = {
+    base: {
+        common: {
+            tag: HARDWARE_MODULE_TAG,
+            module_api_version: POWER_MODULE_API_VERSION_0_2,
+            hal_api_version: HARDWARE_HAL_API_VERSION,
+            id: POWER_HARDWARE_MODULE_ID,
+            name: "Manta Power HAL",
+            author: "The Android Open Source Project",
+            methods: &power_module_methods,
+        },
+
+        init: power_init,
+        setInteractive: power_set_interactive,
+        powerHint: manta_power_hint,
     },
 
-    .init = power_init,
-    .setInteractive = power_set_interactive,
-    .powerHint = manta_power_hint,
+    lock: PTHREAD_MUTEX_INITIALIZER,
+    boostpulse_fd: -1,
+    boostpulse_warned: 0,
 };
 
