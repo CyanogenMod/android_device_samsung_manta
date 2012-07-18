@@ -84,6 +84,33 @@ PRODUCT_COPY_FILES += \
     device/samsung/manta/gps/gps.xml:system/vendor/etc/gps.xml \
     device/samsung/manta/gps/gps.exynos5.so:system/lib/hw/gps.exynos5.so
 
+# NFC packages
+PRODUCT_PACKAGES += \
+    libnfc-nci \
+    libnfc_nci_jni \
+    NfcNci \
+    Tag \
+    com.android.nfc_extras
+
+# NFCEE access control
+ifeq ($(TARGET_BUILD_VARIANT),user)
+    NFCEE_ACCESS_PATH := device/samsung/manta/nfcee_access.xml
+else
+    NFCEE_ACCESS_PATH := device/samsung/manta/nfcee_access_debug.xml
+endif
+
+# NFC access control + feature files + configuration
+PRODUCT_COPY_FILES += \
+    $(NFCEE_ACCESS_PATH):system/etc/nfcee_access.xml \
+    frameworks/native/data/etc/com.android.nfc_extras.xml:system/etc/permissions/com.android.nfc_extras.xml \
+    frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
+    device/samsung/manta/libnfc-brcm.conf:system/etc/libnfc-brcm.conf
+
+# NFC firmware for BCM2079x
+PRODUCT_COPY_FILES += \
+    hardware/broadcom/nfc/bcm2079x/bcm2079x_firmware.ncd:system/vendor/firmware/bcm2079x_firmware.ncd \
+    hardware/broadcom/nfc/bcm2079x/bcm2079x_pre_firmware.ncd:system/vendor/firmware/bcm2079x_pre_firmware.ncd
+
 PRODUCT_PACKAGES += \
     make_ext4fs \
     lights.manta \
