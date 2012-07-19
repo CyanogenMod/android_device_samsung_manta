@@ -9,7 +9,7 @@
        gpioDelayMs="250"
        acNvStoDir="/data/gps/"
 
-       acLogDirectory="/sdcard/gps/broadcom/"
+       acLogDirectory="/data/gps/broadcom/"
 
        LPmode="false"
 
