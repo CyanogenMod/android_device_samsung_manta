@@ -18,6 +18,16 @@
 
 void dumpstate_board()
 {
+    dump_file("board revision", "/sys/devices/soc0/board_rev");
+    dump_file("soc family", "/sys/devices/soc0/family");
+    dump_file("soc revision", "/sys/devices/soc0/revision");
+    dump_file("soc type", "/sys/devices/soc0/machine");
+    dump_file("soc die_id", "/sys/devices/soc0/soc_id");
+    dump_file("mmc0 name", "/sys/devices/platform/dw_mmc.0/mmc_host/mmc0/mmc0:0001/name");
+    dump_file("mmc0 cid", "/sys/devices/platform/dw_mmc.0/mmc_host/mmc0/mmc0:0001/cid");
+    dump_file("mmc0 csd", "/sys/devices/platform/dw_mmc.0/mmc_host/mmc0/mmc0:0001/csd");
+    dump_file("mmc0 ext_csd", "/d/mmc0/mmc0:0001/ext_csd");
+    dump_file("touchscreen name", "/sys/class/input/input0/name");
     dump_file("manta power", "/d/manta-power");
     dump_file("smb347 charger regs", "/d/smb347-regs");
 };
