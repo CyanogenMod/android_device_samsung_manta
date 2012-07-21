@@ -2,6 +2,7 @@
 /dev/ump                  0666   system     system
 /dev/ion                  0666   system     system
 /dev/video6               0660   media      media
+/dev/video7               0660   media      media
 
 # iio devices
 /dev/iio:device*          0660   system     system
