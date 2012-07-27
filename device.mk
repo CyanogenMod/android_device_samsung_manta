@@ -101,6 +101,9 @@ DEVICE_PACKAGE_OVERLAYS := \
 PRODUCT_PACKAGES += \
     gralloc.exynos5
 
+PRODUCT_PACKAGES += \
+    libion
+
 PRODUCT_TAGS += dalvik.gc.type-precise
 
 PRODUCT_PACKAGES += \
