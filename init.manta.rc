@@ -20,6 +20,15 @@ on post-fs-data
     mkdir /data/misc/dhcp 0770 dhcp dhcp
     chown dhcp dhcp /data/misc/dhcp
 
+# permissions for bluetooth.
+	setprop ro.bt.bdaddr_path "/efs/bluetooth/bt_addr"
+	chown bluetooth bluetooth ro.bt.bdaddr_path
+	chown bluetooth bluetooth /dev/ttySAC0
+	chmod 0600 /dev/ttySAC0
+	chmod 0660 /sys/class/rfkill/rfkill0/state
+	chown bluetooth bluetooth /sys/class/rfkill/rfkill0/state
+	chown bluetooth bluetooth /sys/class/rfkill/rfkill0/type
+
 on boot
     mount debugfs /sys/kernel/debug /sys/kernel/debug
     setprop ro.radio.noril yes
