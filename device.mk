@@ -94,9 +94,9 @@ PRODUCT_PACKAGES += \
 
 # NFCEE access control
 ifeq ($(TARGET_BUILD_VARIANT),user)
-    NFCEE_ACCESS_PATH := device/samsung/manta/nfcee_access.xml
+    NFCEE_ACCESS_PATH := device/samsung/manta/nfc/nfcee_access.xml
 else
-    NFCEE_ACCESS_PATH := device/samsung/manta/nfcee_access_debug.xml
+    NFCEE_ACCESS_PATH := device/samsung/manta/nfc/nfcee_access_debug.xml
 endif
 
 # NFC access control + feature files + configuration
@@ -104,7 +104,7 @@ PRODUCT_COPY_FILES += \
     $(NFCEE_ACCESS_PATH):system/etc/nfcee_access.xml \
     frameworks/native/data/etc/com.android.nfc_extras.xml:system/etc/permissions/com.android.nfc_extras.xml \
     frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
-    device/samsung/manta/libnfc-brcm.conf:system/etc/libnfc-brcm.conf
+    device/samsung/manta/nfc/libnfc-brcm.conf:system/etc/libnfc-brcm.conf
 
 # NFC firmware for BCM2079x
 PRODUCT_COPY_FILES += \
