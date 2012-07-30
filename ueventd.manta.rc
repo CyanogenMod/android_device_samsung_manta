@@ -71,3 +71,6 @@
 
 # NFC
 /dev/bcm2079x             0660   nfc        nfc
+
+#JPEG
+/dev/video12              0660   media      media
