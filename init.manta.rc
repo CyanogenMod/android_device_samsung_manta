@@ -37,6 +37,8 @@ on boot
     chmod 0222 /sys/kernel/debug/tracing/trace_marker
     write /sys/kernel/debug/tracing/tracing_on 0
 
+    chmod 0444 /sys/kernel/debug/smb347-regs
+
 on fs
     mount_all /fstab.manta
     setprop ro.crypto.fuse_sdcard true
