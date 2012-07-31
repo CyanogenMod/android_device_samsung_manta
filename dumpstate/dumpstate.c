@@ -27,6 +27,7 @@ void dumpstate_board()
     dump_file("mmc0 cid", "/sys/devices/platform/dw_mmc.0/mmc_host/mmc0/mmc0:0001/cid");
     dump_file("mmc0 csd", "/sys/devices/platform/dw_mmc.0/mmc_host/mmc0/mmc0:0001/csd");
     dump_file("mmc0 ext_csd", "/d/mmc0/mmc0:0001/ext_csd");
+    dump_file("wlan", "/sys/module/bcmdhd/parameters/info_string");
     dump_file("touchscreen name", "/sys/class/input/input0/name");
     dump_file("manta power", "/d/manta-power");
     dump_file("smb347 charger regs", "/d/smb347-regs");
