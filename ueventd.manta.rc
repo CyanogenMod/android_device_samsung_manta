@@ -41,10 +41,15 @@
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    scan_elements/in_timestamp_en    0660    system    system
 
 # gscalers
-/dev/video23              0660   media      media
-/dev/video26              0660   media      media
-/dev/video29              0660   media      media
-/dev/video32              0660   media      media
+/dev/video23              0660   system     system
+/dev/video26              0660   system     system
+/dev/video29              0660   system     system
+/dev/video32              0660   system     system
+
+/dev/video24              0660   system     system
+/dev/video27              0660   system     system
+/dev/video30              0660   system     system
+/dev/video33              0660   system     system
 
 /dev/video33              0660   system     system
 /dev/video34              0660   system     system
