@@ -157,17 +157,7 @@ PRODUCT_PROPERTY_OVERRIDES := \
     ro.sf.lcd_density=320
 
 # setup dalvik vm configs.
-# this is temporary until we figure out what the new
-# framework config should be for devices of this class:
-# Currently, this device is:
-#     xhdpi
-#     xlarge screen (tablet)
-#     2560x1600 resolution (high end?)
-#     2048MB RAM
-PRODUCT_PROPERTY_OVERRIDES += \
-    dalvik.vm.heapstartsize=8m \
-    dalvik.vm.heapgrowthlimit=64m \
-    dalvik.vm.heapsize=256m
+$(call inherit-product, frameworks/native/build/tablet-10in-xhdpi-2048-dalvik-heap.mk)
 
 # set default USB configuration
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
