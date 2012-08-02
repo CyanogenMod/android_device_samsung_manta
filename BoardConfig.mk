@@ -69,3 +69,4 @@ BOARD_LIB_DUMPSTATE := libdumpstate.manta
 
 TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_RECOVERY_UI_LIB := librecovery_ui_manta
+TARGET_RELEASETOOLS_EXTENSIONS := device/samsung/manta

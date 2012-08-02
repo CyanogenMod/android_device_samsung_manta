@@ -6,3 +6,4 @@
 /boot		emmc		/dev/block/platform/dw_mmc.0/by-name/boot
 /recovery	emmc		/dev/block/platform/dw_mmc.0/by-name/recovery
 /misc		emmc		/dev/block/platform/dw_mmc.0/by-name/misc
+/bootloader	emmc		/dev/block/mmcblk0boot0
