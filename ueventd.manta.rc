@@ -90,3 +90,6 @@
 
 #JPEG
 /dev/video12              0660   media      media
+
+# mobicore DRM
+/dev/mobicore             0660   drmrpc     drmrpc
