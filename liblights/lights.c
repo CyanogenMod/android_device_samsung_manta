@@ -15,19 +15,59 @@
  */
 
 #define LOG_TAG "lights"
-#include <cutils/log.h>
-#include <stdint.h>
-#include <string.h>
+
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <pthread.h>
-#include <sys/ioctl.h>
+#include <sched.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
 #include <sys/types.h>
+#include <time.h>
+
+#include <cutils/log.h>
 #include <hardware/lights.h>
+
+#define LED_SLOPE_UP_DEFAULT 0
+#define LED_SLOPE_DOWN_DEFAULT 0
+#define LED_BRIGHTNESS_OFF 0
+#define LED_BRIGHTNESS_MAX 255
+
+#define ALPHA_MASK 0xff000000
+#define COLOR_MASK 0x00ffffff
+
+#define NSEC_PER_MSEC 1000000ULL
+#define NSEC_PER_SEC 1000000000ULL
 
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 
 char const *const LCD_FILE = "/sys/class/backlight/pwm-backlight.0/brightness";
+const char *const LED_DIR = "/sys/class/leds/as3668";
+
+const char *const LED_COLOR_FILE = "color";
+const char *const LED_BRIGHTNESS_FILE = "brightness";
+const char *const LED_DELAY_ON_FILE = "delay_on";
+const char *const LED_DELAY_OFF_FILE = "delay_off";
+const char *const LED_TRIGGER_FILE = "trigger";
+const char *const LED_SLOPE_UP_FILE = "slope_up";
+const char *const LED_SLOPE_DOWN_FILE = "slope_down";
+
+enum LED_STATE {
+	OFF,
+	ON,
+	BLINK,
+};
+
+struct as3668_led_info {
+	unsigned int color;
+	int delay_on;
+	int delay_off;
+	unsigned int slope_up;
+	unsigned int slope_down;
+	enum LED_STATE state;
+};
 
 static int write_int(char const *path, int value)
 {
@@ -90,6 +130,198 @@ static int close_lights(struct hw_device_t *dev)
 	return 0;
 }
 
+/* For LEDs */
+static void set_led_colors(unsigned int color, struct as3668_led_info *leds)
+{
+	unsigned int red;
+	unsigned int green;
+	unsigned int blue;
+	unsigned int white;
+
+	red = (color >> 16) & 0x000000ff;
+	green = (color >> 8) & 0x000000ff;
+	blue = color & 0x000000ff;
+
+	white = red;
+	if (green < white)
+		white = green;
+	if (blue < white)
+		white = blue;
+
+	color -= (white << 16) | (white << 8) | white;
+
+	leds->color = (color << 8) | white;
+}
+
+static void time_add(struct timespec *time, int sec, int nsec)
+{
+	time->tv_nsec += nsec;
+	time->tv_sec += time->tv_nsec / NSEC_PER_SEC;
+	time->tv_nsec %= NSEC_PER_SEC;
+	time->tv_sec += sec;
+}
+
+static bool time_after(struct timespec *t)
+{
+	struct timespec now;
+
+	clock_gettime(CLOCK_MONOTONIC, &now);
+	return now.tv_sec > t->tv_sec || (now.tv_sec == t->tv_sec && now.tv_nsec > t->tv_nsec);
+}
+
+static int led_sysfs_write(char *buf, const char *command, char *format, ...)
+{
+	int fd;
+	char path_name[PATH_MAX];
+	int err;
+	int len;
+	va_list args;
+	struct timespec timeout;
+	int ret;
+
+	err = sprintf(path_name, "%s/%s", LED_DIR, command);
+	if (err < 0)
+		return err;
+
+	clock_gettime(CLOCK_MONOTONIC, &timeout);
+	time_add(&timeout, 0, 100 * NSEC_PER_MSEC);
+
+	do {
+		fd = open(path_name, O_WRONLY);
+		err = -errno;
+		if (fd < 0) {
+			if (errno != EINTR && errno != EACCES && time_after(&timeout)) {
+				ALOGE("failed to open %s!", path_name);
+				return err;
+			}
+			sched_yield();
+		}
+	} while (fd < 0);
+
+	va_start(args, format);
+	len = vsprintf(buf, format, args);
+	va_end(args);
+	if (len < 0)
+		return len;
+
+	err = write(fd, buf, len);
+	if (err == -1)
+		return -errno;
+
+	err = close(fd);
+	if (err == -1)
+		return -errno;
+
+	return 0;
+}
+
+static int write_leds(struct as3668_led_info *leds)
+{
+	char buf[20];
+	int err;
+
+	pthread_mutex_lock(&g_lock);
+
+	err = led_sysfs_write(buf, LED_SLOPE_UP_FILE, "%u", leds->slope_up);
+	if (err)
+		goto err_write_fail;
+	err = led_sysfs_write(buf, LED_SLOPE_DOWN_FILE, "%u", leds->slope_down);
+	if (err)
+		goto err_write_fail;
+
+	switch(leds->state) {
+	case OFF:
+		err = led_sysfs_write(buf, LED_BRIGHTNESS_FILE, "%d",
+			LED_BRIGHTNESS_OFF);
+		break;
+	case BLINK:
+		err = led_sysfs_write(buf, LED_TRIGGER_FILE, "%s", "timer");
+		if (err)
+			goto err_write_fail;
+		err = led_sysfs_write(buf, LED_DELAY_ON_FILE, "%d", leds->delay_on);
+		if (err)
+			goto err_write_fail;
+		err = led_sysfs_write(buf, LED_DELAY_OFF_FILE, "%d", leds->delay_off);
+		if (err)
+			goto err_write_fail;
+	case ON:
+		err = led_sysfs_write(buf, LED_COLOR_FILE, "%x", leds->color);
+		if (err)
+			goto err_write_fail;
+		err = led_sysfs_write(buf, LED_BRIGHTNESS_FILE, "%d",
+			LED_BRIGHTNESS_MAX);
+		if (err)
+			goto err_write_fail;
+	default:
+		break;
+	}
+
+err_write_fail:
+	pthread_mutex_unlock(&g_lock);
+
+	return err;
+}
+
+static int set_light_leds(struct light_state_t const *state, int type)
+{
+	struct as3668_led_info leds;
+	unsigned int color;
+
+	memset(&leds, 0, sizeof(leds));
+	leds.slope_up = LED_SLOPE_UP_DEFAULT;
+	leds.slope_down = LED_SLOPE_DOWN_DEFAULT;
+
+	switch (state->flashMode) {
+	case LIGHT_FLASH_NONE:
+		leds.state = OFF;
+		break;
+	case LIGHT_FLASH_TIMED:
+	case LIGHT_FLASH_HARDWARE:
+		leds.delay_on = state->flashOnMS;
+		leds.delay_off = state->flashOffMS;
+
+		if(leds.delay_on < 0 || leds.delay_off < 0)
+			return -EINVAL;
+
+		if (!(state->color & ALPHA_MASK)) {
+			leds.state = OFF;
+			break;
+		}
+
+		color = state->color & COLOR_MASK;
+		if (color == 0) {
+			leds.state = OFF;
+			break;
+		}
+
+		set_led_colors(color, &leds);
+
+		if (leds.delay_on == 0)
+			leds.state = OFF;
+		else if (leds.delay_off)
+			leds.state = BLINK;
+		else
+			leds.state = ON;
+		break;
+	default:
+		return -EINVAL;
+	}
+
+	return write_leds(&leds);
+}
+
+static int set_light_leds_notifications(struct light_device_t *dev,
+			struct light_state_t const *state)
+{
+	return set_light_leds(state, 0);
+}
+
+static int set_light_leds_attention(struct light_device_t *dev,
+			struct light_state_t const *state)
+{
+	return set_light_leds(state, 1);
+}
+
 static int open_lights(const struct hw_module_t *module, char const *name,
 						struct hw_device_t **device)
 {
@@ -98,6 +330,10 @@ static int open_lights(const struct hw_module_t *module, char const *name,
 
 	if (strcmp(LIGHT_ID_BACKLIGHT, name) == 0)
 		set_light = set_light_backlight;
+	else if (strcmp(LIGHT_ID_NOTIFICATIONS, name) == 0)
+		set_light = set_light_leds_notifications;
+	else if (strcmp(LIGHT_ID_ATTENTION, name) == 0)
+		set_light = set_light_leds_attention;
 	else
 		return -EINVAL;
 
