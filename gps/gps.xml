@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <glgps xmlns="http://www.glpals.com/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.glpals.com/ glconfig.xsd" >
   <!--HAL Confguration  -->
   <hal
@@ -7,14 +7,13 @@
        gpioNStdbyPath="/sys/class/gps/bcm475x/GPS_PWR_EN/value"
        gpioNResetPath="/sys/class/gps/bcm475x/GPS_nRST/value"
        gpioDelayMs="250"
-       acNvStoDir="/data/gps/"
+       acNvStoDir="/data/"
 
-       acLogDirectory="/data/gps/broadcom/"
+       acLogDirectory="/data/gps/log/"
+       cLogEnabled="true"
 
        LPmode="false"
-
        ReAidingType="0"
-
        arp-supl-enable="false"
        arp-supl-cap-msb="false"
        arp-supl-cap-msa="false"
@@ -29,7 +28,6 @@
        SuplUT2Seconds="20"
        SuplUT3Seconds="20"
        SuplVersion="1"
-
        LbsEnable="false"
        LbsLocal="false"
        LbsServer="BCMLS2.glpals.com"
@@ -42,12 +40,10 @@
        LbsTAC="10101222"
        ctrlPipe="/data/gps/glgpsctrl"
        LbsWlanEnable="false"
-
        SensorsEnable="false"
        SensorsPowerSave="false"
        SensorsLog="false"
    />
-
   <gll
        LogPriMask="LOG_INFO"
        LogFacMask="LOG_GLLAPI | LOG_NMEA | LOG_RAWDATA"
@@ -55,11 +51,11 @@
        RfType="GL_RF_47511_BRCM_EXT_LNA"
        WarmStandbyTimeout1Seconds="10"
        WarmStandbyTimeout2Seconds="15"
+       PsfNotConnected="true"
     >
   </gll>
   <gll_features
        EnableLowPowerEls="false"
        EnableLowPowerPmm="true"
    />
-
 </glgps>
