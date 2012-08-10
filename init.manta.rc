@@ -128,6 +128,12 @@ service gpsd /system/vendor/bin/gpsd -c /system/vendor/etc/gps.xml
     user gps
     group system inet sdcard_rw
 
+# MobiCore startup
+service mobicore /system/bin/mcDriverDaemon
+    user drmrpc
+    group drmrpc
+    class main
+
 # on userdebug and eng builds, enable kgdb on the serial console
 on property:ro.debuggable=1
     write /sys/module/kgdboc/parameters/kgdboc ttyFIQ2
