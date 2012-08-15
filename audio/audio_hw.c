@@ -394,6 +394,7 @@ static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
                                    struct resampler_buffer* buffer)
 {
     struct stream_in *in;
+    size_t i;
 
     if (buffer_provider == NULL || buffer == NULL)
         return -EINVAL;
@@ -411,21 +412,24 @@ static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
     if (in->frames_in == 0) {
         in->read_status = pcm_read(in->pcm,
                                    (void*)in->buffer,
-                                   pcm_config.period_size *
-                                       audio_stream_frame_size(&in->stream.common));
+                                   pcm_frames_to_bytes(in->pcm, pcm_config.period_size));
         if (in->read_status != 0) {
             ALOGE("get_next_buffer() pcm_read error %d", in->read_status);
             buffer->raw = NULL;
             buffer->frame_count = 0;
             return in->read_status;
         }
+
         in->frames_in = pcm_config.period_size;
+
+        /* Do stereo to mono conversion in place by discarding right channel */
+        for (i = 1; i < in->frames_in; i++)
+            in->buffer[i] = in->buffer[i * 2];
     }
 
     buffer->frame_count = (buffer->frame_count > in->frames_in) ?
                                 in->frames_in : buffer->frame_count;
-    buffer->i16 = in->buffer + (pcm_config.period_size - in->frames_in) *
-                                                pcm_config.channels;
+    buffer->i16 = in->buffer + (pcm_config.period_size - in->frames_in);
 
     return in->read_status;
 
@@ -450,13 +454,14 @@ static void release_buffer(struct resampler_buffer_provider *buffer_provider,
 static ssize_t read_frames(struct stream_in *in, void *buffer, ssize_t frames)
 {
     ssize_t frames_wr = 0;
+    size_t frame_size = audio_stream_frame_size(&in->stream.common);
 
     while (frames_wr < frames) {
         size_t frames_rd = frames - frames_wr;
         if (in->resampler != NULL) {
             in->resampler->resample_from_provider(in->resampler,
                     (int16_t *)((char *)buffer +
-                            frames_wr * audio_stream_frame_size(&in->stream.common)),
+                            frames_wr * frame_size),
                     &frames_rd);
         } else {
             struct resampler_buffer buf = {
@@ -466,9 +471,9 @@ static ssize_t read_frames(struct stream_in *in, void *buffer, ssize_t frames)
             get_next_buffer(&in->buf_provider, &buf);
             if (buf.raw != NULL) {
                 memcpy((char *)buffer +
-                           frames_wr * audio_stream_frame_size(&in->stream.common),
+                           frames_wr * frame_size,
                         buf.raw,
-                        buf.frame_count * audio_stream_frame_size(&in->stream.common));
+                        buf.frame_count * frame_size);
                 frames_rd = buf.frame_count;
             }
             release_buffer(&in->buf_provider, &buf);
@@ -667,20 +672,19 @@ static int in_set_sample_rate(struct audio_stream *stream, uint32_t rate)
     return 0;
 }
 
+static audio_channel_mask_t in_get_channels(const struct audio_stream *stream)
+{
+    return AUDIO_CHANNEL_IN_MONO;
+}
+
+
 static size_t in_get_buffer_size(const struct audio_stream *stream)
 {
     struct stream_in *in = (struct stream_in *)stream;
 
     return get_input_buffer_size(in->requested_rate,
                                  AUDIO_FORMAT_PCM_16_BIT,
-                                 pcm_config.channels);
-}
-
-static audio_channel_mask_t in_get_channels(const struct audio_stream *stream)
-{
-    struct stream_in *in = (struct stream_in *)stream;
-
-    return audio_channel_in_mask_from_count(pcm_config.channels);
+                                 popcount(in_get_channels(stream)));
 }
 
 static audio_format_t in_get_format(const struct audio_stream *stream)
@@ -809,10 +813,8 @@ static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
 
     /*if (in->num_preprocessors != 0)
         ret = process_frames(in, buffer, frames_rq);
-    else */if (in->resampler != NULL)
-        ret = read_frames(in, buffer, frames_rq);
-    else
-        ret = pcm_read(in->pcm, buffer, bytes);
+      else */
+    ret = read_frames(in, buffer, frames_rq);
 
     if (ret > 0)
         ret = 0;
@@ -977,9 +979,9 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
 
     *stream_in = NULL;
 
-    /* Respond with a request for stereo if a different format is given. */
-    if (config->channel_mask != AUDIO_CHANNEL_IN_STEREO) {
-        config->channel_mask = AUDIO_CHANNEL_IN_STEREO;
+    /* Respond with a request for mono if a different format is given. */
+    if (config->channel_mask != AUDIO_CHANNEL_IN_MONO) {
+        config->channel_mask = AUDIO_CHANNEL_IN_MONO;
         return -EINVAL;
     }
 
@@ -1008,8 +1010,9 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     in->requested_rate = config->sample_rate;
     in->input_source = AUDIO_SOURCE_DEFAULT;
 
-    in->buffer = malloc(pcm_config.period_size *
-                        audio_stream_frame_size(&in->stream.common));
+    in->buffer = malloc(pcm_config.period_size * pcm_config.channels
+                                               * audio_stream_frame_size(&in->stream.common));
+
     if (!in->buffer) {
         ret = -ENOMEM;
         goto err_malloc;
@@ -1021,7 +1024,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
 
         ret = create_resampler(pcm_config.rate,
                                in->requested_rate,
-                               pcm_config.channels,
+                               1,
                                RESAMPLER_QUALITY_DEFAULT,
                                &in->buf_provider,
                                &in->resampler);
