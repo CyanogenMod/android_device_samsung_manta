@@ -24,6 +24,5 @@
 /system/vendor/firmware/setfile.bin
 /system/vendor/firmware/setfile2.bin
 /system/vendor/lib/egl/libGLES_mali.so
-/system/vendor/lib/hw/gralloc.exynos5.so
 /system/vendor/lib/libbt-vendor.so
 /system/vendor/lib/libump_mali.so
