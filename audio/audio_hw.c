@@ -39,6 +39,9 @@
 #include "audio_route.h"
 
 #define PCM_CARD 0
+#define PCM_CARD_SPDIF 1
+#define PCM_TOTAL 2
+
 #define PCM_DEVICE 0
 
 struct pcm_config pcm_config = {
@@ -54,7 +57,6 @@ struct audio_device {
 
     pthread_mutex_t lock; /* see note below on mutex acquisition order */
     unsigned int devices;
-    bool standby;
     bool mic_mute;
     struct audio_route *ar;
     audio_source_t input_source;
@@ -66,8 +68,8 @@ struct stream_out {
     struct audio_stream_out stream;
 
     pthread_mutex_t lock; /* see note below on mutex acquisition order */
-    struct pcm *pcm;
-    bool standby;
+    struct pcm *pcm[PCM_TOTAL];
+    bool standby; /* true if all PCMs are inactive */
     unsigned int device;
 
     struct audio_device *dev;
@@ -336,12 +338,32 @@ static int start_output_stream(struct stream_out *out)
 {
     struct audio_device *adev = out->dev;
 
-    out->pcm = pcm_open(PCM_CARD, PCM_DEVICE, PCM_OUT, &pcm_config);
+    if (out->device & (AUDIO_DEVICE_OUT_SPEAKER |
+                       AUDIO_DEVICE_OUT_WIRED_HEADSET |
+                       AUDIO_DEVICE_OUT_WIRED_HEADPHONE |
+                       AUDIO_DEVICE_OUT_AUX_DIGITAL)) {
+        out->pcm[PCM_CARD] = pcm_open(PCM_CARD, PCM_DEVICE,
+                                      PCM_OUT, &pcm_config);
 
-    if (out->pcm && !pcm_is_ready(out->pcm)) {
-        ALOGE("pcm_open() failed: %s", pcm_get_error(out->pcm));
-        pcm_close(out->pcm);
-        return -ENOMEM;
+        if (out->pcm[PCM_CARD] && !pcm_is_ready(out->pcm[PCM_CARD])) {
+            ALOGE("pcm_open(PCM_CARD) failed: %s",
+                  pcm_get_error(out->pcm[PCM_CARD]));
+            pcm_close(out->pcm[PCM_CARD]);
+            return -ENOMEM;
+        }
+    }
+
+    if (out->device & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET) {
+        out->pcm[PCM_CARD_SPDIF] = pcm_open(PCM_CARD_SPDIF, PCM_DEVICE,
+                                            PCM_OUT, &pcm_config);
+
+        if (out->pcm[PCM_CARD_SPDIF] &&
+                !pcm_is_ready(out->pcm[PCM_CARD_SPDIF])) {
+            ALOGE("pcm_open(PCM_CARD_SPDIF) failed: %s",
+                  pcm_get_error(out->pcm[PCM_CARD_SPDIF]));
+            pcm_close(out->pcm[PCM_CARD_SPDIF]);
+            return -ENOMEM;
+        }
     }
 
     adev->devices &= ~AUDIO_DEVICE_OUT_ALL;
@@ -525,13 +547,18 @@ static int out_set_format(struct audio_stream *stream, audio_format_t format)
 static int out_standby(struct audio_stream *stream)
 {
     struct stream_out *out = (struct stream_out *)stream;
+    int i;
 
     pthread_mutex_lock(&out->dev->lock);
     pthread_mutex_lock(&out->lock);
 
     if (!out->standby) {
-        pcm_close(out->pcm);
-        out->pcm = NULL;
+        for (i = 0; i < PCM_TOTAL; i++) {
+            if (out->pcm[i]) {
+                pcm_close(out->pcm[i]);
+                out->pcm[i] = NULL;
+            }
+        }
 
         out->dev->devices &= ~AUDIO_DEVICE_OUT_ALL;
         select_devices(out->dev);
@@ -606,6 +633,7 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
     int ret;
     struct stream_out *out = (struct stream_out *)stream;
     struct audio_device *adev = out->dev;
+    int i;
 
     /*
      * acquiring hw device mutex systematically is useful if a low
@@ -625,7 +653,10 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
     }
     pthread_mutex_unlock(&adev->lock);
 
-    pcm_write(out->pcm, (void *)buffer, bytes);
+    /* Write to all active PCMs */
+    for (i = 0; i < PCM_TOTAL; i++)
+        if (out->pcm[i])
+           pcm_write(out->pcm[i], (void *)buffer, bytes);
 
 exit:
     pthread_mutex_unlock(&out->lock);
@@ -1067,6 +1098,7 @@ static uint32_t adev_get_supported_devices(const struct audio_hw_device *dev)
             AUDIO_DEVICE_OUT_SPEAKER |
             AUDIO_DEVICE_OUT_WIRED_HEADSET |
             AUDIO_DEVICE_OUT_WIRED_HEADPHONE |
+            AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET |
             /*AUDIO_DEVICE_OUT_ALL_SCO |*/
             AUDIO_DEVICE_OUT_DEFAULT |
             /* IN */
