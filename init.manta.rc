@@ -3,6 +3,8 @@ import init.manta.usb.rc
 on init
     start watchdogd
 
+    mkdir /mnt/secure/sdcard0 0700 root root
+
     export EXTERNAL_STORAGE /storage/sdcard0
     mkdir /storage 0711 root root
     mkdir /storage/sdcard0 0000 root root
