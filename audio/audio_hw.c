@@ -86,7 +86,6 @@ struct stream_in {
     int16_t *buffer;
     size_t frames_in;
     int read_status;
-    unsigned int device;
     audio_source_t input_source;
 
     struct audio_device *dev;
@@ -369,8 +368,6 @@ static int start_input_stream(struct stream_in *in)
     if (in->resampler)
         in->resampler->reset(in->resampler);
 
-    adev->devices &= ~AUDIO_DEVICE_IN_ALL;
-    adev->devices |= in->device;
     adev->input_source = in->input_source;
     select_devices(adev);
 
@@ -711,7 +708,6 @@ static int in_standby(struct audio_stream *stream)
     if (!in->standby) {
         pcm_close(in->pcm);
         in->pcm = NULL;
-        in->dev->devices &= ~AUDIO_DEVICE_IN_ALL;
         in->dev->input_source = AUDIO_SOURCE_DEFAULT;
         select_devices(in->dev);
         in->standby = true;
@@ -754,19 +750,7 @@ static int in_set_parameters(struct audio_stream *stream, const char *kvpairs)
         }
     }
 
-    ret = str_parms_get_str(parms, AUDIO_PARAMETER_STREAM_ROUTING,
-                            value, sizeof(value));
-    if (ret >= 0) {
-        val = atoi(value);
-        if ((in->device != val) && (val != 0)) {
-            in->device = val;
-            apply_now = !in->standby;
-        }
-    }
-
     if (apply_now) {
-        adev->devices &= ~AUDIO_DEVICE_IN_ALL;
-        adev->devices |= in->device;
         adev->input_source = in->input_source;
         select_devices(adev);
     }
