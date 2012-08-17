@@ -59,13 +59,13 @@ def IncrementalOTA_InstallEnd(info):
 
 def WriteBootloader(info, bootloader_img):
   common.ZipWriteStr(info.output_zip, "bootloader.img", bootloader_img)
-  common.ZipWriteStr(info.output_zip, "zero", "0")
   bl_type, bl_device = common.GetTypeAndDevice("/bootloader", info.info_dict)
 
   fstab = info.info_dict["fstab"]
 
   info.script.Print("Writing bootloader...")
   force_ro = "/sys/block/" + bl_device.split("/")[-1] + "/force_ro"
-  info.script.AppendExtra('package_extract_file("zero", "%s");' % (force_ro,))
-  info.script.AppendExtra('package_extract_file("bootloader.img", "%s");' %
-                          bl_device)
+  info.script.AppendExtra(
+      ('samsung.manta.write_bootloader(package_extract_file('
+       '"bootloader.img"), "%s", "%s");') %
+      (bl_device, force_ro))
