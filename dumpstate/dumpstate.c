@@ -32,4 +32,5 @@ void dumpstate_board()
     dump_file("android power", "/d/android-power");
     dump_file("manta power", "/d/manta-power");
     dump_file("smb347 charger regs", "/d/smb347-regs");
+    dump_file("ds2784 fuel gauge regs", "/d/ds2784");
 };
