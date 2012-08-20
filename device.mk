@@ -67,10 +67,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml
 
 
-PRODUCT_COPY_FILES += $(call add-to-product-copy-files-if-exists,\
-packages/wallpapers/LivePicker/android.software.live_wallpaper.xml:system/etc/permissions/android.software.live_wallpaper.xml)
-
-
 PRODUCT_COPY_FILES += \
     device/samsung/manta/bcmdhd.cal:system/etc/wifi/bcmdhd.cal
 
