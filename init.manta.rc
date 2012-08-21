@@ -49,7 +49,7 @@ on boot
 
     # HACK: set maximum memory bus frequency to 667 MHz to fix memory corruption
     # b/7005327
-    write 667000 /sys/class/devfreq/exynos5-bus-mif.0/max_freq
+    write /sys/class/devfreq/exynos5-bus-mif.0/max_freq 667000
 
 on fs
     mount_all /fstab.manta
