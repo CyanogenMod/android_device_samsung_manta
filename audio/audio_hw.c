@@ -283,9 +283,11 @@ static void select_devices(struct audio_device *adev)
 {
     int output_device_id = get_output_device_id(adev->devices);
     int input_source_id = get_input_source_id(adev->input_source);
-    const char *output_route = "playback-idle";
-    const char *input_route = "capture-idle";
+    const char *output_route = NULL;
+    const char *input_route = NULL;
     int new_route_id;
+
+    reset_mixer_state(adev->ar);
 
     if (output_device_id == OUT_DEVICE_INVALID ||
             input_source_id == IN_SOURCE_INVALID) {
@@ -318,11 +320,13 @@ static void select_devices(struct audio_device *adev)
 
     ALOGV("select_devices() devices %#x input src %d output route %s input route %s",
           adev->devices, adev->input_source,
-          output_route,
-          input_route);
+          output_route ? output_route : "none",
+          input_route ? input_route : "none");
 
-    audio_route_apply_path(adev->ar, output_route);
-    audio_route_apply_path(adev->ar, input_route);
+    if (output_route)
+        audio_route_apply_path(adev->ar, output_route);
+    if (input_route)
+        audio_route_apply_path(adev->ar, input_route);
 
     update_mixer_state(adev->ar);
 
