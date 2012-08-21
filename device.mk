@@ -163,6 +163,7 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PROPERTY_OVERRIDES := \
     wifi.interface=wlan0 \
+    ro.opengles.version=131072 \
     ro.sf.lcd_density=320
 
 # setup dalvik vm configs.
