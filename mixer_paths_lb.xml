@@ -11,6 +11,8 @@
   <ctl name="Headphone Switch" value="0" />
   <ctl name="Right Headphone Mux" value="Mixer" />
   <ctl name="Left Headphone Mux" value="Mixer" />
+  <ctl name="Left Output Mixer DAC Switch" value="0" />
+  <ctl name="Right Output Mixer DAC Switch" value="0" />
 
   <ctl name="MIXINL IN1L Switch" value="0" />
   <ctl name="IN1L Switch" value="0" />
@@ -44,18 +46,6 @@
     <ctl name="DAC1 Switch" value="1" />
   </path>
 
-  <path name="speaker-off">
-    <ctl name="Speaker Switch" value="0" />
-    <ctl name="SPKR DAC1 Switch" value="0" />
-    <ctl name="SPKL DAC1 Switch" value="0" />
-  </path>
-
-  <path name="headphone-off">
-    <ctl name="Headphone Switch" value="0" />
-    <ctl name="Left Output Mixer DAC Switch" value="0" />
-    <ctl name="Right Output Mixer DAC Switch" value="0" />
-  </path>
-
   <path name="eq-speaker">
     <ctl name="AIF1DAC1 EQ Switch" value="1" />
     <ctl name="AIF1DAC1 EQ1 Volume" value="12" />
@@ -71,7 +61,6 @@
 
   <path name="headphones">
     <path name="dac1" />
-    <path name="speaker-off" />
     <ctl name="Headphone Switch" value="1" />
     <ctl name="Left Output Mixer DAC Switch" value="1" />
     <ctl name="Right Output Mixer DAC Switch" value="1" />
@@ -80,7 +69,6 @@
 
   <path name="speaker">
     <path name="dac1" />
-    <path name="headphone-off" />
     <ctl name="Speaker Switch" value="1" />
     <ctl name="SPKR DAC1 Switch" value="1" />
     <ctl name="SPKL DAC1 Switch" value="1" />
@@ -106,37 +94,25 @@
     <ctl name="AIF1ADC1R Mixer AIF2 Switch" value="1" />
   </path>
 
-  <path name="main-mic-on">
+  <path name="main-mic">
     <ctl name="MIXINL IN1L Switch" value="1" />
     <ctl name="MIXINL IN1L Volume" value="1" />
     <ctl name="IN1L Switch" value="1" />
     <ctl name="AIF1ADCR Source" value="Left" />
     <path name="adc-to-aif1adc" />
-  </path>
-
-  <path name="main-mic-off">
-    <ctl name="MIXINL IN1L Switch" value="0" />
-    <ctl name="MIXINL IN1L Volume" value="0" />
-    <ctl name="IN1L Switch" value="0" />
   </path>
 
   <!-- second mic not connected on lunchbox: use main mic -->
-  <path name="second-mic-on">
+  <path name="second-mic">
     <ctl name="MIXINL IN1L Switch" value="1" />
     <ctl name="MIXINL IN1L Volume" value="1" />
     <ctl name="IN1L Switch" value="1" />
     <ctl name="AIF1ADCR Source" value="Left" />
     <path name="adc-to-aif1adc" />
-  </path>
-
-  <path name="second-mic-off">
-    <ctl name="MIXINL IN1L Switch" value="0" />
-    <ctl name="MIXINL IN1L Volume" value="0" />
-    <ctl name="IN1L Switch" value="0" />
   </path>
 
   <!-- third mic not connected on lunchbox: use main mic -->
-  <path name="third-mic-on">
+  <path name="third-mic">
     <ctl name="MIXINL IN1L Switch" value="1" />
     <ctl name="MIXINL IN1L Volume" value="1" />
     <ctl name="IN1L Switch" value="1" />
@@ -144,13 +120,7 @@
     <path name="adc-to-aif1adc" />
   </path>
 
-  <path name="third-mic-off">
-    <ctl name="MIXINL IN1L Switch" value="0" />
-    <ctl name="MIXINL IN1L Volume" value="0" />
-    <ctl name="IN1L Switch" value="0" />
-  </path>
-
-  <path name="headset-mic-on">
+  <path name="headset-mic">
     <ctl name="MIXINL IN2L Switch" value="1" />
     <ctl name="MIXINL IN2L Volume" value="1" />
     <ctl name="IN2L Switch" value="1" />
@@ -158,40 +128,9 @@
     <path name="adc-to-aif1adc" />
   </path>
 
-  <path name="headset-mic-off">
-    <ctl name="MIXINL IN2L Switch" value="0" />
-    <ctl name="MIXINL IN2L Volume" value="0" />
-    <ctl name="IN2L Switch" value="0" />
-  </path>
-
-  <path name="main-mic">
-    <path name="main-mic-on" />
-    <path name="second-mic-off" />
-    <path name="headset-mic-off" />
-  </path>
-
-  <path name="second-mic">
-    <path name="second-mic-on" />
-    <path name="main-mic-off" />
-    <path name="headset-mic-off" />
-  </path>
-
-  <path name="headset-mic">
-    <path name="headset-mic-on" />
-    <path name="main-mic-off" />
-    <path name="second-mic-off" />
-  </path>
-
   <!-- These are useful named paths -->
 
   <!-- Playback paths -->
-
-  <path name="playback-idle">
-    <ctl name="Speaker Switch" value="0" />
-    <ctl name="SPKR DAC1 Switch" value="0" />
-    <ctl name="SPKL DAC1 Switch" value="0" />
-    <ctl name="Headphone Switch" value="0" />
-  </path>
 
   <path name="media-speaker">
     <path name="speaker" />
@@ -243,12 +182,6 @@
   </path>
 
   <!-- Capture paths -->
-
-  <path name="capture-idle">
-    <path name="main-mic-off" />
-    <path name="second-mic-off" />
-    <path name="headset-mic-off" />
-  </path>
 
   <path name="media-main-mic">
     <path name="main-mic" />
