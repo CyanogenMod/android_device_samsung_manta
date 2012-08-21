@@ -51,6 +51,8 @@ on boot
     write /sys/class/devfreq/exynos5-bus-mif.0/max_freq 667000
 
 on fs
+    mkdir /factory 0775 radio radio
+
     mount_all /fstab.manta
     setprop ro.crypto.fuse_sdcard true
 
