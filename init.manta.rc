@@ -140,7 +140,8 @@ service gpsd /system/vendor/bin/gpsd -c /system/vendor/etc/gps.xml
     group system inet
 
 # MobiCore startup
-service mobicore /system/bin/mcDriverDaemon
+service mobicore /system/bin/mcDriverDaemon -r /system/vendor/secapp/020a0000000000000000000000000000.drbin
+    setenv MC_REGISTRY_PATH /system/vendor/secapp
     user drmrpc
     group drmrpc
     class main
