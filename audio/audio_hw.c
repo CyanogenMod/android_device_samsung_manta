@@ -544,13 +544,9 @@ static int out_set_format(struct audio_stream *stream, audio_format_t format)
     return -ENOSYS;
 }
 
-static int out_standby(struct audio_stream *stream)
+static int do_out_standby(struct stream_out *out)
 {
-    struct stream_out *out = (struct stream_out *)stream;
     int i;
-
-    pthread_mutex_lock(&out->dev->lock);
-    pthread_mutex_lock(&out->lock);
 
     if (!out->standby) {
         for (i = 0; i < PCM_TOTAL; i++) {
@@ -566,10 +562,23 @@ static int out_standby(struct audio_stream *stream)
         out->standby = true;
     }
 
+    return 0;
+}
+
+static int out_standby(struct audio_stream *stream)
+{
+    struct stream_out *out = (struct stream_out *)stream;
+    int ret;
+
+    pthread_mutex_lock(&out->dev->lock);
+    pthread_mutex_lock(&out->lock);
+
+    ret = do_out_standby(out);
+
     pthread_mutex_unlock(&out->lock);
     pthread_mutex_unlock(&out->dev->lock);
 
-    return 0;
+    return ret;
 }
 
 static int out_dump(const struct audio_stream *stream, int fd)
@@ -595,6 +604,14 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
     if (ret >= 0) {
         val = atoi(value);
         if ((out->device != val) && (val != 0)) {
+            /* Force standby if moving to/from SPDIF or if the output
+             * device changes when in SPDIF mode */
+            if (((val & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET) ^
+                 (adev->devices & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET)) ||
+                (adev->devices & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET)) {
+                do_out_standby(out);
+            }
+
             out->device = val;
             if (!out->standby) {
                 adev->devices &= ~AUDIO_DEVICE_OUT_ALL;
