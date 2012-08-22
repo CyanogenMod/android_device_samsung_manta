@@ -22,7 +22,8 @@
 /system/vendor/firmware/maxtouch_nv.fw
 /system/vendor/firmware/mfc_fw.bin
 /system/vendor/firmware/setfile.bin
-/system/vendor/firmware/setfile2.bin
+/system/vendor/firmware/setfile_4e5.bin
+/system/vendor/firmware/setfile_6a3.bin
 /system/vendor/lib/egl/libGLES_mali.so
 /system/vendor/lib/libbt-vendor.so
 /system/vendor/lib/libump_mali.so
