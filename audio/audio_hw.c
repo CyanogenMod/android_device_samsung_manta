@@ -47,8 +47,8 @@
 struct pcm_config pcm_config = {
     .channels = 2,
     .rate = 44100,
-    .period_size = 880,
-    .period_count = 4,
+    .period_size = 512,
+    .period_count = 2,
     .format = PCM_FORMAT_S16_LE,
 };
 
