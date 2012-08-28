@@ -390,6 +390,7 @@ static int start_input_stream(struct stream_in *in)
     if (in->resampler)
         in->resampler->reset(in->resampler);
 
+    in->frames_in = 0;
     adev->input_source = in->input_source;
     select_devices(adev);
 
