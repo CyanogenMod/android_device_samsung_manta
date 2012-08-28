@@ -44,6 +44,9 @@
 
 #define PCM_DEVICE 0
 
+/* duration in ms of volume ramp applied when starting capture to remove plop */
+#define CAPTURE_START_RAMP_MS 100
+
 struct pcm_config pcm_config = {
     .channels = 2,
     .rate = 44100,
@@ -89,6 +92,9 @@ struct stream_in {
     size_t frames_in;
     int read_status;
     audio_source_t input_source;
+    uint16_t ramp_vol;
+    uint16_t ramp_step;
+    size_t  ramp_frames;
 
     struct audio_device *dev;
 };
@@ -394,8 +400,14 @@ static int start_input_stream(struct stream_in *in)
     adev->input_source = in->input_source;
     select_devices(adev);
 
+    /* initialize volume ramp */
+    in->ramp_frames = (CAPTURE_START_RAMP_MS * in->requested_rate) / 1000;
+    in->ramp_step = (uint16_t)(USHRT_MAX / in->ramp_frames);
+    in->ramp_vol = 0;;
+
     return 0;
 }
+
 
 static size_t get_input_buffer_size(unsigned int sample_rate,
                                     audio_format_t format,
@@ -822,6 +834,24 @@ static int in_set_gain(struct audio_stream_in *stream, float gain)
     return 0;
 }
 
+static void in_apply_ramp(struct stream_in *in, int16_t *buffer, size_t frames)
+{
+    size_t i;
+    uint16_t vol = in->ramp_vol;
+    uint16_t step = in->ramp_step;
+
+    frames = (frames < in->ramp_frames) ? frames : in->ramp_frames;
+
+    for (i = 0; i < frames; i++)
+    {
+        buffer[i] = (int16_t)((buffer[i] * vol) >> 16);
+        vol += step;
+    }
+
+    in->ramp_vol = vol;
+    in->ramp_frames -= frames;
+}
+
 static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
                        size_t bytes)
 {
@@ -855,6 +885,9 @@ static ssize_t in_read(struct audio_stream_in *stream, void* buffer,
 
     if (ret > 0)
         ret = 0;
+
+    if (in->ramp_frames > 0)
+        in_apply_ramp(in, buffer, frames_rq);
 
     /*
      * Instead of writing zeroes here, we could trust the hardware
