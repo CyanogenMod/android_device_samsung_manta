@@ -122,7 +122,6 @@ PRODUCT_COPY_FILES += \
     hardware/broadcom/nfc/bcm2079x/bcm2079x_pre_firmware.ncd:system/vendor/firmware/bcm2079x_pre_firmware.ncd
 
 PRODUCT_PACKAGES += \
-    make_ext4fs \
     lights.manta \
     sensors.manta
 
@@ -156,10 +155,6 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PACKAGES += \
     camera.exynos5
-
-# Filesystem management tools
-PRODUCT_PACKAGES += \
-    make_ext4fs
 
 PRODUCT_PROPERTY_OVERRIDES := \
     wifi.interface=wlan0 \
