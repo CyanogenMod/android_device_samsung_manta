@@ -21,6 +21,9 @@
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    accl_enable            0660    system    system
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    gyro_enable            0660    system    system
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    gyro_enable            0660    system    system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    sampling_frequency     0660    system    system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    dmp_event_int_on       0660    system    system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    quaternion_on          0660    system    system
 
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    trigger/current_trigger          0660    system    system
 
