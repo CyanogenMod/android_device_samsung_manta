@@ -184,7 +184,7 @@ PRODUCT_PACKAGES += \
     charger \
     charger_res_images
 
-$(call inherit-product, hardware/samsung_slsi/exynos5/exynos5.mk)
+$(call inherit-product-if-exists, hardware/samsung_slsi/exynos5/exynos5.mk)
 $(call inherit-product-if-exists, vendor/samsung_slsi/exynos5/exynos5-vendor.mk)
 $(call inherit-product-if-exists, vendor/samsung/manta/device-vendor.mk)
 
