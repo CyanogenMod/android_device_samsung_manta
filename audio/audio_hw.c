@@ -59,7 +59,7 @@ struct audio_device {
     struct audio_hw_device hw_device;
 
     pthread_mutex_t lock; /* see note below on mutex acquisition order */
-    unsigned int devices;
+    unsigned int out_device;
     bool mic_mute;
     struct audio_route *ar;
     audio_source_t input_source;
@@ -124,9 +124,7 @@ enum {
 
 int get_output_device_id(unsigned int device)
 {
-    device &= AUDIO_DEVICE_OUT_ALL;
-
-    if (device == 0)
+    if (device == AUDIO_DEVICE_NONE)
         return OUT_DEVICE_NONE;
 
     if (popcount(device) == 2) {
@@ -288,7 +286,7 @@ const struct route_config * const route_configs[IN_SOURCE_TAB_SIZE]
 
 static void select_devices(struct audio_device *adev)
 {
-    int output_device_id = get_output_device_id(adev->devices);
+    int output_device_id = get_output_device_id(adev->out_device);
     int input_source_id = get_input_source_id(adev->input_source);
     const char *output_route = NULL;
     const char *input_route = NULL;
@@ -299,7 +297,7 @@ static void select_devices(struct audio_device *adev)
     if (output_device_id == OUT_DEVICE_INVALID ||
             input_source_id == IN_SOURCE_INVALID) {
         ALOGV("select_devices() invalid device %#x or source %d",
-              adev->devices, adev->input_source);
+              adev->out_device, adev->input_source);
         return;
     }
 
@@ -326,7 +324,7 @@ static void select_devices(struct audio_device *adev)
     }
 
     ALOGV("select_devices() devices %#x input src %d output route %s input route %s",
-          adev->devices, adev->input_source,
+          adev->out_device, adev->input_source,
           output_route ? output_route : "none",
           input_route ? input_route : "none");
 
@@ -372,8 +370,7 @@ static int start_output_stream(struct stream_out *out)
         }
     }
 
-    adev->devices &= ~AUDIO_DEVICE_OUT_ALL;
-    adev->devices |= out->device;
+    adev->out_device = out->device;
     select_devices(adev);
 
     return 0;
@@ -569,7 +566,7 @@ static int do_out_standby(struct stream_out *out)
             }
         }
 
-        out->dev->devices &= ~AUDIO_DEVICE_OUT_ALL;
+        out->dev->out_device = AUDIO_DEVICE_NONE;
         select_devices(out->dev);
 
         out->standby = true;
@@ -620,15 +617,14 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
             /* Force standby if moving to/from SPDIF or if the output
              * device changes when in SPDIF mode */
             if (((val & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET) ^
-                 (adev->devices & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET)) ||
-                (adev->devices & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET)) {
+                 (adev->out_device & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET)) ||
+                (adev->out_device & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET)) {
                 do_out_standby(out);
             }
 
             out->device = val;
             if (!out->standby) {
-                adev->devices &= ~AUDIO_DEVICE_OUT_ALL;
-                adev->devices |= out->device;
+                adev->out_device = out->device;
                 select_devices(adev);
             }
         }
@@ -1143,23 +1139,6 @@ static int adev_close(hw_device_t *device)
     return 0;
 }
 
-static uint32_t adev_get_supported_devices(const struct audio_hw_device *dev)
-{
-    return (/* OUT */
-            AUDIO_DEVICE_OUT_SPEAKER |
-            AUDIO_DEVICE_OUT_WIRED_HEADSET |
-            AUDIO_DEVICE_OUT_WIRED_HEADPHONE |
-            AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET |
-            /*AUDIO_DEVICE_OUT_ALL_SCO |*/
-            AUDIO_DEVICE_OUT_DEFAULT |
-            /* IN */
-            AUDIO_DEVICE_IN_BUILTIN_MIC |
-            AUDIO_DEVICE_IN_WIRED_HEADSET |
-            AUDIO_DEVICE_IN_BACK_MIC |
-            /*AUDIO_DEVICE_IN_ALL_SCO |*/
-            AUDIO_DEVICE_IN_DEFAULT);
-}
-
 static int adev_open(const hw_module_t* module, const char* name,
                      hw_device_t** device)
 {
@@ -1174,11 +1153,10 @@ static int adev_open(const hw_module_t* module, const char* name,
         return -ENOMEM;
 
     adev->hw_device.common.tag = HARDWARE_DEVICE_TAG;
-    adev->hw_device.common.version = AUDIO_DEVICE_API_VERSION_1_0;
+    adev->hw_device.common.version = AUDIO_DEVICE_API_VERSION_2_0;
     adev->hw_device.common.module = (struct hw_module_t *) module;
     adev->hw_device.common.close = adev_close;
 
-    adev->hw_device.get_supported_devices = adev_get_supported_devices;
     adev->hw_device.init_check = adev_init_check;
     adev->hw_device.set_voice_volume = adev_set_voice_volume;
     adev->hw_device.set_master_volume = adev_set_master_volume;
