@@ -44,6 +44,8 @@ TARGET_BOOTLOADER_BOARD_NAME := manta
 
 BOARD_EGL_CFG := device/samsung/manta/egl.cfg
 
+OVERRIDE_RS_DRIVER := libRSDriverArm.so
+
 #BOARD_USES_HGL := true
 #BOARD_USES_OVERLAY := true
 USE_OPENGL_RENDERER := true
