@@ -156,6 +156,10 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     camera.exynos5
 
+# Filesystem management tools
+PRODUCT_PACKAGES += \
+    e2fsck
+
 PRODUCT_PROPERTY_OVERRIDES := \
     wifi.interface=wlan0 \
     ro.opengles.version=131072 \
