@@ -143,4 +143,7 @@
 
     <!--  Maximum number of supported users -->
     <integer name="config_multiuserMaximumUsers">8</integer>
+
+    <bool name="config_ui_enableFadingMarquee">false</bool>
+
 </resources>
