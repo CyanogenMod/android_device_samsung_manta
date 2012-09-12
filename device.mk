@@ -148,7 +148,8 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PACKAGES += \
     audio.primary.manta \
-    audio.a2dp.default
+    audio.a2dp.default \
+	audio.usb.default
 
 PRODUCT_PACKAGES += \
     power.manta
