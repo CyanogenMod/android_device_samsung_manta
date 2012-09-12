@@ -107,7 +107,6 @@ enum {
     OUT_DEVICE_SPEAKER_AND_HEADSET,
     OUT_DEVICE_TAB_SIZE,           /* number of rows in route_configs[][] */
     OUT_DEVICE_NONE,
-    OUT_DEVICE_INVALID,
     OUT_DEVICE_CNT
 };
 
@@ -118,7 +117,6 @@ enum {
     IN_SOURCE_VOICE_COMMUNICATION,
     IN_SOURCE_TAB_SIZE,            /* number of lines in route_configs[][] */
     IN_SOURCE_NONE,
-    IN_SOURCE_INVALID,
     IN_SOURCE_CNT
 };
 
@@ -134,11 +132,11 @@ int get_output_device_id(unsigned int device)
                         AUDIO_DEVICE_OUT_WIRED_HEADPHONE)))
             return OUT_DEVICE_SPEAKER_AND_HEADSET;
         else
-            return OUT_DEVICE_INVALID;
+            return OUT_DEVICE_NONE;
     }
 
     if (popcount(device) != 1)
-        return OUT_DEVICE_INVALID;
+        return OUT_DEVICE_NONE;
 
     switch (device) {
     case AUDIO_DEVICE_OUT_SPEAKER:
@@ -152,7 +150,7 @@ int get_output_device_id(unsigned int device)
     case AUDIO_DEVICE_OUT_BLUETOOTH_SCO_CARKIT:
         return OUT_DEVICE_BT_SCO;
     default:
-        return OUT_DEVICE_INVALID;
+        return OUT_DEVICE_NONE;
     }
 }
 
@@ -170,7 +168,7 @@ int get_input_source_id(audio_source_t source)
     case AUDIO_SOURCE_VOICE_COMMUNICATION:
         return IN_SOURCE_VOICE_COMMUNICATION;
     default:
-        return IN_SOURCE_INVALID;
+        return IN_SOURCE_NONE;
     }
 }
 
@@ -293,13 +291,6 @@ static void select_devices(struct audio_device *adev)
     int new_route_id;
 
     reset_mixer_state(adev->ar);
-
-    if (output_device_id == OUT_DEVICE_INVALID ||
-            input_source_id == IN_SOURCE_INVALID) {
-        ALOGV("select_devices() invalid device %#x or source %d",
-              adev->out_device, adev->input_source);
-        return;
-    }
 
     new_route_id = (1 << (input_source_id + OUT_DEVICE_CNT)) + (1 << output_device_id);
     if (new_route_id == adev->cur_route_id)
