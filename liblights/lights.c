@@ -30,8 +30,8 @@
 #include <cutils/log.h>
 #include <hardware/lights.h>
 
-#define LED_SLOPE_UP_DEFAULT 0
-#define LED_SLOPE_DOWN_DEFAULT 0
+#define LED_SLOPE_UP_DEFAULT 450
+#define LED_SLOPE_DOWN_DEFAULT 450
 #define LED_BRIGHTNESS_OFF 0
 #define LED_BRIGHTNESS_MAX 255
 
@@ -62,8 +62,8 @@ enum LED_STATE {
 
 struct as3668_led_info {
 	unsigned int color;
-	int delay_on;
-	int delay_off;
+	unsigned int delay_on;
+	unsigned int delay_off;
 	unsigned int slope_up;
 	unsigned int slope_down;
 	enum LED_STATE state;
@@ -238,10 +238,10 @@ static int write_leds(struct as3668_led_info *leds)
 		err = led_sysfs_write(buf, LED_TRIGGER_FILE, "%s", "timer");
 		if (err)
 			goto err_write_fail;
-		err = led_sysfs_write(buf, LED_DELAY_ON_FILE, "%d", leds->delay_on);
+		err = led_sysfs_write(buf, LED_DELAY_ON_FILE, "%u", leds->delay_on);
 		if (err)
 			goto err_write_fail;
-		err = led_sysfs_write(buf, LED_DELAY_OFF_FILE, "%d", leds->delay_off);
+		err = led_sysfs_write(buf, LED_DELAY_OFF_FILE, "%u", leds->delay_off);
 		if (err)
 			goto err_write_fail;
 	case ON:
@@ -277,11 +277,15 @@ static int set_light_leds(struct light_state_t const *state, int type)
 		break;
 	case LIGHT_FLASH_TIMED:
 	case LIGHT_FLASH_HARDWARE:
-		leds.delay_on = state->flashOnMS;
-		leds.delay_off = state->flashOffMS;
-
-		if(leds.delay_on < 0 || leds.delay_off < 0)
+		if (state->flashOnMS < 0 || state->flashOffMS < 0)
 			return -EINVAL;
+
+		leds.delay_off = state->flashOffMS;
+		leds.delay_on = state->flashOnMS;
+		if (leds.delay_on <= leds.slope_up + leds.slope_down)
+			leds.delay_on = 1;
+		else
+			leds.delay_on -= leds.slope_up + leds.slope_down;
 
 		if (!(state->color & ALPHA_MASK)) {
 			leds.state = OFF;
