@@ -16,5 +16,17 @@
 # Input Device Calibration File for the manta touch screen.
 #
 
-# Basic Parameters
+device.internal = 1
+
 touch.deviceType = touchScreen
+touch.orientationAware = 1
+
+touch.size.calibration = area
+touch.size.scale = 52
+touch.size.bias = 11.8
+touch.size.isSummed = 0
+
+touch.pressure.calibration = amplitude
+touch.pressure.scale = 0.015
+
+touch.orientation.calibration = none
