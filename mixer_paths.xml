@@ -3,6 +3,7 @@
   <ctl name="DAC1R Mixer AIF1.1 Switch" value="0" />
   <ctl name="DAC1L Mixer AIF1.1 Switch" value="0" />
   <ctl name="DAC1 Switch" value="0" />
+  <ctl name="DAC2 Switch" value="0" />
   <ctl name="AIF1DRC1 Mode" value="Default" />
   <ctl name="AIF1DAC1 DRC Switch" value="0" />
 
@@ -39,14 +40,27 @@
 
   <ctl name="AIF2DACL Mux" value="AIF3" />
   <ctl name="AIF2DACR Mux" value="AIF3" />
-  <ctl name="AIF3ADC Mux" value="Mono PCM" />
-  <ctl name="Mono PCM Out Mux" value="AIF2ADCL" />
+  <ctl name="AIF2DAC Mux" value="AIF3DACDAT" />
+  <ctl name="AIF3ADC Mux" value="AIF2ADCDAT" />
+
+  <ctl name="AIF1ADC1L Mixer AIF2 Switch" value="0" />
+  <ctl name="AIF1ADC1R Mixer AIF2 Switch" value="0" />
+  <ctl name="AIF1ADC2L Mixer AIF2 Switch" value="0" />
+  <ctl name="AIF1ADC2R Mixer AIF2 Switch" value="0" />
+  <ctl name="AIF1ADC1L Mixer ADC/DMIC Switch" value="0" />
+  <ctl name="AIF1ADC1R Mixer ADC/DMIC Switch" value="0" />
 
   <!-- These are commonly used control sequences -->
   <path name="dac1">
     <ctl name="DAC1R Mixer AIF1.1 Switch" value="1" />
     <ctl name="DAC1L Mixer AIF1.1 Switch" value="1" />
     <ctl name="DAC1 Switch" value="1" />
+  </path>
+
+  <path name="dac2">
+    <ctl name="AIF2DAC2L Mixer AIF1.1 Switch" value="1" />
+    <ctl name="AIF2DAC2R Mixer AIF1.1 Switch" value="1" />
+    <ctl name="DAC2 Switch" value="1" />
   </path>
 
   <path name="eq-speaker">
@@ -87,15 +101,13 @@
   <path name="adc-to-aif1adc">
     <ctl name="AIF1ADC1L Mixer ADC/DMIC Switch" value="1" />
     <ctl name="AIF1ADC1R Mixer ADC/DMIC Switch" value="1" />
-    <ctl name="AIF1ADC1L Mixer AIF2 Switch" value="0" />
-    <ctl name="AIF1ADC1R Mixer AIF2 Switch" value="0" />
   </path>
 
   <path name="aif2-to-aif1adc">
-    <ctl name="AIF1ADC1L Mixer ADC/DMIC Switch" value="0" />
-    <ctl name="AIF1ADC1R Mixer ADC/DMIC Switch" value="0" />
     <ctl name="AIF1ADC1L Mixer AIF2 Switch" value="1" />
     <ctl name="AIF1ADC1R Mixer AIF2 Switch" value="1" />
+    <ctl name="AIF1ADC2L Mixer AIF2 Switch" value="1" />
+    <ctl name="AIF1ADC2R Mixer AIF2 Switch" value="1" />
   </path>
 
   <path name="main-mic">
@@ -189,8 +201,7 @@
   </path>
 
   <path name="bt-sco-headset">
-    <ctl name="AIF2DAC2L Mixer AIF1.1 Switch" value="1" />
-    <ctl name="AIF2DAC2R Mixer AIF1.1 Switch" value="1" />
+    <path name="dac2" />
   </path>
 
   <!-- Capture paths -->
@@ -233,6 +244,10 @@
     <ctl name="AIF1ADC1 HPF Mode" value="HiFi" />
   </path>
 
+  <path name="bt-sco-mic">
+    <path name="aif2-to-aif1adc" />
+  </path>
+
   <!-- TODO headset paths not properly configured yet -->
   <path name="voice-rec-headset-mic">
     <path name="headset-mic" />
@@ -244,10 +259,6 @@
     <path name="headset-mic" />
     <ctl name="IN1R Volume" value="16" />
     <ctl name="AIF1ADC1 HPF Mode" value="Voice 1" />
-  </path>
-
-  <path name="bt-sco-mic">
-    <path name="aif2-to-aif1adc" />
   </path>
 
 </mixer>
