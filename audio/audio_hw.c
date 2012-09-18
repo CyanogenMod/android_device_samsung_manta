@@ -43,6 +43,8 @@
 #define PCM_TOTAL 2
 
 #define PCM_DEVICE 0
+#define PCM_DEVICE_VOICE 2
+#define PCM_DEVICE_SCO 3
 
 /* duration in ms of volume ramp applied when starting capture to remove plop */
 #define CAPTURE_START_RAMP_MS 100
@@ -51,6 +53,14 @@ struct pcm_config pcm_config = {
     .channels = 2,
     .rate = 44100,
     .period_size = 512,
+    .period_count = 2,
+    .format = PCM_FORMAT_S16_LE,
+};
+
+struct pcm_config pcm_config_sco = {
+    .channels = 1,
+    .rate = 8000,
+    .period_size = 128,
     .period_count = 2,
     .format = PCM_FORMAT_S16_LE,
 };
@@ -65,6 +75,10 @@ struct audio_device {
     audio_source_t input_source;
     int cur_route_id;     /* current route ID: combination of input source
                            * and output device IDs */
+    struct pcm *pcm_voice_out;
+    struct pcm *pcm_sco_out;
+    struct pcm *pcm_voice_in;
+    struct pcm *pcm_sco_in;
 };
 
 struct stream_out {
@@ -336,7 +350,8 @@ static int start_output_stream(struct stream_out *out)
     if (out->device & (AUDIO_DEVICE_OUT_SPEAKER |
                        AUDIO_DEVICE_OUT_WIRED_HEADSET |
                        AUDIO_DEVICE_OUT_WIRED_HEADPHONE |
-                       AUDIO_DEVICE_OUT_AUX_DIGITAL)) {
+                       AUDIO_DEVICE_OUT_AUX_DIGITAL |
+                       AUDIO_DEVICE_OUT_ALL_SCO)) {
         out->pcm[PCM_CARD] = pcm_open(PCM_CARD, PCM_DEVICE,
                                       PCM_OUT, &pcm_config);
 
@@ -396,6 +411,62 @@ static int start_input_stream(struct stream_in *in)
     return 0;
 }
 
+/* must be called with the hw device mutex locked, OK to hold other mutexes */
+static void start_bt_sco(struct audio_device *adev) {
+    adev->pcm_voice_out = pcm_open(PCM_CARD, PCM_DEVICE_VOICE, PCM_OUT,
+                              &pcm_config_sco);
+    if (adev->pcm_voice_out && !pcm_is_ready(adev->pcm_voice_out)) {
+        ALOGE("pcm_open(VOICE_OUT) failed: %s", pcm_get_error(adev->pcm_voice_out));
+        goto err_voice_out;
+    }
+    adev->pcm_sco_out = pcm_open(PCM_CARD, PCM_DEVICE_SCO, PCM_OUT,
+                            &pcm_config_sco);
+    if (adev->pcm_sco_out && !pcm_is_ready(adev->pcm_sco_out)) {
+        ALOGE("pcm_open(SCO_OUT) failed: %s", pcm_get_error(adev->pcm_sco_out));
+        goto err_sco_out;
+    }
+    adev->pcm_voice_in = pcm_open(PCM_CARD, PCM_DEVICE_VOICE, PCM_IN,
+                                 &pcm_config_sco);
+    if (adev->pcm_voice_in && !pcm_is_ready(adev->pcm_voice_in)) {
+        ALOGE("pcm_open(VOICE_IN) failed: %s", pcm_get_error(adev->pcm_voice_in));
+        goto err_voice_in;
+    }
+    adev->pcm_sco_in = pcm_open(PCM_CARD, PCM_DEVICE_SCO, PCM_IN,
+                               &pcm_config_sco);
+    if (adev->pcm_sco_in && !pcm_is_ready(adev->pcm_sco_in)) {
+        ALOGE("pcm_open(SCO_IN) failed: %s", pcm_get_error(adev->pcm_sco_in));
+        goto err_sco_in;
+    }
+
+    pcm_start(adev->pcm_voice_out);
+    pcm_start(adev->pcm_sco_out);
+    pcm_start(adev->pcm_voice_in);
+    pcm_start(adev->pcm_sco_in);
+
+    return;
+
+err_sco_in:
+    pcm_close(adev->pcm_sco_in);
+err_voice_in:
+    pcm_close(adev->pcm_voice_in);
+err_sco_out:
+    pcm_close(adev->pcm_sco_out);
+err_voice_out:
+    pcm_close(adev->pcm_voice_out);
+}
+
+/* must be called with the hw device mutex locked, OK to hold other mutexes */
+static void stop_bt_sco(struct audio_device *adev) {
+    pcm_stop(adev->pcm_voice_out);
+    pcm_stop(adev->pcm_sco_out);
+    pcm_stop(adev->pcm_voice_in);
+    pcm_stop(adev->pcm_sco_in);
+
+    pcm_close(adev->pcm_voice_out);
+    pcm_close(adev->pcm_sco_out);
+    pcm_close(adev->pcm_voice_in);
+    pcm_close(adev->pcm_sco_in);
+}
 
 static size_t get_input_buffer_size(unsigned int sample_rate,
                                     audio_format_t format,
@@ -611,6 +682,15 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
                  (adev->out_device & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET)) ||
                 (adev->out_device & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET)) {
                 do_out_standby(out);
+            }
+
+            /* Start/stop the BT SCO stream */
+            if ((val & AUDIO_DEVICE_OUT_ALL_SCO) ^
+                (adev->out_device & AUDIO_DEVICE_OUT_ALL_SCO)) {
+                if (val & AUDIO_DEVICE_OUT_ALL_SCO)
+                    start_bt_sco(adev);
+                else
+                    stop_bt_sco(adev);
             }
 
             out->device = val;
