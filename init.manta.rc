@@ -29,7 +29,7 @@ on post-fs-data
     chown dhcp dhcp /data/misc/dhcp
 
 # permissions for bluetooth.
-	setprop ro.bt.bdaddr_path "/efs/bluetooth/bt_addr"
+	setprop ro.bt.bdaddr_path "/factory/bluetooth/bt_addr"
 	chown bluetooth bluetooth ro.bt.bdaddr_path
 	chown bluetooth bluetooth /dev/ttySAC0
 	chmod 0600 /dev/ttySAC0
