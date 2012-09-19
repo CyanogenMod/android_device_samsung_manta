@@ -156,7 +156,8 @@
 
   <path name="media-speaker">
     <path name="speaker" />
-    <ctl name="Speaker Volume" value="61" />
+    <ctl name="Speaker Volume" id="0" value="61" />
+    <ctl name="Speaker Volume" id="1" value="62" />
   </path>
 
   <path name="media-headphones">
@@ -166,7 +167,8 @@
 
   <path name="voice-rec-speaker">
     <path name="speaker" />
-    <ctl name="Speaker Volume" value="61" />
+    <ctl name="Speaker Volume" id="0" value="61" />
+    <ctl name="Speaker Volume" id="1" value="62" />
   </path>
 
   <path name="voice-rec-headphones">
@@ -176,7 +178,8 @@
 
   <path name="communication-speaker">
     <path name="speaker" />
-    <ctl name="Speaker Volume" value="61" />
+    <ctl name="Speaker Volume" id="0" value="61" />
+    <ctl name="Speaker Volume" id="1" value="62" />
   </path>
 
   <path name="communication-headphones">
@@ -194,7 +197,8 @@
     <ctl name="SPKL DAC1 Switch" value="1" />
     <ctl name="Speaker Mixer Volume" value="3" />
     <ctl name="Speaker Boost Volume" value="5" />
-    <ctl name="Speaker Volume" value="61" />
+    <ctl name="Speaker Volume" id="0" value="61" />
+    <ctl name="Speaker Volume" id="1" value="62" />
     <ctl name="AIF1DRC1 Mode" value="Speakers Media" />
     <ctl name="AIF1DAC1 DRC Switch" value="1" />
     <path name="eq-speaker" />
