@@ -98,6 +98,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     libnfc-nci \
     libnfc_nci_jni \
+    nfc_nci.manta \
     NfcNci \
     Tag \
     com.android.nfc_extras
