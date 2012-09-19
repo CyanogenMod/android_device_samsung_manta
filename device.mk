@@ -98,6 +98,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     libnfc-nci \
     libnfc_nci_jni \
+    nfc_nci.manta \
     NfcNci \
     Tag \
     com.android.nfc_extras
@@ -193,7 +194,7 @@ PRODUCT_PACKAGES += \
     charger \
     charger_res_images
 
-$(call inherit-product, hardware/samsung_slsi/exynos5/exynos5.mk)
+$(call inherit-product-if-exists, hardware/samsung_slsi/exynos5/exynos5.mk)
 $(call inherit-product-if-exists, vendor/samsung_slsi/exynos5/exynos5-vendor.mk)
 $(call inherit-product-if-exists, vendor/samsung/manta/device-vendor.mk)
 
