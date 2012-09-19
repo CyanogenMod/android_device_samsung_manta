@@ -24,7 +24,6 @@
 #include <stdio.h>
 
 #include <cutils/log.h>
-#include <cutils/properties.h>
 
 #include <tinyalsa/asoundlib.h>
 
@@ -599,14 +598,7 @@ struct audio_route *audio_route_init(void)
     int bytes_read;
     void *buf;
     int i;
-    struct mixer_path *path;
     struct audio_route *ar;
-    /* TODO remove when lunchbox is deprecated */
-    char property[PROPERTY_VALUE_MAX];
-    int hw_revision;
-
-    property_get("ro.revision", property, "1");
-    hw_revision = atoi(property);
 
     ar = calloc(1, sizeof(struct audio_route));
     if (!ar)
@@ -626,11 +618,7 @@ struct audio_route *audio_route_init(void)
     if (alloc_mixer_state(ar) < 0)
         goto err_mixer_state;
 
-    /* TODO remove when lunchbox is deprecated */
-    if (hw_revision == 1)
-        file = fopen("/system/etc/mixer_paths_lb.xml", "r");
-    else
-        file = fopen(MIXER_XML_PATH, "r");
+    file = fopen(MIXER_XML_PATH, "r");
 
     if (!file) {
         ALOGE("Failed to open %s", MIXER_XML_PATH);
