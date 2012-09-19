@@ -15,6 +15,4 @@
 -->
 
 <resources>
-    <!-- Enable user management -->
-    <bool name="enable_user_management">true</bool>
 </resources>
