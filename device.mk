@@ -117,11 +117,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
     device/samsung/manta/nfc/libnfc-brcm.conf:system/etc/libnfc-brcm.conf
 
-# NFC firmware for BCM2079x
-PRODUCT_COPY_FILES += \
-    hardware/broadcom/nfc/bcm2079x/bcm2079x_firmware.ncd:system/vendor/firmware/bcm2079x_firmware.ncd \
-    hardware/broadcom/nfc/bcm2079x/bcm2079x_pre_firmware.ncd:system/vendor/firmware/bcm2079x_pre_firmware.ncd
-
 PRODUCT_PACKAGES += \
     lights.manta \
     sensors.manta
