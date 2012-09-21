@@ -80,7 +80,7 @@
 /dev/media2               0660   media      media
 
 # mixer
-/dev/video16              0660   system     system
+/dev/video16              0660   system     audio
 /dev/video17              0660   system     system
 /dev/video18              0660   system     system
 /dev/video19              0660   system     system
