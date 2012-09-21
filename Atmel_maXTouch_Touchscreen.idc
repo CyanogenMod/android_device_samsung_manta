@@ -29,4 +29,4 @@ touch.size.isSummed = 0
 touch.pressure.calibration = amplitude
 touch.pressure.scale = 0.015
 
-touch.orientation.calibration = none
+touch.orientation.calibration = vector
