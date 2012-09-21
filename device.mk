@@ -73,9 +73,6 @@ PRODUCT_COPY_FILES += \
 # audio mixer paths
 PRODUCT_COPY_FILES += \
     device/samsung/manta/mixer_paths.xml:system/etc/mixer_paths.xml
-# audio mixer paths for lunch box: remove when deprecated
-PRODUCT_COPY_FILES += \
-    device/samsung/manta/mixer_paths_lb.xml:system/etc/mixer_paths_lb.xml
 
 # audio policy configuration
 PRODUCT_COPY_FILES += \
