@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # Copyright 2012 The Android Open Source Project
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +14,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Samsung/ARM blob(s) necessary for Manta hardware
-PRODUCT_PACKAGES := \
-    libGLES_mali
+# start jb-mr1-dev
+# 474128 = JOO86
+# end jb-mr1-dev
+
+source ../../../common/clear-factory-images-variables.sh
+BUILD=474128
+DEVICE=manta
+PRODUCT=mantaray
+VERSION=joo86
+#SRCPREFIX=signed-
+BOOTLOADER=mantali03
+source ../../../common/generate-factory-images-common.sh

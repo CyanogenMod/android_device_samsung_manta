@@ -16,12 +16,13 @@
 
 # start jb-mr1-dev
 # 454897 = JOO61E
+# 474128 = JOO86
 # end jb-mr1-dev
 BRANCH=jb-mr1-dev
 if test $BRANCH=jb-mr1-dev
 then
-  ZIP=mantaray-ota-454897.zip
-  BUILD=joo61e
+  ZIP=mantaray-ota-474128.zip
+  BUILD=joo86
 fi # jb-dev
 ROOTDEVICE=manta
 DEVICE=manta
@@ -42,6 +43,8 @@ do
     ;;
   broadcom)
     TO_EXTRACT="\
+            system/vendor/firmware/bcm2079x_firmware.ncd \
+            system/vendor/firmware/bcm2079x_pre_firmware.ncd \
             system/vendor/firmware/bcm43241.hcd \
             system/vendor/lib/libbt-vendor.so \
             "
@@ -50,20 +53,22 @@ do
     TO_EXTRACT="\
             system/vendor/firmware/fimc_is_fw.bin \
             system/vendor/firmware/fimc_is_fw2.bin \
+            system/vendor/firmware/maxtouch.fw \
             system/vendor/firmware/maxtouch_hv.fw \
             system/vendor/firmware/maxtouch_nv.fw \
             system/vendor/firmware/mfc_fw.bin \
             system/vendor/firmware/setfile.bin \
             system/vendor/firmware/setfile_4e5.bin \
             system/vendor/firmware/setfile_6a3.bin \
+            system/vendor/lib/libdrmdecrypt.so \
             system/vendor/secapp/00060308060501020000000000000000.tlbin \
             system/vendor/secapp/020a0000000000000000000000000000.drbin \
+            system/vendor/secapp/07060000000000000000000000000000.tlbin \
             "
     ;;
   samsung_arm)
     TO_EXTRACT="\
             system/vendor/lib/egl/libGLES_mali.so \
-            system/vendor/lib/libump_mali.so \
             "
     ;;
   esac

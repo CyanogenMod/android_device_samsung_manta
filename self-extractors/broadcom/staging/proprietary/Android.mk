@@ -17,6 +17,26 @@ LOCAL_PATH := $(call my-dir)
 ifeq ($(TARGET_DEVICE),manta)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE := bcm2079x_firmware
+LOCAL_SRC_FILES := bcm2079x_firmware.ncd
+LOCAL_MODULE_SUFFIX := .ncd
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR)/firmware
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_OWNER := broadcom
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := bcm2079x_pre_firmware
+LOCAL_SRC_FILES := bcm2079x_pre_firmware.ncd
+LOCAL_MODULE_SUFFIX := .ncd
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR)/firmware
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_OWNER := broadcom
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE := bcm43241
 LOCAL_SRC_FILES := bcm43241.hcd
 LOCAL_MODULE_SUFFIX := .hcd
