@@ -69,6 +69,12 @@ on fs
     mkdir /data/nfc 770 nfc nfc
     mkdir /data/nfc/param 770 nfc nfc
 
+# audio: permissions for voice processing
+    chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/voice_processing
+    chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/voice_processing
+    chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/preset
+    chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/preset
+
 # virtual sdcard daemon running as media_rw (1023)
 service sdcard /system/bin/sdcard /data/media /mnt/shell/emulated 1023 1023
     class late_start
