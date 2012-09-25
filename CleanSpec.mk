@@ -52,3 +52,4 @@ $(call add-clean-step, rm -rf $(PRODUCT_OUT)/obj/SHARED_LIBRARIES/libui_intermed
 $(call add-clean-step, rm -f $(PRODUCT_OUT)/root/default.prop)
 $(call add-clean-step, rm -f $(TARGET_OUT)/build.prop)
 $(call add-clean-step, rm -f $(PRODUCT_OUT)/system/etc/mixer_paths_lb.xml)
+$(call add-clean-step, rm -f $(PRODUCT_OUT)/system/etc/permissions/android.hardware.camera.xml)
