@@ -66,10 +66,10 @@
   <path name="eq-speaker">
     <ctl name="AIF1DAC1 EQ Switch" value="1" />
     <ctl name="AIF1DAC1 EQ1 Volume" value="3" />
-    <ctl name="AIF1DAC1 EQ2 Volume" value="11" />
-    <ctl name="AIF1DAC1 EQ3 Volume" value="12" />
-    <ctl name="AIF1DAC1 EQ4 Volume" value="12" />
-    <ctl name="AIF1DAC1 EQ5 Volume" value="12" />
+    <ctl name="AIF1DAC1 EQ2 Volume" value="8" />
+    <ctl name="AIF1DAC1 EQ3 Volume" value="16" />
+    <ctl name="AIF1DAC1 EQ4 Volume" value="10" />
+    <ctl name="AIF1DAC1 EQ5 Volume" value="11" />
   </path>
 
   <path name="eq-headphone">
