@@ -402,15 +402,17 @@ static void start_tag(void *data, const XML_Char *tag_name,
                 /* set only one value */
                 id = atoi((char *)attr_id);
                 if (id < ar->mixer_state[ctl_index].num_values) {
-                    /*
-                     * We're unlinking the values, so copy old_value[0] into
-                     * all the new_value elements.
-                     */
-                    for (i = 0; i < ar->mixer_state[ctl_index].num_values; i++) {
-                        ar->mixer_state[ctl_index].new_value[i] =
-                                ar->mixer_state[ctl_index].old_value[0];
+                    if (ar->mixer_state[ctl_index].new_linked) {
+                        /*
+                         * We're unlinking the values, so copy old_value[0] into
+                         * all the new_value elements.
+                         */
+                        for (i = 0; i < ar->mixer_state[ctl_index].num_values; i++) {
+                            ar->mixer_state[ctl_index].new_value[i] =
+                                    ar->mixer_state[ctl_index].old_value[0];
+                        }
+                        ar->mixer_state[ctl_index].new_linked = false;
                     }
-                    ar->mixer_state[ctl_index].new_linked = false;
                     ar->mixer_state[ctl_index].new_value[id] = value;
                 } else {
                     ALOGE("value id out of range for mixer ctl '%s'",
@@ -523,8 +525,15 @@ void update_mixer_state(struct audio_route *ar)
             }
         } else {
             for (j = 0; j < num_values; j++) {
-                /* unlinked ctl, so set each value if necessary */
-                if (ar->mixer_state[i].old_value[j] != ar->mixer_state[i].new_value[j]) {
+                /*
+                 * unlinked ctl, so set each value if necessary.
+                 * Note that if the new value is unlinked but the old is
+                 * linked, only value 0 is valid, so we always have to
+                 * update the mixer for the other values.
+                 */
+                if (ar->mixer_state[i].old_linked ||
+                    (ar->mixer_state[i].old_value[j] !=
+                            ar->mixer_state[i].new_value[j])) {
                     mixer_ctl_set_value(ar->mixer_state[i].ctl, j,
                                         ar->mixer_state[i].new_value[j]);
                     ar->mixer_state[i].old_value[j] = ar->mixer_state[i].new_value[j];
