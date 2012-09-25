@@ -101,20 +101,20 @@ static void power_init(struct power_module *module)
     struct dirent **namelist;
     int n;
     /*
-     * cpufreq interactive governor: timer 20ms, min sample 60ms,
-     * hispeed 1G at load 60%.
+     * cpufreq interactive governor: timer 20ms, min sample 40ms,
+     * hispeed 1G at load 60%, delay 80ms prior to move above hispeed.
      */
 
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/timer_rate",
                 "20000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/min_sample_time",
-                "60000");
+                "40000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/hispeed_freq",
                 "1000000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load",
                 "60");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay",
-                "40000");
+                "80000");
 
     init_touchscreen_power_path(manta);
 }
