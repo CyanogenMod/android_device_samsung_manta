@@ -14,5 +14,7 @@
 
 # Broadcom blob(s) necessary for Manta hardware
 PRODUCT_PACKAGES := \
+    bcm2079x_firmware \
+    bcm2079x_pre_firmware \
     bcm43241 \
     libbt-vendor
