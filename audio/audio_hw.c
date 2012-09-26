@@ -739,11 +739,33 @@ static int out_set_format(struct audio_stream *stream, audio_format_t format)
     return -ENOSYS;
 }
 
+/* Return the set of output devices associated with active streams
+ * other than out.  Assumes out is non-NULL and out->dev is locked.
+ */
+static audio_devices_t output_devices(struct stream_out *out)
+{
+    struct audio_device *dev = out->dev;
+    enum output_type type;
+    audio_devices_t devices = AUDIO_DEVICE_NONE;
+
+    for (type = 0; type < OUTPUT_TOTAL; ++type) {
+        struct stream_out *other = dev->outputs[type];
+        if (other && (other != out) && !other->standby) {
+            /* safe to access other stream without a mutex,
+             * because we hold the dev lock,
+             * which prevents the other stream from being closed
+             */
+            devices |= other->device;
+        }
+    }
+
+    return devices;
+}
+
 static int do_out_standby(struct stream_out *out)
 {
     int i;
     struct audio_device *dev;
-    enum output_type type;
 
     if (!out->standby) {
         for (i = 0; i < PCM_TOTAL; i++) {
@@ -756,18 +778,7 @@ static int do_out_standby(struct stream_out *out)
 
         /* re-calculate the set of active devices from other streams */
         dev = out->dev;
-        audio_devices_t devices = AUDIO_DEVICE_NONE;
-        for (type = 0; type < OUTPUT_TOTAL; ++type) {
-            struct stream_out *other = dev->outputs[type];
-            if (other && (other != out) && !other->standby) {
-                /* safe to access other stream without a mutex,
-                 * because we hold the dev lock,
-                 * which prevents the other stream from being closed
-                 */
-                devices |= other->device;
-            }
-        }
-        dev->out_device = devices;
+        dev->out_device = output_devices(out);
         select_devices(dev);
 
     }
@@ -833,7 +844,7 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
 
             out->device = val;
             if (!out->standby) {
-                adev->out_device |= out->device;
+                adev->out_device = output_devices(out) | out->device;
                 select_devices(adev);
             }
         }
