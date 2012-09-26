@@ -17,12 +17,13 @@
 # start jb-mr1-dev
 # 454897 = JOO61E
 # 474128 = JOO86
+# 476441 = JOO87B
 # end jb-mr1-dev
 BRANCH=jb-mr1-dev
 if test $BRANCH=jb-mr1-dev
 then
-  ZIP=mantaray-ota-474128.zip
-  BUILD=joo86
+  ZIP=mantaray-ota-476441.zip
+  BUILD=joo87b
 fi # jb-dev
 ROOTDEVICE=manta
 DEVICE=manta
@@ -46,7 +47,6 @@ do
             system/vendor/firmware/bcm2079x_firmware.ncd \
             system/vendor/firmware/bcm2079x_pre_firmware.ncd \
             system/vendor/firmware/bcm43241.hcd \
-            system/vendor/lib/libbt-vendor.so \
             "
     ;;
   samsung)
