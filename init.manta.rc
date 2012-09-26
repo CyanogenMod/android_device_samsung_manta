@@ -47,6 +47,9 @@ on boot
 
     chmod 0444 /sys/kernel/debug/smb347-regs
 
+# Set Mali power policy as Coarse demand
+    write /sys/devices/platform/mali.0/power_policy coarse_demand
+
 on fs
     mkdir /factory 0775 radio radio
 
