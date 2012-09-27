@@ -41,6 +41,9 @@ on boot
     mount debugfs /sys/kernel/debug /sys/kernel/debug
     setprop ro.radio.noril yes
 
+    # Reduce reserved lowmem from ~48MB to ~12MB
+    write /proc/sys/vm/lowmem_reserve_ratio "128 128"
+
     # Set up kernel tracing, but disable it by default
     chmod 0222 /sys/kernel/debug/tracing/trace_marker
     write /sys/kernel/debug/tracing/tracing_on 0
