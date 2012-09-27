@@ -31,6 +31,9 @@
 #include <hardware/audio.h>
 #include <hardware/hardware.h>
 
+#include <linux/videodev2.h>
+#include <videodev2_exynos_media.h>
+
 #include <system/audio.h>
 
 #include <tinyalsa/asoundlib.h>
@@ -378,6 +381,30 @@ const struct route_config * const route_configs[IN_SOURCE_TAB_SIZE]
 
 /* Helper functions */
 
+static int enable_hdmi_audio(int enable)
+{
+    int fd;
+    int ret;
+    struct v4l2_control ctrl;
+
+    fd = open("/dev/video16", O_RDWR);
+    if (fd < 0) {
+        ALOGE("cannot open /dev/video16 (%d)", fd);
+        return -ENOSYS;
+    }
+
+    ctrl.id = V4L2_CID_TV_ENABLE_HDMI_AUDIO;
+    ctrl.value = !!enable;
+    ret = ioctl(fd, VIDIOC_S_CTRL, &ctrl);
+
+    if (ret < 0)
+        ALOGE("V4L2_CID_TV_ENABLE_HDMI_AUDIO ioctl error (%d)", errno);
+
+    close(fd);
+
+    return ret;
+}
+
 static void select_devices(struct audio_device *adev)
 {
     int output_device_id = get_output_device_id(adev->out_device);
@@ -460,6 +487,8 @@ static void select_devices(struct audio_device *adev)
         if ((adev->es305_preset_fd >= 0) && (adev->es305_vp_fd >= 0))
             adev->es305_preset = new_es305_preset;
     }
+
+    enable_hdmi_audio(adev->out_device & AUDIO_DEVICE_OUT_AUX_DIGITAL);
 
     update_mixer_state(adev->ar);
 }
