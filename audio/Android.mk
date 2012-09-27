@@ -24,6 +24,7 @@ LOCAL_SRC_FILES := \
 LOCAL_C_INCLUDES += \
 	external/tinyalsa/include \
 	external/expat/lib \
+	hardware/samsung_slsi/exynos5/include \
 	$(call include-path-for, audio-utils)
 LOCAL_SHARED_LIBRARIES := liblog libcutils libtinyalsa libaudioutils libexpat
 LOCAL_MODULE_TAGS := optional
