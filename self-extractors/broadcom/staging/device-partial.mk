@@ -16,5 +16,4 @@
 PRODUCT_PACKAGES := \
     bcm2079x_firmware \
     bcm2079x_pre_firmware \
-    bcm43241 \
-    libbt-vendor
+    bcm43241
