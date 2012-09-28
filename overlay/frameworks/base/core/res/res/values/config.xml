@@ -106,7 +106,7 @@
          Must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessLevels">
         <item>10</item>
-        <item>180</item>
+        <item>60</item>      <!-- Sensor in dark office: 60, well lit: 220 -->
         <item>15000</item>   <!-- Screen under direct sunlight, but not sensor. -->
         <item>225000</item>  <!-- Sensor under direct sunlight. -->
     </integer-array>
@@ -153,7 +153,7 @@
     <!-- Screen brightness used to dim the screen when the user activity
          timeout expires.  May be less than the minimum allowed brightness setting
          that can be set by the user. -->
-    <integer name="config_screenBrightnessDim">7</integer>
+    <integer name="config_screenBrightnessDim">5</integer>
 
     <!-- Whether a software navigation bar should be shown. NOTE: in the future this may be
          autodetected from the Configuration. -->
