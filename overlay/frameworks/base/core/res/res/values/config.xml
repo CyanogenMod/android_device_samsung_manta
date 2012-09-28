@@ -106,7 +106,7 @@
          Must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessLevels">
         <item>10</item>
-        <item>60</item>      <!-- Sensor in dark office: 60, well lit: 220 -->
+        <item>50</item>      <!-- Sensor in dark office: 60, well lit: 220 -->
         <item>15000</item>   <!-- Screen under direct sunlight, but not sensor. -->
         <item>225000</item>  <!-- Sensor under direct sunlight. -->
     </integer-array>
@@ -119,7 +119,7 @@
     <integer-array name="config_autoBrightnessLcdBacklightValues">
         <item>10</item>
         <item>13</item>
-        <item>45</item>
+        <item>65</item>
         <item>220</item>
         <item>255</item>
     </integer-array>
