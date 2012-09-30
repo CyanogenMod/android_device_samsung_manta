@@ -44,6 +44,8 @@
 
 #include "audio_route.h"
 
+#include <eS305VoiceProcessing.h>
+
 #define PCM_CARD 0
 #define PCM_CARD_SPDIF 1
 #define PCM_TOTAL 2
@@ -55,14 +57,6 @@
 
 /* duration in ms of volume ramp applied when starting capture to remove plop */
 #define CAPTURE_START_RAMP_MS 100
-
-#define ES305_SYSFS_PATH "/sys/class/i2c-dev/i2c-4/device/4-003e/"
-#define ES305_PRESET_PATH ES305_SYSFS_PATH "preset"
-#define ES305_VOICE_PROCESSING_PATH ES305_SYSFS_PATH "voice_processing"
-#define ES305_SLEEP_PATH ES305_SYSFS_PATH "sleep"
-
-#define ES305_ON "1"
-#define ES305_OFF "0"
 
 /* default sampling for HDMI multichannel output */
 #define HDMI_MULTI_DEFAULT_SAMPLING_RATE  44100
@@ -141,9 +135,6 @@ struct audio_device {
     int es305_preset;
     int es305_new_mode;
     int es305_mode;
-    int es305_vp_fd;
-    int es305_preset_fd;
-    int es305_sleep_fd;
     int hdmi_drv_fd;
     struct bubble_level *bubble_level;
 
@@ -184,6 +175,7 @@ struct stream_in {
     size_t frames_in;
     int read_status;
     audio_source_t input_source;
+    audio_io_handle_t io_handle;
     audio_devices_t device;
     uint16_t ramp_vol;
     uint16_t ramp_step;
@@ -224,21 +216,6 @@ enum {
     IN_SOURCE_TAB_SIZE,            /* number of lines in route_configs[][] */
     IN_SOURCE_NONE,
     IN_SOURCE_CNT
-};
-
-enum {
-    ES305_PRESET_INIT = -3,
-    ES305_PRESET_CURRENT = -2,
-    ES305_PRESET_OFF = -1,
-    ES305_PRESET_VOIP_HANDHELD = 0,
-    ES305_PRESET_ASRA_HANDHELD = 1,
-    ES305_PRESET_VOIP_DESKTOP = 2,
-    ES305_PRESET_ASRA_DESKTOP = 3,
-    ES305_PRESET_VOIP_HEADSET = 4,
-    ES305_PRESET_ASRA_HEADSET = 5,
-    ES305_PRESET_VOIP_HEADPHONES = 6,
-    ES305_PRESET_VOIP_HP_DESKTOP = 7,
-    ES305_PRESET_CAMCORDER = 8,
 };
 
 enum {
@@ -344,22 +321,22 @@ const struct route_config camcorder_headphones = {
 const struct route_config voice_rec_speaker = {
     "voice-rec-speaker",
     "voice-rec-main-mic",
-    { ES305_PRESET_OFF,
-      ES305_PRESET_OFF }
+    { ES305_PRESET_ASRA_HANDHELD,
+      ES305_PRESET_ASRA_DESKTOP }
 };
 
 const struct route_config voice_rec_headphones = {
     "voice-rec-headphones",
     "voice-rec-main-mic",
-    { ES305_PRESET_OFF,
-      ES305_PRESET_OFF }
+    { ES305_PRESET_ASRA_HANDHELD,
+      ES305_PRESET_ASRA_DESKTOP }
 };
 
 const struct route_config voice_rec_headset = {
     "voice-rec-headphones",
     "voice-rec-headset-mic",
-    { ES305_PRESET_OFF,
-      ES305_PRESET_OFF }
+    { ES305_PRESET_ASRA_HEADSET,
+      ES305_PRESET_ASRA_HEADSET }
 };
 
 const struct route_config communication_speaker = {
@@ -577,49 +554,11 @@ static void select_devices(struct audio_device *adev)
 
     if ((new_es305_preset != ES305_PRESET_CURRENT) &&
             (new_es305_preset != adev->es305_preset)) {
-        ALOGV("select_devices() changing es305 preset from %d to %d es305 mode %d",
-              adev->es305_preset, new_es305_preset, adev->es305_mode);
-        /* open es305 control files */
-        if (adev->es305_vp_fd < 0) {
-            adev->es305_vp_fd = open(ES305_VOICE_PROCESSING_PATH, O_RDWR);
-            ALOGE_IF(adev->es305_vp_fd < 0,
-                     "Could not open es305 voice processing enable file: %s",
-                     strerror(errno));
-        }
-        if (adev->es305_preset_fd < 0) {
-            adev->es305_preset_fd = open(ES305_PRESET_PATH, O_RDWR);
-            ALOGE_IF(adev->es305_preset_fd < 0,
-                     "Could not open es305 preset file: %s",
-                     strerror(errno));
-        }
-
-        if (new_es305_preset == ES305_PRESET_OFF) {
-            if (adev->es305_vp_fd >= 0) {
-                write(adev->es305_vp_fd, ES305_OFF, strlen(ES305_OFF));
-            }
-
-            if (adev->es305_sleep_fd < 0) {
-                adev->es305_sleep_fd = open(ES305_SLEEP_PATH, O_RDWR);
-            }
-            if (adev->es305_sleep_fd < 0) {
-                ALOGE("Could not open es305 sleep file: %s", strerror(errno));
-            } else {
-                write(adev->es305_sleep_fd, ES305_ON, strlen(ES305_ON));
-            }
-        } else {
-            if ((adev->es305_vp_fd >= 0) &&
-                    ((adev->es305_preset == ES305_PRESET_OFF) ||
-                     (adev->es305_preset == ES305_PRESET_INIT)))
-                write(adev->es305_vp_fd, ES305_ON, strlen(ES305_ON));
-
-            if (adev->es305_preset_fd >= 0) {
-                char str[8];
-                sprintf(str, "%d", new_es305_preset);
-                write(adev->es305_preset_fd, str, strlen(str));
-            }
-        }
-        if ((adev->es305_preset_fd >= 0) && (adev->es305_vp_fd >= 0))
+        ALOGV("  select_devices() changing es305 preset from %d to %d",
+              adev->es305_preset, new_es305_preset);
+        if (eS305_UsePreset(new_es305_preset) == 0) {
             adev->es305_preset = new_es305_preset;
+        }
     }
 
     update_mixer_state(adev->ar);
@@ -736,6 +675,8 @@ static int start_input_stream(struct stream_in *in)
     in->frames_in = 0;
     adev->input_source = in->input_source;
     adev->in_device = in->device;
+
+    eS305_SetActiveIoHandle(in->io_handle);
     select_devices(adev);
 
     /* initialize volume ramp */
@@ -1263,6 +1204,8 @@ static int in_standby(struct audio_stream *stream)
         in->dev->bubble_level->stop_polling(in->dev->bubble_level);
     }
 
+    eS305_SetActiveIoHandle(ES305_IO_HANDLE_NONE);
+
     pthread_mutex_unlock(&in->lock);
     pthread_mutex_unlock(&in->dev->lock);
 
@@ -1413,12 +1356,38 @@ static uint32_t in_get_input_frames_lost(struct audio_stream_in *stream)
 static int in_add_audio_effect(const struct audio_stream *stream,
                                effect_handle_t effect)
 {
+    struct stream_in *in = (struct stream_in *)stream;
+    effect_descriptor_t descr;
+    if ((*effect)->get_descriptor(effect, &descr) == 0) {
+
+        pthread_mutex_lock(&in->dev->lock);
+        pthread_mutex_lock(&in->lock);
+
+        eS305_AddEffect(&descr, in->io_handle);
+
+        pthread_mutex_unlock(&in->lock);
+        pthread_mutex_unlock(&in->dev->lock);
+    }
+
     return 0;
 }
 
 static int in_remove_audio_effect(const struct audio_stream *stream,
                                   effect_handle_t effect)
 {
+    struct stream_in *in = (struct stream_in *)stream;
+    effect_descriptor_t descr;
+    if ((*effect)->get_descriptor(effect, &descr) == 0) {
+
+        pthread_mutex_lock(&in->dev->lock);
+        pthread_mutex_lock(&in->lock);
+
+        eS305_RemoveEffect(&descr, in->io_handle);
+
+        pthread_mutex_unlock(&in->lock);
+        pthread_mutex_unlock(&in->dev->lock);
+    }
+
     return 0;
 }
 
@@ -1551,11 +1520,7 @@ static char * adev_get_parameters(const struct audio_hw_device *dev,
 
     str_parms_destroy(parms);
     if (ret >= 0) {
-        if ((adev->es305_preset_fd >= 0) && (adev->es305_vp_fd >= 0))
-            parms = str_parms_create_str("ec_supported=yes");
-        else
-            parms = str_parms_create_str("ec_supported=no");
-
+        parms = str_parms_create_str("ec_supported=yes");
         str = str_parms_to_str(parms);
         str_parms_destroy(parms);
         return str;
@@ -1652,6 +1617,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     in->requested_rate = config->sample_rate;
     in->input_source = AUDIO_SOURCE_DEFAULT;
     in->device = devices;
+    in->io_handle = handle;
 
     in->buffer = malloc(pcm_config_in.period_size * pcm_config_in.channels
                                                * audio_stream_frame_size(&in->stream.common));
@@ -1712,12 +1678,8 @@ static int adev_close(hw_device_t *device)
 
     audio_route_free(adev->ar);
 
-    if (adev->es305_vp_fd >= 0)
-        close(adev->es305_vp_fd);
-    if (adev->es305_preset_fd >= 0)
-        close(adev->es305_preset_fd);
-    if (adev->es305_sleep_fd >= 0)
-        close(adev->es305_sleep_fd);
+    eS305_Release();
+
     if (adev->hdmi_drv_fd >= 0)
         close(adev->hdmi_drv_fd);
 
@@ -1765,9 +1727,6 @@ static int adev_open(const hw_module_t* module, const char* name,
     /* adev->cur_route_id initial value is 0 and such that first device
      * selection is always applied by select_devices() */
 
-    adev->es305_vp_fd = -1;
-    adev->es305_preset_fd = -1;
-    adev->es305_sleep_fd = -1;
     adev->es305_preset = ES305_PRESET_INIT;
     adev->es305_new_mode = ES305_MODE_LEVEL;
     adev->es305_mode = ES305_MODE_LEVEL;
