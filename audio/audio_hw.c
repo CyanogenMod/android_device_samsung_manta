@@ -69,6 +69,14 @@ struct pcm_config pcm_config = {
     .format = PCM_FORMAT_S16_LE,
 };
 
+struct pcm_config pcm_config_in = {
+    .channels = 2,
+    .rate = 44100,
+    .period_size = 1024,
+    .period_count = 2,
+    .format = PCM_FORMAT_S16_LE,
+};
+
 struct pcm_config pcm_config_sco = {
     .channels = 1,
     .rate = 8000,
@@ -538,7 +546,7 @@ static int start_input_stream(struct stream_in *in)
 {
     struct audio_device *adev = in->dev;
 
-    in->pcm = pcm_open(PCM_CARD, PCM_DEVICE, PCM_IN, &pcm_config);
+    in->pcm = pcm_open(PCM_CARD, PCM_DEVICE, PCM_IN, &pcm_config_in);
 
     if (in->pcm && !pcm_is_ready(in->pcm)) {
         ALOGE("pcm_open() failed: %s", pcm_get_error(in->pcm));
@@ -630,7 +638,7 @@ static size_t get_input_buffer_size(unsigned int sample_rate,
      * multiple of 16 frames, as audioflinger expects audio buffers to
      * be a multiple of 16 frames
      */
-    size = (pcm_config.period_size * sample_rate) / pcm_config.rate;
+    size = (pcm_config_in.period_size * sample_rate) / pcm_config_in.rate;
     size = ((size + 15) / 16) * 16;
 
     return size * channel_count * audio_bytes_per_sample(format);
@@ -658,7 +666,7 @@ static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
     if (in->frames_in == 0) {
         in->read_status = pcm_read(in->pcm,
                                    (void*)in->buffer,
-                                   pcm_frames_to_bytes(in->pcm, pcm_config.period_size));
+                                   pcm_frames_to_bytes(in->pcm, pcm_config_in.period_size));
         if (in->read_status != 0) {
             ALOGE("get_next_buffer() pcm_read error %d", in->read_status);
             buffer->raw = NULL;
@@ -666,7 +674,7 @@ static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
             return in->read_status;
         }
 
-        in->frames_in = pcm_config.period_size;
+        in->frames_in = pcm_config_in.period_size;
 
         /* Do stereo to mono conversion in place by discarding right channel */
         for (i = 1; i < in->frames_in; i++)
@@ -675,7 +683,7 @@ static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
 
     buffer->frame_count = (buffer->frame_count > in->frames_in) ?
                                 in->frames_in : buffer->frame_count;
-    buffer->i16 = in->buffer + (pcm_config.period_size - in->frames_in);
+    buffer->i16 = in->buffer + (pcm_config_in.period_size - in->frames_in);
 
     return in->read_status;
 
@@ -1399,7 +1407,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     in->requested_rate = config->sample_rate;
     in->input_source = AUDIO_SOURCE_DEFAULT;
 
-    in->buffer = malloc(pcm_config.period_size * pcm_config.channels
+    in->buffer = malloc(pcm_config_in.period_size * pcm_config_in.channels
                                                * audio_stream_frame_size(&in->stream.common));
 
     if (!in->buffer) {
@@ -1407,11 +1415,11 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
         goto err_malloc;
     }
 
-    if (in->requested_rate != pcm_config.rate) {
+    if (in->requested_rate != pcm_config_in.rate) {
         in->buf_provider.get_next_buffer = get_next_buffer;
         in->buf_provider.release_buffer = release_buffer;
 
-        ret = create_resampler(pcm_config.rate,
+        ret = create_resampler(pcm_config_in.rate,
                                in->requested_rate,
                                1,
                                RESAMPLER_QUALITY_DEFAULT,
