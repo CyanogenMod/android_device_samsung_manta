@@ -106,8 +106,8 @@
   <path name="aif2-to-aif1adc">
     <ctl name="AIF1ADC1L Mixer AIF2 Switch" value="1" />
     <ctl name="AIF1ADC1R Mixer AIF2 Switch" value="1" />
-    <ctl name="AIF1ADC2L Mixer AIF2 Switch" value="1" />
-    <ctl name="AIF1ADC2R Mixer AIF2 Switch" value="1" />
+    <ctl name="AIF2DACL Mux" value="AIF2" />
+    <ctl name="AIF2DACR Mux" value="AIF2" />
   </path>
 
   <path name="main-mic">
