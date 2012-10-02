@@ -14,4 +14,10 @@
 
 # Samsung/ARM blob(s) necessary for Manta hardware
 PRODUCT_PACKAGES := \
-    libGLES_mali
+    libGLES_mali \
+    libbccArm.sha1.so \
+    libbccArm.so \
+    libbcinfoArm.so \
+    libclcoreArm.bc \
+    libclcore_neonArm.bc \
+    libRSDriverArm.so
