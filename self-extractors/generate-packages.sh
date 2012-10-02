@@ -18,12 +18,13 @@
 # 454897 = JOO61E
 # 474128 = JOO86
 # 476441 = JOO87B
+# 483070 = JOP01
 # end jb-mr1-dev
 BRANCH=jb-mr1-dev
 if test $BRANCH=jb-mr1-dev
 then
-  ZIP=mantaray-ota-476441.zip
-  BUILD=joo87b
+  ZIP=mantaray-ota-483070.zip
+  BUILD=jop01
 fi # jb-dev
 ROOTDEVICE=manta
 DEVICE=manta
@@ -69,6 +70,12 @@ do
   samsung_arm)
     TO_EXTRACT="\
             system/vendor/lib/egl/libGLES_mali.so \
+            system/vendor/lib/libbccArm.sha1.so \
+            system/vendor/lib/libbccArm.so \
+            system/vendor/lib/libbcinfoArm.so \
+            system/vendor/lib/libclcoreArm.bc \
+            system/vendor/lib/libclcore_neonArm.bc \
+            system/vendor/lib/libRSDriverArm.so \
             "
     ;;
   esac
