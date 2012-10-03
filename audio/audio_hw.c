@@ -61,6 +61,14 @@
 #define ES305_ON "1"
 #define ES305_OFF "0"
 
+/* default sampling for HDMI multichannel output */
+#define HDMI_MULTI_DEFAULT_SAMPLING_RATE  44100
+/* maximum number of channel mask configurations supported. Currently the primary
+ * output only supports 1 (stereo) and the multi channel HDMI output 2 (5.1 and 7.1) */
+#define MAX_SUPPORTED_CHANNEL_MASKS 2
+
+#define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
+
 struct pcm_config pcm_config = {
     .channels = 2,
     .rate = 44100,
@@ -97,9 +105,18 @@ struct pcm_config pcm_config_deep = {
     .format = PCM_FORMAT_S16_LE,
 };
 
+struct pcm_config pcm_config_hdmi_multi = {
+    .channels = 6, /* changed when the stream is opened */
+    .rate = HDMI_MULTI_DEFAULT_SAMPLING_RATE,
+    .period_size = 1024,
+    .period_count = 4,
+    .format = PCM_FORMAT_S16_LE,
+};
+
 enum output_type {
     OUTPUT_DEEP_BUF,      // deep PCM buffers output stream
     OUTPUT_LOW_LATENCY,   // low latency output stream
+    OUTPUT_HDMI,          // HDMI multi channel
     OUTPUT_TOTAL
 };
 
@@ -121,6 +138,8 @@ struct audio_device {
     int es305_mode;
     int es305_vp_fd;
     int es305_preset_fd;
+    int hdmi_drv_fd;
+
     struct stream_out *outputs[OUTPUT_TOTAL];
 };
 
@@ -129,10 +148,17 @@ struct stream_out {
 
     pthread_mutex_t lock; /* see note below on mutex acquisition order */
     struct pcm *pcm[PCM_TOTAL];
-    struct pcm_config *config;
+    struct pcm_config config;
     unsigned int pcm_device;
     bool standby; /* true if all PCMs are inactive */
     unsigned int device;
+    /* FIXME: when HDMI multichannel output is active, other outputs must be disabled as
+     * HDMI and WM1811 share the same I2S. This means that notifications and other sounds are
+     * silent when watching a 5.1 movie. */
+    bool disabled;
+    audio_channel_mask_t channel_mask;
+    /* Array of supported channel mask configurations. +1 so that the last entry is always 0 */
+    audio_channel_mask_t supported_channel_masks[MAX_SUPPORTED_CHANNEL_MASKS + 1];
 
     struct audio_device *dev;
 };
@@ -156,6 +182,19 @@ struct stream_in {
     size_t  ramp_frames;
 
     struct audio_device *dev;
+};
+
+#define STRING_TO_ENUM(string) { #string, string }
+
+struct string_to_enum {
+    const char *name;
+    uint32_t value;
+};
+
+const struct string_to_enum out_channels_name_to_enum_table[] = {
+    STRING_TO_ENUM(AUDIO_CHANNEL_OUT_STEREO),
+    STRING_TO_ENUM(AUDIO_CHANNEL_OUT_5POINT1),
+    STRING_TO_ENUM(AUDIO_CHANNEL_OUT_7POINT1),
 };
 
 enum {
@@ -382,6 +421,8 @@ const struct route_config * const route_configs[IN_SOURCE_TAB_SIZE]
     }
 };
 
+static int do_out_standby(struct stream_out *out);
+
 /**
  * NOTE: when multiple mutexes have to be acquired, always respect the
  * following order: hw device > in stream > out stream
@@ -389,26 +430,78 @@ const struct route_config * const route_configs[IN_SOURCE_TAB_SIZE]
 
 /* Helper functions */
 
-static int enable_hdmi_audio(int enable)
+static int open_hdmi_driver(struct audio_device *adev)
 {
-    int fd;
+    if (adev->hdmi_drv_fd < 0) {
+        adev->hdmi_drv_fd = open("/dev/video16", O_RDWR);
+        if (adev->hdmi_drv_fd < 0)
+            ALOGE("%s cannot open video16 (%d)", __func__, adev->hdmi_drv_fd);
+    }
+    return adev->hdmi_drv_fd;
+}
+
+/* must be called with hw device mutex locked */
+static int enable_hdmi_audio(struct audio_device *adev, int enable)
+{
     int ret;
     struct v4l2_control ctrl;
 
-    fd = open("/dev/video16", O_RDWR);
-    if (fd < 0) {
-        ALOGE("cannot open /dev/video16 (%d)", fd);
-        return -ENOSYS;
-    }
+    ret = open_hdmi_driver(adev);
+    if (ret < 0)
+        return ret;
 
     ctrl.id = V4L2_CID_TV_ENABLE_HDMI_AUDIO;
     ctrl.value = !!enable;
-    ret = ioctl(fd, VIDIOC_S_CTRL, &ctrl);
+    ret = ioctl(adev->hdmi_drv_fd, VIDIOC_S_CTRL, &ctrl);
 
     if (ret < 0)
         ALOGE("V4L2_CID_TV_ENABLE_HDMI_AUDIO ioctl error (%d)", errno);
 
-    close(fd);
+    return ret;
+}
+
+/* must be called with hw device mutex locked */
+static int read_hdmi_channel_masks(struct audio_device *adev, struct stream_out *out) {
+    int ret;
+    struct v4l2_control ctrl;
+
+    ret = open_hdmi_driver(adev);
+    if (ret < 0)
+        return ret;
+
+    ctrl.id = V4L2_CID_TV_MAX_AUDIO_CHANNELS;
+    ret = ioctl(adev->hdmi_drv_fd, VIDIOC_G_CTRL, &ctrl);
+    if (ret < 0) {
+        ALOGE("V4L2_CID_TV_MAX_AUDIO_CHANNELS ioctl error (%d)", errno);
+        return ret;
+    }
+
+    ALOGV("%s ioctl %d got %d max channels", __func__, ret, ctrl.value);
+
+    if (ctrl.value != 6 && ctrl.value != 8)
+        return -ENOSYS;
+
+    out->supported_channel_masks[0] = AUDIO_CHANNEL_OUT_5POINT1;
+    if (ctrl.value == 8)
+        out->supported_channel_masks[1] = AUDIO_CHANNEL_OUT_7POINT1;
+
+    return ret;
+}
+
+/* must be called with hw device mutex locked */
+static int set_hdmi_channels(struct audio_device *adev, int channels) {
+    int ret;
+    struct v4l2_control ctrl;
+
+    ret = open_hdmi_driver(adev);
+    if (ret < 0)
+        return ret;
+
+    ctrl.id = V4L2_CID_TV_SET_NUM_CHANNELS;
+    ctrl.value = channels;
+    ret = ioctl(adev->hdmi_drv_fd, VIDIOC_S_CTRL, &ctrl);
+    if (ret < 0)
+        ALOGE("V4L2_CID_TV_SET_NUM_CHANNELS ioctl error (%d)", errno);
 
     return ret;
 }
@@ -424,7 +517,7 @@ static void select_devices(struct audio_device *adev)
 
     reset_mixer_state(adev->ar);
 
-    enable_hdmi_audio(adev->out_device & AUDIO_DEVICE_OUT_AUX_DIGITAL);
+    enable_hdmi_audio(adev, adev->out_device & AUDIO_DEVICE_OUT_AUX_DIGITAL);
 
     new_route_id = (1 << (input_source_id + OUT_DEVICE_CNT)) + (1 << output_device_id);
     if (new_route_id == adev->cur_route_id)
@@ -501,18 +594,44 @@ static void select_devices(struct audio_device *adev)
     update_mixer_state(adev->ar);
 }
 
+static void force_non_hdmi_out_standby(struct audio_device *adev)
+{
+    enum output_type type;
+    struct stream_out *out;
+
+    for (type = 0; type < OUTPUT_TOTAL; ++type) {
+        out = adev->outputs[type];
+        if (type == OUTPUT_HDMI || !out)
+            continue;
+        pthread_mutex_lock(&out->lock);
+        do_out_standby(out);
+        pthread_mutex_unlock(&out->lock);
+    }
+}
+
 /* must be called with hw device and output stream mutexes locked */
 static int start_output_stream(struct stream_out *out)
 {
     struct audio_device *adev = out->dev;
+    int type;
+
+    if (out == adev->outputs[OUTPUT_HDMI]) {
+        force_non_hdmi_out_standby(adev);
+    } else if (adev->outputs[OUTPUT_HDMI] && !adev->outputs[OUTPUT_HDMI]->standby) {
+        out->disabled = true;
+        return 0;
+    }
+
+    out->disabled = false;
 
     if (out->device & (AUDIO_DEVICE_OUT_SPEAKER |
                        AUDIO_DEVICE_OUT_WIRED_HEADSET |
                        AUDIO_DEVICE_OUT_WIRED_HEADPHONE |
                        AUDIO_DEVICE_OUT_AUX_DIGITAL |
                        AUDIO_DEVICE_OUT_ALL_SCO)) {
+
         out->pcm[PCM_CARD] = pcm_open(PCM_CARD, out->pcm_device,
-                                      PCM_OUT, out->config);
+                                      PCM_OUT, &out->config);
 
         if (out->pcm[PCM_CARD] && !pcm_is_ready(out->pcm[PCM_CARD])) {
             ALOGE("pcm_open(PCM_CARD) failed: %s",
@@ -523,8 +642,8 @@ static int start_output_stream(struct stream_out *out)
     }
 
     if (out->device & AUDIO_DEVICE_OUT_DGTL_DOCK_HEADSET) {
-        out->pcm[PCM_CARD_SPDIF] = pcm_open(PCM_CARD_SPDIF, PCM_DEVICE,
-                                            PCM_OUT, &pcm_config);
+        out->pcm[PCM_CARD_SPDIF] = pcm_open(PCM_CARD_SPDIF, out->pcm_device,
+                                            PCM_OUT, &out->config);
 
         if (out->pcm[PCM_CARD_SPDIF] &&
                 !pcm_is_ready(out->pcm[PCM_CARD_SPDIF])) {
@@ -537,6 +656,9 @@ static int start_output_stream(struct stream_out *out)
 
     adev->out_device |= out->device;
     select_devices(adev);
+
+    if (out->device & AUDIO_DEVICE_OUT_AUX_DIGITAL)
+        set_hdmi_channels(adev, out->config.channels);
 
     return 0;
 }
@@ -746,7 +868,9 @@ static ssize_t read_frames(struct stream_in *in, void *buffer, ssize_t frames)
 
 static uint32_t out_get_sample_rate(const struct audio_stream *stream)
 {
-    return pcm_config.rate;
+    struct stream_out *out = (struct stream_out *)stream;
+
+    return out->config.rate;
 }
 
 static int out_set_sample_rate(struct audio_stream *stream, uint32_t rate)
@@ -756,14 +880,17 @@ static int out_set_sample_rate(struct audio_stream *stream, uint32_t rate)
 
 static size_t out_get_buffer_size(const struct audio_stream *stream)
 {
-    struct stream_out *out = (struct stream_out *) stream;
+    struct stream_out *out = (struct stream_out *)stream;
 
-    return out->config->period_size * audio_stream_frame_size(stream);
+    return out->config.period_size *
+            audio_stream_frame_size((struct audio_stream *)stream);
 }
 
 static audio_channel_mask_t out_get_channels(const struct audio_stream *stream)
 {
-    return AUDIO_CHANNEL_OUT_STEREO;
+    struct stream_out *out = (struct stream_out *)stream;
+
+    return out->channel_mask;
 }
 
 static audio_format_t out_get_format(const struct audio_stream *stream)
@@ -801,8 +928,8 @@ static audio_devices_t output_devices(struct stream_out *out)
 
 static int do_out_standby(struct stream_out *out)
 {
+    struct audio_device *adev = out->dev;
     int i;
-    struct audio_device *dev;
 
     if (!out->standby) {
         for (i = 0; i < PCM_TOTAL; i++) {
@@ -813,11 +940,15 @@ static int do_out_standby(struct stream_out *out)
         }
         out->standby = true;
 
-        /* re-calculate the set of active devices from other streams */
-        dev = out->dev;
-        dev->out_device = output_devices(out);
-        select_devices(dev);
+        if (out == adev->outputs[OUTPUT_HDMI]) {
+            /* force standby on low latency output stream so that it can reuse HDMI driver if
+             * necessary when restarted */
+            force_non_hdmi_out_standby(adev);
+        }
 
+        /* re-calculate the set of active devices from other streams */
+        adev->out_device = output_devices(out);
+        select_devices(adev);
     }
 
     return 0;
@@ -879,11 +1010,13 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
                     stop_bt_sco(adev);
             }
 
-            out->device = val;
-            if (!out->standby) {
-                adev->out_device = output_devices(out) | out->device;
+            if (!out->standby && (out == adev->outputs[OUTPUT_HDMI] ||
+                    !adev->outputs[OUTPUT_HDMI] ||
+                    adev->outputs[OUTPUT_HDMI]->standby)) {
+                adev->out_device = output_devices(out) | val;
                 select_devices(adev);
             }
+            out->device = val;
         }
     }
     pthread_mutex_unlock(&out->lock);
@@ -895,15 +1028,50 @@ static int out_set_parameters(struct audio_stream *stream, const char *kvpairs)
 
 static char * out_get_parameters(const struct audio_stream *stream, const char *keys)
 {
-    return strdup("");
+    struct stream_out *out = (struct stream_out *)stream;
+    struct str_parms *query = str_parms_create_str(keys);
+    char *str;
+    char value[256];
+    struct str_parms *reply = str_parms_create();
+    size_t i, j;
+    int ret;
+    bool first = true;
+
+    ret = str_parms_get_str(query, AUDIO_PARAMETER_STREAM_SUP_CHANNELS, value, sizeof(value));
+    if (ret >= 0) {
+        value[0] = '\0';
+        i = 0;
+        /* the last entry in supported_channel_masks[] is always 0 */
+        while (out->supported_channel_masks[i] != 0) {
+            for (j = 0; j < ARRAY_SIZE(out_channels_name_to_enum_table); j++) {
+                if (out_channels_name_to_enum_table[j].value == out->supported_channel_masks[i]) {
+                    if (!first) {
+                        strcat(value, "|");
+                    }
+                    strcat(value, out_channels_name_to_enum_table[j].name);
+                    first = false;
+                    break;
+                }
+            }
+            i++;
+        }
+        str_parms_add_str(reply, AUDIO_PARAMETER_STREAM_SUP_CHANNELS, value);
+        str = str_parms_to_str(reply);
+    } else {
+        str = strdup(keys);
+    }
+
+    str_parms_destroy(query);
+    str_parms_destroy(reply);
+    return str;
 }
 
 static uint32_t out_get_latency(const struct audio_stream_out *stream)
 {
-    struct stream_out *out = (struct stream_out *) stream;
+    struct stream_out *out = (struct stream_out *)stream;
 
-    return (out->config->period_size * out->config->period_count * 1000) /
-            out->config->rate;
+    return (out->config.period_size * out->config.period_count * 1000) /
+            out->config.rate;
 }
 
 static int out_set_volume(struct audio_stream_out *stream, float left,
@@ -938,10 +1106,16 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
     }
     pthread_mutex_unlock(&adev->lock);
 
+    if (out->disabled) {
+        ret = -EPIPE;
+        goto exit;
+    }
+
     /* Write to all active PCMs */
     for (i = 0; i < PCM_TOTAL; i++)
         if (out->pcm[i])
            pcm_write(out->pcm[i], (void *)buffer, bytes);
+
 
 exit:
     pthread_mutex_unlock(&out->lock);
@@ -1177,7 +1351,6 @@ static int in_remove_audio_effect(const struct audio_stream *stream,
     return 0;
 }
 
-
 static int adev_open_output_stream(struct audio_hw_device *dev,
                                    audio_io_handle_t handle,
                                    audio_devices_t devices,
@@ -1193,6 +1366,39 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     out = (struct stream_out *)calloc(1, sizeof(struct stream_out));
     if (!out)
         return -ENOMEM;
+
+    out->supported_channel_masks[0] = AUDIO_CHANNEL_OUT_STEREO;
+    out->channel_mask = AUDIO_CHANNEL_OUT_STEREO;
+    if (devices == AUDIO_DEVICE_NONE)
+        devices = AUDIO_DEVICE_OUT_SPEAKER;
+    out->device = devices;
+
+    if (flags & AUDIO_OUTPUT_FLAG_DIRECT &&
+                   devices == AUDIO_DEVICE_OUT_AUX_DIGITAL) {
+        pthread_mutex_lock(&adev->lock);
+        ret = read_hdmi_channel_masks(adev, out);
+        pthread_mutex_unlock(&adev->lock);
+        if (ret != 0)
+            goto err_open;
+        if (config->sample_rate == 0)
+            config->sample_rate = HDMI_MULTI_DEFAULT_SAMPLING_RATE;
+        if (config->channel_mask == 0)
+            config->channel_mask = AUDIO_CHANNEL_OUT_5POINT1;
+        out->channel_mask = config->channel_mask;
+        out->config = pcm_config_hdmi_multi;
+        out->config.rate = config->sample_rate;
+        out->config.channels = popcount(config->channel_mask);
+        out->pcm_device = PCM_DEVICE;
+        type = OUTPUT_HDMI;
+    } else if (flags & AUDIO_OUTPUT_FLAG_DEEP_BUFFER) {
+        out->config = pcm_config_deep;
+        out->pcm_device = PCM_DEVICE_DEEP;
+        type = OUTPUT_DEEP_BUF;
+    } else {
+        out->config = pcm_config;
+        out->pcm_device = PCM_DEVICE;
+        type = OUTPUT_LOW_LATENCY;
+    }
 
     out->stream.common.get_sample_rate = out_get_sample_rate;
     out->stream.common.set_sample_rate = out_set_sample_rate;
@@ -1220,16 +1426,6 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
 
     out->standby = true;
 
-    if (flags & AUDIO_OUTPUT_FLAG_DEEP_BUFFER) {
-        out->config = &pcm_config_deep;
-        out->pcm_device = PCM_DEVICE_DEEP;
-        type = OUTPUT_DEEP_BUF;
-    } else {
-        out->config = &pcm_config;
-        out->pcm_device = PCM_DEVICE;
-        type = OUTPUT_LOW_LATENCY;
-    }
-
     pthread_mutex_lock(&adev->lock);
     if (adev->outputs[type]) {
         pthread_mutex_unlock(&adev->lock);
@@ -1240,6 +1436,7 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     pthread_mutex_unlock(&adev->lock);
 
     *stream_out = &out->stream;
+
     return 0;
 
 err_open:
@@ -1260,6 +1457,7 @@ static void adev_close_output_stream(struct audio_hw_device *dev,
     for (type = 0; type < OUTPUT_TOTAL; ++type) {
         if (adev->outputs[type] == (struct stream_out *) stream) {
             adev->outputs[type] = NULL;
+            break;
         }
     }
     pthread_mutex_unlock(&adev->lock);
@@ -1466,10 +1664,12 @@ static int adev_close(hw_device_t *device)
 
     audio_route_free(adev->ar);
 
-    if(adev->es305_vp_fd >= 0)
+    if (adev->es305_vp_fd >= 0)
         close(adev->es305_vp_fd);
-    if(adev->es305_preset_fd >= 0)
+    if (adev->es305_preset_fd >= 0)
         close(adev->es305_preset_fd);
+    if (adev->hdmi_drv_fd >= 0)
+        close(adev->hdmi_drv_fd);
 
     free(device);
     return 0;
@@ -1517,7 +1717,7 @@ static int adev_open(const hw_module_t* module, const char* name,
     adev->es305_preset_fd = -1;
     adev->es305_preset = ES305_PRESET_INIT;
     adev->es305_mode = ES305_MODE_DEFAULT;
-
+    adev->hdmi_drv_fd = -1;
     *device = &adev->hw_device.common;
 
     return 0;
