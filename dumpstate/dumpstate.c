@@ -35,4 +35,7 @@ void dumpstate_board()
     dump_file("ds2784 fuel gauge regs", "/d/ds2784");
     dump_file("bus traffic shaper", "/d/bts_dev_status");
     dump_file("display controller", "/d/s3c-fb");
+    dump_file("ion system heap", "/d/ion/ion_noncontig_heap");
+    dump_file("ion exynos noncontig heap", "/d/ion/exynos_noncontig_heap");
+    dump_file("ion exynos contig heap", "/d/ion/exynos_contig_heap");
 };
