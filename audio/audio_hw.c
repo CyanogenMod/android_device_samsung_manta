@@ -125,6 +125,7 @@ struct audio_device {
 
     pthread_mutex_t lock; /* see note below on mutex acquisition order */
     audio_devices_t out_device; /* "or" of stream_out.device for all active output streams */
+    audio_devices_t in_device;
     bool mic_mute;
     struct audio_route *ar;
     audio_source_t input_source;
@@ -151,7 +152,7 @@ struct stream_out {
     struct pcm_config config;
     unsigned int pcm_device;
     bool standby; /* true if all PCMs are inactive */
-    unsigned int device;
+    audio_devices_t device;
     /* FIXME: when HDMI multichannel output is active, other outputs must be disabled as
      * HDMI and WM1811 share the same I2S. This means that notifications and other sounds are
      * silent when watching a 5.1 movie. */
@@ -177,6 +178,7 @@ struct stream_in {
     size_t frames_in;
     int read_status;
     audio_source_t input_source;
+    audio_devices_t device;
     uint16_t ramp_vol;
     uint16_t ramp_step;
     size_t  ramp_frames;
@@ -239,7 +241,7 @@ enum {
     ES305_NUM_MODES,
 };
 
-int get_output_device_id(unsigned int device)
+int get_output_device_id(audio_devices_t device)
 {
     if (device == AUDIO_DEVICE_NONE)
         return OUT_DEVICE_NONE;
@@ -533,10 +535,21 @@ static void select_devices(struct audio_device *adev)
             new_es305_preset =
                 route_configs[input_source_id][output_device_id]->es305_preset[adev->es305_mode];
         } else {
+            switch (adev->in_device) {
+            case AUDIO_DEVICE_IN_WIRED_HEADSET:
+                output_device_id = OUT_DEVICE_HEADSET;
+                break;
+            case AUDIO_DEVICE_IN_BLUETOOTH_SCO_HEADSET:
+                output_device_id = OUT_DEVICE_BT_SCO;
+                break;
+            default:
+                output_device_id = OUT_DEVICE_SPEAKER;
+                break;
+            }
             input_route =
-                    route_configs[input_source_id][OUT_DEVICE_SPEAKER]->input_route;
+                    route_configs[input_source_id][output_device_id]->input_route;
             new_es305_preset =
-                route_configs[input_source_id][OUT_DEVICE_SPEAKER]->es305_preset[adev->es305_mode];
+                route_configs[input_source_id][output_device_id]->es305_preset[adev->es305_mode];
         }
     } else {
         if (output_device_id != OUT_DEVICE_NONE) {
@@ -682,6 +695,7 @@ static int start_input_stream(struct stream_in *in)
 
     in->frames_in = 0;
     adev->input_source = in->input_source;
+    adev->in_device = in->device;
     select_devices(adev);
 
     /* initialize volume ramp */
@@ -1199,6 +1213,7 @@ static int in_standby(struct audio_stream *stream)
         pcm_close(in->pcm);
         in->pcm = NULL;
         in->dev->input_source = AUDIO_SOURCE_DEFAULT;
+        in->dev->in_device = AUDIO_DEVICE_NONE;
         select_devices(in->dev);
         in->standby = true;
     }
@@ -1226,11 +1241,10 @@ static int in_set_parameters(struct audio_stream *stream, const char *kvpairs)
 
     parms = str_parms_create_str(kvpairs);
 
-    ret = str_parms_get_str(parms, AUDIO_PARAMETER_STREAM_INPUT_SOURCE,
-                            value, sizeof(value));
-
     pthread_mutex_lock(&adev->lock);
     pthread_mutex_lock(&in->lock);
+    ret = str_parms_get_str(parms, AUDIO_PARAMETER_STREAM_INPUT_SOURCE,
+                            value, sizeof(value));
     if (ret >= 0) {
         val = atoi(value);
         /* no audio source uses val == 0 */
@@ -1240,8 +1254,20 @@ static int in_set_parameters(struct audio_stream *stream, const char *kvpairs)
         }
     }
 
+    ret = str_parms_get_str(parms, AUDIO_PARAMETER_STREAM_ROUTING,
+                            value, sizeof(value));
+    if (ret >= 0) {
+        val = atoi(value);
+        /* no audio device uses val == 0 */
+        if ((in->device != val) && (val != 0)) {
+            in->device = val;
+            apply_now = !in->standby;
+        }
+    }
+
     if (apply_now) {
         adev->input_source = in->input_source;
+        adev->in_device = in->device;
         select_devices(adev);
     }
 
@@ -1604,6 +1630,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     in->standby = true;
     in->requested_rate = config->sample_rate;
     in->input_source = AUDIO_SOURCE_DEFAULT;
+    in->device = devices;
 
     in->buffer = malloc(pcm_config_in.period_size * pcm_config_in.channels
                                                * audio_stream_frame_size(&in->stream.common));
