@@ -56,6 +56,7 @@
 #define SENSORS_LINEAR_ACCEL_HANDLE     (ID_LA)
 #define SENSORS_GRAVITY_HANDLE          (ID_GR)
 #define SENSORS_GYROSCOPE_HANDLE        (ID_GY)
+#define SENSORS_RAW_GYROSCOPE_HANDLE    (ID_RG)
 #define SENSORS_ACCELERATION_HANDLE     (ID_A)
 #define SENSORS_MAGNETIC_FIELD_HANDLE   (ID_M)
 #define SENSORS_ORIENTATION_HANDLE      (ID_O)
@@ -149,6 +150,7 @@ private:
             case ID_LA:
             case ID_GR:
             case ID_GY:
+            case ID_RG:
             case ID_A:
             case ID_M:
             case ID_O:
@@ -231,6 +233,7 @@ sensors_poll_context_t::~sensors_poll_context_t()
 int sensors_poll_context_t::activate(int handle, int enabled)
 {
     FUNC_LOG;
+    if (!mInitialized) return -EINVAL;
     int index = handleToDriver(handle);
     if (index < 0) return index;
     int err =  mSensors[index]->enable(handle, enabled);
@@ -260,7 +263,7 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
         for (int i=0 ; count && i<numSensorDrivers ; i++) {
             SensorBase* const sensor(mSensors[i]);
             // See if we have some pending events from the last poll()
-            if ((mPollFds[i].revents & POLLIN) || (sensor->hasPendingEvents())) {
+            if ((mPollFds[i].revents & (POLLIN | POLLPRI)) || (sensor->hasPendingEvents())) {
                 int nb;
                 if (i == compass) {
                     /* result is hardcoded to 0 */
@@ -271,6 +274,7 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
                     /* result is hardcoded to 0 */
                     sensor->readEvents(NULL, count);
                     nb = ((MPLSensor*) mSensors[mpl])->executeOnData(data, count);
+                    mPollFds[i].revents = 0;
                 }
                 else {
                     nb = sensor->readEvents(data, count);
@@ -292,7 +296,7 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
                 ALOGE("poll() failed (%s)", strerror(errno));
                 return -errno;
             }
-            if (mPollFds[wake].revents & POLLIN) {
+            if (mPollFds[wake].revents & (POLLIN | POLLPRI)) {
                 char msg;
                 int result = read(mPollFds[wake].fd, &msg, 1);
                 ALOGE_IF(result<0, "error reading from wake pipe (%s)", strerror(errno));
