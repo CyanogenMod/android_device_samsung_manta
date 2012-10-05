@@ -57,6 +57,7 @@
 #define ES305_SYSFS_PATH "/sys/class/i2c-dev/i2c-4/device/4-003e/"
 #define ES305_PRESET_PATH ES305_SYSFS_PATH "preset"
 #define ES305_VOICE_PROCESSING_PATH ES305_SYSFS_PATH "voice_processing"
+#define ES305_SLEEP_PATH ES305_SYSFS_PATH "sleep"
 
 #define ES305_ON "1"
 #define ES305_OFF "0"
@@ -139,6 +140,7 @@ struct audio_device {
     int es305_mode;
     int es305_vp_fd;
     int es305_preset_fd;
+    int es305_sleep_fd;
     int hdmi_drv_fd;
 
     struct stream_out *outputs[OUTPUT_TOTAL];
@@ -589,6 +591,15 @@ static void select_devices(struct audio_device *adev)
         if (new_es305_preset == ES305_PRESET_OFF) {
             if (adev->es305_vp_fd >= 0) {
                 write(adev->es305_vp_fd, ES305_OFF, strlen(ES305_OFF));
+            }
+
+            if (adev->es305_sleep_fd < 0) {
+                adev->es305_sleep_fd = open(ES305_SLEEP_PATH, O_RDWR);
+            }
+            if (adev->es305_sleep_fd < 0) {
+                ALOGE("Could not open es305 sleep file: %s", strerror(errno));
+            } else {
+                write(adev->es305_sleep_fd, ES305_ON, strlen(ES305_ON));
             }
         } else {
             if (adev->es305_vp_fd >= 0) {
@@ -1695,6 +1706,8 @@ static int adev_close(hw_device_t *device)
         close(adev->es305_vp_fd);
     if (adev->es305_preset_fd >= 0)
         close(adev->es305_preset_fd);
+    if (adev->es305_sleep_fd >= 0)
+        close(adev->es305_sleep_fd);
     if (adev->hdmi_drv_fd >= 0)
         close(adev->hdmi_drv_fd);
 
@@ -1742,6 +1755,7 @@ static int adev_open(const hw_module_t* module, const char* name,
 
     adev->es305_vp_fd = -1;
     adev->es305_preset_fd = -1;
+    adev->es305_sleep_fd = -1;
     adev->es305_preset = ES305_PRESET_INIT;
     adev->es305_mode = ES305_MODE_DEFAULT;
     adev->hdmi_drv_fd = -1;
