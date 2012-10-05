@@ -29,6 +29,10 @@
     <!-- Default LED off time for notification LED in milliseconds. -->
     <integer name="config_defaultNotificationLedOff">5000</integer>
 
+    <string-array name="config_overlay_locationProviderPackageNames" translatable="false">
+        <item>com.google.android.location</item>
+    </string-array>
+
     <!-- This device is not "voice capable"; it's data-only. -->
     <bool name="config_voice_capable">false</bool>
 
