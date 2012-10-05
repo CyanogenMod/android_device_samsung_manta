@@ -38,4 +38,5 @@ void dumpstate_board()
     dump_file("ion system heap", "/d/ion/ion_noncontig_heap");
     dump_file("ion exynos noncontig heap", "/d/ion/exynos_noncontig_heap");
     dump_file("ion exynos contig heap", "/d/ion/exynos_contig_heap");
+    dump_file("shrinkers", "/d/shrinker");
 };
