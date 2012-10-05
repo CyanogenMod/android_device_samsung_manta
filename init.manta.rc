@@ -78,6 +78,8 @@ on fs
     chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/voice_processing
     chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/preset
     chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/preset
+    chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/sleep
+    chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/sleep
 
 # virtual sdcard daemon running as media_rw (1023)
 service sdcard /system/bin/sdcard /data/media /mnt/shell/emulated 1023 1023
