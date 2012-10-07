@@ -105,8 +105,9 @@
 
          Must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessLevels">
-        <item>10</item>
+        <item>10</item>      <!-- Pitch black 0, and 9 is next possible value. -->
         <item>50</item>      <!-- Sensor in dark office: 60, well lit: 220 -->
+        <item>90</item>      <!-- Sensor in dark office: 60, well lit: 220 -->
         <item>15000</item>   <!-- Screen under direct sunlight, but not sensor. -->
         <item>225000</item>  <!-- Sensor under direct sunlight. -->
     </integer-array>
@@ -117,9 +118,10 @@
          The brightness values must be between 0 and 255 and be non-decreasing.
          This must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessLcdBacklightValues">
-        <item>10</item>
+        <item>2</item>
         <item>13</item>
         <item>65</item>
+        <item>85</item>
         <item>220</item>
         <item>255</item>
     </integer-array>
@@ -130,6 +132,7 @@
          The brightness values must be between 0 and 255 and be non-decreasing.
          This must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessButtonBacklightValues">
+        <item>0</item>
         <item>0</item>
         <item>0</item>
         <item>0</item>
@@ -148,12 +151,13 @@
         <item>0</item>
         <item>0</item>
         <item>0</item>
+        <item>0</item>
     </integer-array>
 
     <!-- Screen brightness used to dim the screen when the user activity
          timeout expires.  May be less than the minimum allowed brightness setting
          that can be set by the user. -->
-    <integer name="config_screenBrightnessDim">5</integer>
+    <integer name="config_screenBrightnessDim">10</integer>
 
     <!-- If this is true, the screen will come on when you unplug usb/power/whatever. -->
     <bool name="config_unplugTurnsOnScreen">true</bool>
