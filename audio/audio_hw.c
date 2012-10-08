@@ -326,21 +326,15 @@ const struct route_config media_headset = {
 const struct route_config camcorder_speaker = {
     "media-speaker",
     "media-second-mic",
-    // broken with current firmware, workaround by turning off eS305 for camcorder
-    //    { ES305_PRESET_CAMCORDER,
-    //      ES305_PRESET_CAMCORDER }
-    { ES305_PRESET_OFF,
-      ES305_PRESET_OFF }
+    { ES305_PRESET_CAMCORDER,
+      ES305_PRESET_CAMCORDER }
 };
 
 const struct route_config camcorder_headphones = {
     "media-headphones",
     "media-second-mic",
-    // broken with current firmware, workaround by turning off eS305 for camcorder
-    //    { ES305_PRESET_CAMCORDER,
-    //      ES305_PRESET_CAMCORDER }
-    { ES305_PRESET_OFF,
-      ES305_PRESET_OFF }
+    { ES305_PRESET_CAMCORDER,
+      ES305_PRESET_CAMCORDER }
 };
 
 const struct route_config voice_rec_speaker = {
