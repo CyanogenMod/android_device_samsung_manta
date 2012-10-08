@@ -106,7 +106,7 @@
          Must be overridden in platform specific overlays -->
     <integer-array name="config_autoBrightnessLevels">
         <item>10</item>      <!-- Pitch black 0, and 9 is next possible value. -->
-        <item>50</item>      <!-- Sensor in dark office: 60, well lit: 220 -->
+        <item>30</item>      <!-- Sensor in dark office: 60, well lit: 220 -->
         <item>90</item>      <!-- Sensor in dark office: 60, well lit: 220 -->
         <item>15000</item>   <!-- Screen under direct sunlight, but not sensor. -->
         <item>225000</item>  <!-- Sensor under direct sunlight. -->
