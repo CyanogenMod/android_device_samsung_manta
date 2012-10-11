@@ -166,7 +166,7 @@
     <bool name="config_intrusiveNotificationLed">true</bool>
 
     <!--  Maximum number of supported users -->
-    <integer name="config_multiuserMaximumUsers">8</integer>
+    <integer name="config_multiuserMaximumUsers">1</integer>
 
     <bool name="config_ui_enableFadingMarquee">false</bool>
 
