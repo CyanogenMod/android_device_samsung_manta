@@ -31,6 +31,7 @@ void dumpstate_board()
     dump_file("touchscreen name", "/sys/class/input/input0/name");
     dump_file("android power", "/d/android-power");
     dump_file("manta power", "/d/manta-power");
+    dump_file("dock status", "/sys/class/switch/dock/dock_status");
     dump_file("smb347 charger regs", "/d/smb347-regs");
     dump_file("ds2784 fuel gauge regs", "/d/ds2784");
     dump_file("bus traffic shaper", "/d/bts_dev_status");
