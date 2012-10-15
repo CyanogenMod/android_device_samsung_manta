@@ -25,8 +25,9 @@ LOCAL_C_INCLUDES += \
 	external/tinyalsa/include \
 	external/expat/lib \
 	hardware/samsung_slsi/exynos5/include \
+	device/samsung/manta/bubblelevel \
 	$(call include-path-for, audio-utils)
-LOCAL_SHARED_LIBRARIES := liblog libcutils libtinyalsa libaudioutils libexpat
+LOCAL_SHARED_LIBRARIES := liblog libcutils libtinyalsa libaudioutils libexpat libbubblelevel
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
