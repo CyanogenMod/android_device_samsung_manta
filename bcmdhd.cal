@@ -100,6 +100,7 @@ subband5gver=0
 elna2g=0
 elna5g=0
 muxenab=0x10
+deadman_to=0x21000000
 btc_params80=0
 btc_params6=10
 btc_params95=53
