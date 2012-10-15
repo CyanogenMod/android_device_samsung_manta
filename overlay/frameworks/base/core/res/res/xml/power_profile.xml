@@ -23,7 +23,7 @@
   <item name="screen.full">901</item>
   <item name="bluetooth.active">25</item> <!-- TBD, DM5/DH5 from DS -->
   <item name="bluetooth.on">15</item> <!-- TBD, continuous rx from DS -->
-  <item name="wifi.on">85</item>
+  <item name="wifi.on">1</item>
   <item name="wifi.active">211</item>
   <item name="wifi.scan">78</item>
   <item name="dsp.audio">48</item> <!-- not used -->
