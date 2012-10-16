@@ -340,22 +340,22 @@ const struct route_config camcorder_headphones = {
 const struct route_config voice_rec_speaker = {
     "voice-rec-speaker",
     "voice-rec-main-mic",
-    { ES305_PRESET_ASRA_HANDHELD,
-      ES305_PRESET_ASRA_DESKTOP }
+    { ES305_PRESET_OFF,
+      ES305_PRESET_OFF }
 };
 
 const struct route_config voice_rec_headphones = {
     "voice-rec-headphones",
     "voice-rec-main-mic",
-    { ES305_PRESET_ASRA_HANDHELD,
-      ES305_PRESET_ASRA_DESKTOP }
+    { ES305_PRESET_OFF,
+      ES305_PRESET_OFF }
 };
 
 const struct route_config voice_rec_headset = {
     "voice-rec-headphones",
     "voice-rec-headset-mic",
-    { ES305_PRESET_ASRA_HEADSET,
-      ES305_PRESET_ASRA_HEADSET }
+    { ES305_PRESET_OFF,
+      ES305_PRESET_OFF }
 };
 
 const struct route_config communication_speaker = {
