@@ -96,8 +96,6 @@
     <path name="eq-speaker" />
   </path>
 
-  <!-- TODO: these values are for lunchbox Mic wiring. Must be changed for Alpha HW -->
-
   <path name="adc-to-aif1adc">
     <ctl name="AIF1ADC1L Mixer ADC/DMIC Switch" value="1" />
     <ctl name="AIF1ADC1R Mixer ADC/DMIC Switch" value="1" />
@@ -252,7 +250,6 @@
     <path name="aif2-to-aif1adc" />
   </path>
 
-  <!-- TODO headset paths not properly configured yet -->
   <path name="voice-rec-headset-mic">
     <path name="headset-mic" />
     <ctl name="IN1R Volume" value="16" />
