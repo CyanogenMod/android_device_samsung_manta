@@ -40,6 +40,8 @@
 
 #include <audio_utils/resampler.h>
 
+#include <BubbleLevel.h>
+
 #include "audio_route.h"
 
 #define PCM_CARD 0
@@ -137,11 +139,13 @@ struct audio_device {
     struct pcm *pcm_voice_in;
     struct pcm *pcm_sco_in;
     int es305_preset;
+    int es305_new_mode;
     int es305_mode;
     int es305_vp_fd;
     int es305_preset_fd;
     int es305_sleep_fd;
     int hdmi_drv_fd;
+    struct bubble_level *bubble_level;
 
     struct stream_out *outputs[OUTPUT_TOTAL];
 };
@@ -239,7 +243,7 @@ enum {
 
 enum {
     ES305_MODE_DEFAULT,
-    ES305_MODE_DESKTOP,
+    ES305_MODE_LEVEL,
     ES305_NUM_MODES,
 };
 
@@ -524,9 +528,10 @@ static void select_devices(struct audio_device *adev)
     enable_hdmi_audio(adev, adev->out_device & AUDIO_DEVICE_OUT_AUX_DIGITAL);
 
     new_route_id = (1 << (input_source_id + OUT_DEVICE_CNT)) + (1 << output_device_id);
-    if (new_route_id == adev->cur_route_id)
+    if ((new_route_id == adev->cur_route_id) && (adev->es305_mode == adev->es305_new_mode))
         return;
     adev->cur_route_id = new_route_id;
+    adev->es305_mode = adev->es305_new_mode;
 
     if (input_source_id != IN_SOURCE_NONE) {
         if (output_device_id != OUT_DEVICE_NONE) {
@@ -572,8 +577,8 @@ static void select_devices(struct audio_device *adev)
 
     if ((new_es305_preset != ES305_PRESET_CURRENT) &&
             (new_es305_preset != adev->es305_preset)) {
-        ALOGV("select_devices() changing es305 preset from %d to %d",
-              adev->es305_preset, new_es305_preset);
+        ALOGV("select_devices() changing es305 preset from %d to %d es305 mode %d",
+              adev->es305_preset, new_es305_preset, adev->es305_mode);
         /* open es305 control files */
         if (adev->es305_vp_fd < 0) {
             adev->es305_vp_fd = open(ES305_VOICE_PROCESSING_PATH, O_RDWR);
@@ -602,9 +607,11 @@ static void select_devices(struct audio_device *adev)
                 write(adev->es305_sleep_fd, ES305_ON, strlen(ES305_ON));
             }
         } else {
-            if (adev->es305_vp_fd >= 0) {
+            if ((adev->es305_vp_fd >= 0) &&
+                    ((adev->es305_preset == ES305_PRESET_OFF) ||
+                     (adev->es305_preset == ES305_PRESET_INIT)))
                 write(adev->es305_vp_fd, ES305_ON, strlen(ES305_ON));
-            }
+
             if (adev->es305_preset_fd >= 0) {
                 char str[8];
                 sprintf(str, "%d", new_es305_preset);
@@ -616,6 +623,25 @@ static void select_devices(struct audio_device *adev)
     }
 
     update_mixer_state(adev->ar);
+}
+
+void bubblelevel_callback(bool is_level, void *user_data)
+{
+    struct audio_device *adev = (struct audio_device *)user_data;
+    int es305_mode;
+
+    if (is_level)
+        es305_mode = ES305_MODE_LEVEL;
+    else
+        es305_mode = ES305_MODE_DEFAULT;
+
+    pthread_mutex_lock(&adev->lock);
+    if (es305_mode != adev->es305_mode) {
+        adev->es305_new_mode = es305_mode;
+        select_devices(adev);
+        ALOGV("bubblelevel_callback is_level %d es305_mode %d", is_level, es305_mode);
+    }
+    pthread_mutex_unlock(&adev->lock);
 }
 
 static void force_non_hdmi_out_standby(struct audio_device *adev)
@@ -684,6 +710,9 @@ static int start_output_stream(struct stream_out *out)
     if (out->device & AUDIO_DEVICE_OUT_AUX_DIGITAL)
         set_hdmi_channels(adev, out->config.channels);
 
+    /* anticipate level measurement in case we start capture later */
+    adev->bubble_level->poll_once(adev->bubble_level);
+
     return 0;
 }
 
@@ -713,6 +742,9 @@ static int start_input_stream(struct stream_in *in)
     in->ramp_frames = (CAPTURE_START_RAMP_MS * in->requested_rate) / 1000;
     in->ramp_step = (uint16_t)(USHRT_MAX / in->ramp_frames);
     in->ramp_vol = 0;;
+
+    adev->bubble_level->set_poll_interval(adev->bubble_level, BL_POLL_INTERVAL_MIN_SEC);
+    adev->bubble_level->start_polling(adev->bubble_level);
 
     return 0;
 }
@@ -1227,6 +1259,8 @@ static int in_standby(struct audio_stream *stream)
         in->dev->in_device = AUDIO_DEVICE_NONE;
         select_devices(in->dev);
         in->standby = true;
+
+        in->dev->bubble_level->stop_polling(in->dev->bubble_level);
     }
 
     pthread_mutex_unlock(&in->lock);
@@ -1503,31 +1537,7 @@ static void adev_close_output_stream(struct audio_hw_device *dev,
 
 static int adev_set_parameters(struct audio_hw_device *dev, const char *kvpairs)
 {
-    struct audio_device *adev = (struct audio_device *)dev;
-    struct str_parms *parms;
-    char *str;
-    char value[32];
-    int ret;
-
-    parms = str_parms_create_str(kvpairs);
-    ret = str_parms_get_str(parms, "desktop", value, sizeof(value));
-    if (ret >= 0) {
-        int es305_mode;
-
-        if (strcmp(value, "yes") == 0)
-            es305_mode = ES305_MODE_DESKTOP;
-        else
-            es305_mode = ES305_MODE_DEFAULT;
-
-        ALOGV("adev_set_parameters() changing es305 mode to %d", es305_mode);
-        pthread_mutex_lock(&adev->lock);
-        if (es305_mode != adev->es305_mode) {
-            adev->es305_mode = es305_mode;
-            select_devices(adev);
-        }
-        pthread_mutex_unlock(&adev->lock);
-    }
-    return ret;
+    return 0;
 }
 
 static char * adev_get_parameters(const struct audio_hw_device *dev,
@@ -1711,6 +1721,8 @@ static int adev_close(hw_device_t *device)
     if (adev->hdmi_drv_fd >= 0)
         close(adev->hdmi_drv_fd);
 
+    bubble_level_release(adev->bubble_level);
+
     free(device);
     return 0;
 }
@@ -1757,9 +1769,13 @@ static int adev_open(const hw_module_t* module, const char* name,
     adev->es305_preset_fd = -1;
     adev->es305_sleep_fd = -1;
     adev->es305_preset = ES305_PRESET_INIT;
-    adev->es305_mode = ES305_MODE_DEFAULT;
+    adev->es305_new_mode = ES305_MODE_LEVEL;
+    adev->es305_mode = ES305_MODE_LEVEL;
     adev->hdmi_drv_fd = -1;
     *device = &adev->hw_device.common;
+
+    adev->bubble_level = bubble_level_create();
+    adev->bubble_level->set_callback(adev->bubble_level, bubblelevel_callback, adev);
 
     return 0;
 }
