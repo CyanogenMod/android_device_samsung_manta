@@ -13,8 +13,8 @@
   <ctl name="Speaker Mixer Volume" value="0" />
 
   <ctl name="Headphone Switch" value="0" />
-  <ctl name="Right Headphone Mux" value="Mixer" />
-  <ctl name="Left Headphone Mux" value="Mixer" />
+  <ctl name="Right Headphone Mux" value="DAC" />
+  <ctl name="Left Headphone Mux" value="DAC" />
   <ctl name="Left Output Mixer DAC Switch" value="0" />
   <ctl name="Right Output Mixer DAC Switch" value="0" />
 
@@ -79,8 +79,6 @@
   <path name="headphones">
     <path name="dac1" />
     <ctl name="Headphone Switch" value="1" />
-    <ctl name="Left Output Mixer DAC Switch" value="1" />
-    <ctl name="Right Output Mixer DAC Switch" value="1" />
     <path name="eq-headphone" />
   </path>
 
@@ -188,8 +186,6 @@
   <path name="speaker-and-headphones">
     <path name="dac1" />
     <ctl name="Headphone Switch" value="1" />
-    <ctl name="Left Output Mixer DAC Switch" value="1" />
-    <ctl name="Right Output Mixer DAC Switch" value="1" />
     <ctl name="Speaker Switch" value="1" />
     <ctl name="SPKR DAC1 Switch" value="1" />
     <ctl name="SPKL DAC1 Switch" value="1" />
