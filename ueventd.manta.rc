@@ -30,6 +30,12 @@
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    power_state                      0660    system    system
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    buffer/enable                    0660    system    system
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    buffer/length                    0660    system    system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    firmware_loaded                  0660    system    system
+
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    dmp_firmware                     0660    system    system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    dmp_on                           0660    system    system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    dmp_int_on                       0660    system    system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    dmp_output_rate                  0660    system    system
 
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    scan_elements/in_accel_x_en      0660    system    system
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    scan_elements/in_accel_y_en      0660    system    system
@@ -47,13 +53,13 @@
 /sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0068/iio:device*    scan_elements/in_timestamp_en    0660    system    system
 
 # led
-/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668	color       0660   system   system
-/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668	brightness  0660   system   system
-/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668	delay_on    0660   system   system
-/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668	delay_off   0660   system   system
-/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668	trigger     0660   system   system
-/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668	slope_up    0660   system   system
-/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668	slope_down  0660   system   system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668    color       0660   system   system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668    brightness  0660   system   system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668    delay_on    0660   system   system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668    delay_off   0660   system   system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668    trigger     0660   system   system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668    slope_up    0660   system   system
+/sys/devices/platform/s3c2440-i2c.1/i2c-1/1-0042/leds/as3668    slope_down  0660   system   system
 
 # gscalers
 /dev/video23              0660   media      graphics

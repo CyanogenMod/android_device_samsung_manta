@@ -70,7 +70,7 @@
 /*****************************************************************************/
 
 /* The SENSORS Module */
-#define LOCAL_SENSORS (2)
+#define LOCAL_SENSORS 2
 static struct sensor_t sSensorList[LOCAL_SENSORS + MPLSensor::numSensors] = {
       { "BH1721fvc Light sensor",
           "Rohm",
@@ -132,6 +132,9 @@ private:
     enum {
         mpl = 0,
         compass,
+#ifdef ENABLE_DMP_DISPL_ORIENT_FEAT
+        dmpOrient,
+#endif
         light,
         pressure,
         numSensorDrivers,       // wake pipe goes here
@@ -155,6 +158,10 @@ private:
             case ID_M:
             case ID_O:
                 return mpl;
+#ifdef ENABLE_DMP_DISPL_ORIENT_FEAT
+            case ID_SO:
+                return dmpOrient;
+#endif
             case ID_L:
                 return light;
             case ID_PR:
@@ -175,11 +182,6 @@ sensors_poll_context_t::sensors_poll_context_t()
     // Must clean this up early or else the destructor will make a mess.
     memset(mSensors, 0, sizeof(mSensors));
 
-    if (!p_mplsen->isValid()) {
-        delete p_compasssensor;
-        return;
-    }
-
     setCallbackObject(p_mplsen); //setup the callback object for handing mpl callbacks
     numSensors =
         LOCAL_SENSORS +
@@ -196,6 +198,11 @@ sensors_poll_context_t::sensors_poll_context_t()
     mPollFds[compass].events = POLLIN;
     mPollFds[compass].revents = 0;
 
+#ifdef ENABLE_DMP_DISPL_ORIENT_FEAT
+    mPollFds[dmpOrient].fd = ((MPLSensor*)mSensors[mpl])->getDmpOrientFd();
+    mPollFds[dmpOrient].events = POLLPRI;
+    mPollFds[dmpOrient].revents = 0;
+#endif
     mSensors[light] = new LightSensor();
     mPollFds[light].fd = mSensors[light]->getFd();
     mPollFds[light].events = POLLIN;
@@ -276,6 +283,16 @@ int sensors_poll_context_t::pollEvents(sensors_event_t* data, int count)
                     nb = ((MPLSensor*) mSensors[mpl])->executeOnData(data, count);
                     mPollFds[i].revents = 0;
                 }
+#ifdef ENABLE_DMP_DISPL_ORIENT_FEAT
+                else if (i == dmpOrient) {
+                    nb = ((MPLSensor*) mSensors[mpl])->readDmpOrientEvents(data, count);
+                    mPollFds[dmpOrient].revents= 0;
+                    if (!isDmpScreenAutoRotationEnabled()) {
+                            /* ignore the data */
+                            nb = 0;
+                    }
+                }
+#endif
                 else {
                     nb = sensor->readEvents(data, count);
                 }
