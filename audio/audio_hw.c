@@ -946,7 +946,10 @@ static int do_out_standby(struct stream_out *out)
 
         /* re-calculate the set of active devices from other streams */
         adev->out_device = output_devices(out);
-        select_devices(adev);
+
+        /* Skip resetting the mixer if no output device is active */
+        if (adev->out_device)
+            select_devices(adev);
     }
 
     return 0;
