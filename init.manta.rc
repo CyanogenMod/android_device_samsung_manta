@@ -79,12 +79,24 @@ on fs
     mkdir /data/nfc/param 770 nfc nfc
 
 # audio: permissions for voice processing
+    # global switch for voice processing effects
     chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/voice_processing
     chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/voice_processing
-    chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/preset
-    chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/preset
+    # voice processing chip sleep
     chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/sleep
     chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/sleep
+    # voice processing usecase preset
+    chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/preset
+    chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/preset
+    # voice processing noise suppression level
+    chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/tx_ns_level
+    chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/tx_ns_level
+    # voice processing AGC enable (TX)
+    chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/tx_agc_enable
+    chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/tx_agc_enable
+    # voice processing AEC enable
+    chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/aec_enable
+    chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/aec_enable
 
 # virtual sdcard daemon running as media_rw (1023)
 service sdcard /system/bin/sdcard /data/media /mnt/shell/emulated 1023 1023
