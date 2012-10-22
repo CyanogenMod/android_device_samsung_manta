@@ -79,6 +79,11 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/samsung/manta/audio_policy.conf:system/etc/audio_policy.conf
 
+# audio effects
+PRODUCT_PACKAGES += libaudience_voicefx
+PRODUCT_COPY_FILES += \
+    device/samsung/manta/audio_effects.conf:system/etc/audio_effects.conf
+
 # for bugmailer
 PRODUCT_PACKAGES := send_bug
 PRODUCT_COPY_FILES += \
