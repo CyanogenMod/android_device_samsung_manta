@@ -73,7 +73,6 @@ struct adnc_pfx_ops_s {
     int (* set_parameter)(adnc_pfx_effect_t *fx, void *param, void *value);
     int (* get_parameter)(adnc_pfx_effect_t *fx, void *param, size_t *size, void *value);
     int (* set_device)(adnc_pfx_effect_t *fx, uint32_t device);
-    int (* commit_eS305)(adnc_pfx_effect_t *fx);// called with a lock on sAdncBundleLock
 };
 
 // Effect context
@@ -322,19 +321,6 @@ int aec_set_device(adnc_pfx_effect_t *effect, uint32_t device)
     return 0;
 }
 
-int aec_commit(adnc_pfx_effect_t *effect)
-{
-    ALOGV("aec_commit");
-
-    bool aec_on = ((effect->session->activeMsk & (1 << effect->procId)) != 0);
-
-    if (effect->session->ioHandle == eS305_ctrl.ioHandle) {
-        return Adnc_SetEchoCancellationInt_l(aec_on /*aec_on*/);
-    } else {
-        return 0;
-    }
-}
-
 static const adnc_pfx_ops_t aec_ops = {
         aec_create,
         aec_init,
@@ -344,7 +330,6 @@ static const adnc_pfx_ops_t aec_ops = {
         aec_set_parameter,
         aec_get_parameter,
         aec_set_device,
-        aec_commit,
 };
 
 
@@ -390,19 +375,6 @@ void ns_disable(adnc_pfx_effect_t *effect)
     ALOGV("ns_disable [noop]");
 }
 
-int ns_commit(adnc_pfx_effect_t *effect)
-{
-    ALOGV("ns_commit");
-
-    bool ns_on = ((effect->session->activeMsk & (1 << effect->procId)) != 0);
-
-    if (effect->session->ioHandle == eS305_ctrl.ioHandle) {
-        return Adnc_SetNoiseSuppressionInt_l(ns_on /*ns_on*/);
-    } else {
-        return 0;
-    }
-}
-
 static const adnc_pfx_ops_t ns_ops = {
         ns_create,
         ns_init,
@@ -412,7 +384,6 @@ static const adnc_pfx_ops_t ns_ops = {
         ns_set_parameter,
         ns_get_parameter,
         NULL,
-        ns_commit
 };
 
 
@@ -458,19 +429,6 @@ void agc_disable(adnc_pfx_effect_t *effect)
     ALOGV("agc_disable [noop]");
 }
 
-int agc_commit(adnc_pfx_effect_t *effect)
-{
-    ALOGV("agc_commit");
-
-    bool agc_on = ((effect->session->activeMsk & (1 << effect->procId)) != 0);
-
-    if (effect->session->ioHandle == eS305_ctrl.ioHandle) {
-        return Adnc_SetAutomaticGainControlInt_l(agc_on /*agc_on*/);
-    } else {
-        return 0;
-    }
-}
-
 static const adnc_pfx_ops_t agc_ops = {
         agc_create,
         agc_init,
@@ -480,7 +438,6 @@ static const adnc_pfx_ops_t agc_ops = {
         agc_set_parameter,
         agc_get_parameter,
         NULL,
-        agc_commit
 };
 
 //------------------------------------------------------------------------------
@@ -1200,8 +1157,22 @@ int Adnc_SetNoiseSuppressionInt_l(bool ns_on)
     }
 
     if (ns_on) {
-        write(eS305_ctrl.fd[ES305_CTRL_TX_NS_LEVEL], ES305_NS_ON, strlen(ES305_NS_ON));
+        if (eS305_ctrl.requested_preset == ES305_PRESET_ASRA_HANDHELD) {
+            ALOGV("  setting ns to %s", ES305_NS_VOICE_REC_HANDHELD_ON);
+            write(eS305_ctrl.fd[ES305_CTRL_TX_NS_LEVEL],
+                    ES305_NS_VOICE_REC_HANDHELD_ON, strlen(ES305_NS_VOICE_REC_HANDHELD_ON));
+        } else if ((eS305_ctrl.requested_preset == ES305_PRESET_ASRA_DESKTOP)
+                || (eS305_ctrl.requested_preset == ES305_PRESET_ASRA_HEADSET)) {
+            ALOGV("  setting ns to %s", ES305_NS_VOICE_REC_SINGLE_MIC_ON);
+            write(eS305_ctrl.fd[ES305_CTRL_TX_NS_LEVEL],
+                    ES305_NS_VOICE_REC_SINGLE_MIC_ON, strlen(ES305_NS_VOICE_REC_SINGLE_MIC_ON));
+        } else {
+            ALOGV("  setting ns to %s", ES305_NS_DEFAULT_ON);
+            write(eS305_ctrl.fd[ES305_CTRL_TX_NS_LEVEL],
+                    ES305_NS_DEFAULT_ON, strlen(ES305_NS_DEFAULT_ON));
+        }
     } else {
+        ALOGV("  setting ns to %s", ES305_NS_OFF);
         write(eS305_ctrl.fd[ES305_CTRL_TX_NS_LEVEL], ES305_NS_OFF, strlen(ES305_NS_OFF));
     }
     return 0;
@@ -1312,15 +1283,27 @@ int Adnc_ApplySettingsFromSessionContextInt_l(adnc_pfx_session_t * session)
                   session->createdMsk, session->activeMsk, session->ioHandle);
     int status = 0;
 
-    for (int i = 0 ; (i < PFX_ID_CNT) && (status == 0) ; i++) {
-        adnc_pfx_effect_t *pfx = &session->effects[i];
-        if ((pfx->ops->commit_eS305)             /* the effect has a commit function */
-                && (session->createdMsk & (1<<i)) /* the effect has been created */
-                && (session->activeMsk  & (1<<i)) /* the effect is active        */
-        ) {
-            ALOGV("Adnc_ApplySettingsFromSessionContextInt_l commit");
-            status = pfx->ops->commit_eS305(pfx);
-        }
+    if (session->ioHandle != eS305_ctrl.ioHandle) {
+        return status;
+    }
+
+    // NS: special case of noise suppression, always reset according to effect state
+    //     as default desirable value might differ from the preset
+    const bool ns_on = ((session->activeMsk & (1 << PFX_ID_NS)) != 0);
+    status = Adnc_SetNoiseSuppressionInt_l(ns_on /*ns_on*/);
+
+    // AEC
+    if ((session->createdMsk & (1 << PFX_ID_AEC))         /* the effect has been created */
+            && (session->activeMsk  & (1 << PFX_ID_AEC))) /* the effect is active        */
+    {
+        Adnc_SetEchoCancellationInt_l(true /*aec_on*/);
+    }
+
+    // AGC
+    if ((session->createdMsk & (1 << PFX_ID_AGC))         /* the effect has been created */
+            && (session->activeMsk  & (1 << PFX_ID_AGC))) /* the effect is active        */
+    {
+        Adnc_SetAutomaticGainControlInt_l(true /*agc_on*/);
     }
 
     return status;
