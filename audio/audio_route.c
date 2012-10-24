@@ -259,6 +259,8 @@ static int path_add_value(struct mixer_path *path,
         path->setting[path_index].ctl = mixer_value->ctl;
         path->setting[path_index].num_values = num_values;
         path->setting[path_index].value = malloc(num_values * sizeof(int));
+        path->setting[path_index].linked = true;
+        path->setting[path_index].value[0] = mixer_value->value;
     }
 
     if (mixer_value->index == -1) {
