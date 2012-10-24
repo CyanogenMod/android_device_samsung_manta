@@ -23,7 +23,9 @@
 #define ES305_ON "1"
 #define ES305_OFF "0"
 
-#define ES305_NS_ON  "6"
+#define ES305_NS_DEFAULT_ON  "4"
+#define ES305_NS_VOICE_REC_HANDHELD_ON "6"
+#define ES305_NS_VOICE_REC_SINGLE_MIC_ON "0"
 #define ES305_NS_OFF "0"
 #define ES305_AGC_ON  "1"
 #define ES305_AGC_OFF "0"
