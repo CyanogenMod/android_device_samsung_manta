@@ -133,11 +133,10 @@ bool BubbleLevelImpl::threadLoop() {
                 if (mPollCount >= BL_SENSOR_POLL_COUNT) {
                     // majority vote
                     isLevel = (mLevelCount > (BL_SENSOR_POLL_COUNT / 2));
-                    if (mState == BL_STATE_POLLING) {
-                        mState = BL_STATE_SLEEPING;
-                    } else {
-                        mState = BL_STATE_IDLE;
+                    if (mState == BL_STATE_POLLING_ONCE) {
+                        mCmd = BL_CMD_STOP_POLL;
                     }
+                    mState = BL_STATE_SLEEPING;
                 }
                 break;
             case BL_STATE_SLEEPING:
@@ -154,7 +153,7 @@ bool BubbleLevelImpl::threadLoop() {
             }
         }
 
-        if (mState == BL_STATE_SLEEPING || mState == BL_STATE_IDLE) {
+        if (mState == BL_STATE_SLEEPING) {
             Mutex::Autolock _l(mCallbackLock);
             if (mCallBack != NULL) {
                 mCallBack(isLevel, mUserData);
