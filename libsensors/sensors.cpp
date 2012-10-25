@@ -41,17 +41,6 @@
 
 #define DELAY_OUT_TIME 0x7FFFFFFF
 
-#define SENSORS_ROTATION_VECTOR  (1<<ID_RV)
-#define SENSORS_LINEAR_ACCEL     (1<<ID_LA)
-#define SENSORS_GRAVITY          (1<<ID_GR)
-#define SENSORS_GYROSCOPE        (1<<ID_GY)
-#define SENSORS_ACCELERATION     (1<<ID_A)
-#define SENSORS_MAGNETIC_FIELD   (1<<ID_M)
-#define SENSORS_ORIENTATION      (1<<ID_O)
-#define SENSORS_LIGHT            (1<<ID_L)
-#define SENSORS_PROXIMITY        (1<<ID_P)
-#define SENSORS_PRESSURE         (1<<ID_PR)
-
 #define SENSORS_ROTATION_VECTOR_HANDLE  (ID_RV)
 #define SENSORS_LINEAR_ACCEL_HANDLE     (ID_LA)
 #define SENSORS_GRAVITY_HANDLE          (ID_GR)
