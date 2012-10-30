@@ -1331,8 +1331,8 @@ int Adnc_ApplySettingsForHandleInt_l(audio_io_handle_t handle)
  */
 int Adnc_ReevaluateUsageInt_l(audio_io_handle_t handle)
 {
-    ALOGV("Adnc_ReevaluateUsageInt_l(handle=%d) requested_preset=%d",
-            handle, eS305_ctrl.requested_preset);
+    ALOGV(" Adnc_ReevaluateUsageInt_l(handle=%d) current_preset=%d requested_preset=%d",
+            handle, eS305_ctrl.current_preset, eS305_ctrl.requested_preset);
     int status = 0;
     if ((eS305_ctrl.requested_preset == ES305_PRESET_OFF) || (handle == ES305_IO_HANDLE_NONE)) {
         status = Adnc_SleepInt_l();
@@ -1361,25 +1361,53 @@ int Adnc_ReevaluateUsageInt_l(audio_io_handle_t handle)
 //-------------------------------------------------------
 int eS305_UsePreset(int preset)
 {
-    ALOGV("eS305_UsePreset(%d)", preset);
+    ALOGV("eS305_UsePreset(%d) current=%d handle=%d",
+            preset, eS305_ctrl.current_preset, eS305_ctrl.ioHandle);
+
+    int status = 0;
 
     pthread_mutex_lock(&sAdncBundleLock);
 
     //if (preset != -1) { AdncBundle_logv_dumpSessions(); }
 
+    // allow preset transition from any preset to any other during recording,
+    //    except from one ASRA preset to another
+    if (eS305_ctrl.ioHandle != ES305_IO_HANDLE_NONE) {
+        switch(eS305_ctrl.current_preset) {
+        case ES305_PRESET_ASRA_HANDHELD:
+        case ES305_PRESET_ASRA_DESKTOP:
+        case ES305_PRESET_ASRA_HEADSET:
+            switch(preset) {
+            case ES305_PRESET_ASRA_HANDHELD:
+            case ES305_PRESET_ASRA_DESKTOP:
+            case ES305_PRESET_ASRA_HEADSET:
+                ALOGV("  not switching from ASRA preset %d to %d during voice recognition",
+                        eS305_ctrl.current_preset, preset);
+                status = -EINVAL;
+                goto exit;
+            default:
+                // transitioning from ASRA to non-ASRA: valid
+                break;
+            }
+            break;
+        default:
+            // transitioning from non-ASRA: valid
+            break;
+        }
+    }
+
     eS305_ctrl.requested_preset = preset;
 
-    int status = AdncBundle_Init_l();
+    status = AdncBundle_Init_l();
     if (status != 0) {
         ALOGE(" error applying preset, bundle failed to initialize");
-        pthread_mutex_unlock(&sAdncBundleLock);
-        return status;
+        goto exit;
     }
 
     status = Adnc_ReevaluateUsageInt_l(eS305_ctrl.ioHandle);
 
+exit:
     pthread_mutex_unlock(&sAdncBundleLock);
-
     return status;
 }
 
