@@ -17,7 +17,7 @@
 #ifndef _BDROID_BUILDCFG_H
 #define _BDROID_BUILDCFG_H
 
-#define BTM_DEF_LOCAL_NAME "Manta"
+#define BTM_DEF_LOCAL_NAME "Nexus 10"
 
 // Networking, Capturing, Object Transfer
 // MAJOR CLASS: COMPUTER
