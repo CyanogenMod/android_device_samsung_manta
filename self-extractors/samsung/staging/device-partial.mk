@@ -17,8 +17,6 @@ PRODUCT_PACKAGES := \
     fimc_is_fw \
     fimc_is_fw2 \
     maxtouch \
-    maxtouch_hv \
-    maxtouch_nv \
     mfc_fw \
     setfile \
     setfile_4e5 \
