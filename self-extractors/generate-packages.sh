@@ -19,12 +19,13 @@
 # 474128 = JOO86
 # 476441 = JOO87B
 # 483070 = JOP01
+# 521994 = JOP32B
 # end jb-mr1-dev
 BRANCH=jb-mr1-dev
 if test $BRANCH=jb-mr1-dev
 then
-  ZIP=mantaray-ota-483070.zip
-  BUILD=jop01
+  ZIP=mantaray-ota-521994.zip
+  BUILD=jop32b
 fi # jb-dev
 ROOTDEVICE=manta
 DEVICE=manta
@@ -55,8 +56,6 @@ do
             system/vendor/firmware/fimc_is_fw.bin \
             system/vendor/firmware/fimc_is_fw2.bin \
             system/vendor/firmware/maxtouch.fw \
-            system/vendor/firmware/maxtouch_hv.fw \
-            system/vendor/firmware/maxtouch_nv.fw \
             system/vendor/firmware/mfc_fw.bin \
             system/vendor/firmware/setfile.bin \
             system/vendor/firmware/setfile_4e5.bin \

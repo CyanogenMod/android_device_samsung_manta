@@ -47,26 +47,6 @@ LOCAL_MODULE_OWNER := samsung
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := maxtouch_hv
-LOCAL_SRC_FILES := maxtouch_hv.fw
-LOCAL_MODULE_SUFFIX := .fw
-LOCAL_MODULE_CLASS := ETC
-LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR)/firmware
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_OWNER := samsung
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := maxtouch_nv
-LOCAL_SRC_FILES := maxtouch_nv.fw
-LOCAL_MODULE_SUFFIX := .fw
-LOCAL_MODULE_CLASS := ETC
-LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR)/firmware
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_OWNER := samsung
-include $(BUILD_PREBUILT)
-
-include $(CLEAR_VARS)
 LOCAL_MODULE := mfc_fw
 LOCAL_SRC_FILES := mfc_fw.bin
 LOCAL_MODULE_SUFFIX := .bin
