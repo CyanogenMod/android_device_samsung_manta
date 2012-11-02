@@ -33,6 +33,8 @@ public:
     BubbleLevelImpl();
     virtual ~BubbleLevelImpl();
 
+    int initStatus() const { return mInitStatus; }
+
     // BubbleLevel interface
     int setCallback(BubbleLevel_CallBack_t callback, void *userData);
     int setPollInterval(unsigned int seconds);
@@ -70,6 +72,8 @@ private:
         BL_CMD_EXIT,
     };
 
+    int init();
+
     Mutex  mStateLock;
     Mutex  mCallbackLock;
     Condition mCond;
@@ -86,7 +90,7 @@ private:
     Sensor const* mAccelerometer;
     sp<SensorEventQueue> mSensorEventQueue;
     sp<Looper> mLooper;
-
+    int mInitStatus;
 };
 
 };
@@ -96,6 +100,10 @@ class BubbleLevelBase: public BubbleLevel
 public:
     BubbleLevelBase() { mBubbleLevel = new android::BubbleLevelImpl(); }
     virtual ~BubbleLevelBase() {}
+
+    int initStatus() {
+        return mBubbleLevel->initStatus();
+    }
 
     // BubbleLevel interface
     virtual int setCallback(BubbleLevel_CallBack_t callback, void *userData) {
@@ -119,7 +127,13 @@ private:
 };
 
 BubbleLevel *BubbleLevel::create() {
-    return static_cast<BubbleLevel *>(new BubbleLevelBase());
+    BubbleLevelBase *bl = new BubbleLevelBase();
+
+    if (bl->initStatus() != 0) {
+        delete bl;
+        bl = NULL;
+    }
+    return static_cast<BubbleLevel *>(bl);
 }
 
 struct bubble_level_C_impl
