@@ -20,7 +20,7 @@ LOCAL_MODULE := libbubblelevel
 LOCAL_SRC_FILES := \
 	BubbleLevelImpl.cpp
 
-LOCAL_SHARED_LIBRARIES := liblog libutils libgui
+LOCAL_SHARED_LIBRARIES := liblog libutils libgui libbinder
 LOCAL_MODULE_TAGS := optional
 
 include $(BUILD_SHARED_LIBRARY)
