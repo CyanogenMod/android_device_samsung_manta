@@ -18,13 +18,14 @@
 # 474128 = JOO86
 # 521994 = JOP32B
 # 526897 = JOP39B
+# 527221 = JOP40
 # end jb-mr1-dev
 
 source ../../../common/clear-factory-images-variables.sh
-BUILD=526897
+BUILD=527221
 DEVICE=manta
 PRODUCT=mantaray
-VERSION=jop39b
+VERSION=jop40
 SRCPREFIX=signed-
 BOOTLOADER=mantalj12
 source ../../../common/generate-factory-images-common.sh
