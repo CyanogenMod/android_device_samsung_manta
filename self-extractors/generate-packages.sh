@@ -22,12 +22,13 @@
 # 521994 = JOP32B
 # 524024 = JOP36
 # 526897 = JOP39B
+# 527662 = JOP40C
 # end jb-mr1-dev
 BRANCH=jb-mr1-dev
 if test $BRANCH=jb-mr1-dev
 then
-  ZIP=mantaray-ota-526897.zip
-  BUILD=jop39b
+  ZIP=mantaray-ota-527662.zip
+  BUILD=jop40c
 fi # jb-mr1-dev
 ROOTDEVICE=manta
 DEVICE=manta
