@@ -179,4 +179,5 @@
          true forces it to use the/dev/input/event subsystem. -->
     <bool name="config_useDevInputEventForAudioJack">true</bool>
 
+    <bool name="config_enableWifiDisplay">true</bool>
 </resources>
