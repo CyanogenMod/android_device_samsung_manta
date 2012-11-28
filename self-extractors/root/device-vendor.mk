@@ -17,4 +17,3 @@ LOCAL_STEM := manta/device-partial.mk
 $(call inherit-product-if-exists, vendor/audience/$(LOCAL_STEM))
 $(call inherit-product-if-exists, vendor/broadcom/$(LOCAL_STEM))
 $(call inherit-product-if-exists, vendor/samsung/$(LOCAL_STEM))
-$(call inherit-product-if-exists, vendor/samsung_arm/$(LOCAL_STEM))

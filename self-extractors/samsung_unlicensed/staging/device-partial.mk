@@ -12,12 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Samsung/ARM blob(s) necessary for Manta hardware
+# Samsung blob(s) necessary for Manta hardware
 PRODUCT_PACKAGES := \
-    libGLES_mali \
+    fimc_is_fw \
+    maxtouch \
+    setfile \
     libbccArm.sha1.so \
     libbccArm.so \
     libbcinfoArm.so \
     libclcoreArm.bc \
     libclcore_neonArm.bc \
-    libRSDriverArm.so
+    libdrmdecrypt \
+    libRSDriverArm.so \
+    00060308060501020000000000000000 \
+    020a0000000000000000000000000000 \
+    07060000000000000000000000000000
