@@ -24,11 +24,11 @@
 # end jb-mr1-dev
 
 source ../../../common/clear-factory-images-variables.sh
-BUILD=533553
+BUILD=527662
 DEVICE=manta
 PRODUCT=mantaray
-VERSION=jop40d
-SRCPREFIX=signed-
+VERSION=jop40c
+SRCPREFIX=FIX-signed-
 BOOTLOADER=mantalj12
 ERASEALL=true
 source ../../../common/generate-factory-images-common.sh
