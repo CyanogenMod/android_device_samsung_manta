@@ -149,8 +149,7 @@ PRODUCT_PACKAGES += \
     audio.primary.manta \
     audio.a2dp.default \
     audio.usb.default \
-    libbubblelevel \
-    audio.r_submix.default
+    libbubblelevel
 
 PRODUCT_PACKAGES += \
     power.manta
