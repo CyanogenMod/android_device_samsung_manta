@@ -28,7 +28,7 @@ static int sensor_callback(int fd, int events, void* data);
 #define BL_SENSOR_POLL_INTERVAL_MS 20
 #define BL_SENSOR_POLL_TIMEOUT_MS (BL_SENSOR_POLL_INTERVAL_MS * 5)
 #define BL_SENSOR_POLL_COUNT 10
-
+#define BL_SENSOR_LEVEL_THRESHOLD (2.0)
 
 BubbleLevelImpl::BubbleLevelImpl()
     : Thread(false),
@@ -278,10 +278,10 @@ static int sensor_callback(int fd, int events, void* data)
                       sensorEvents[i].vector.roll);
 
                 if ((sensorEvents[i].vector.roll > 0.0) &&
-                        (sensorEvents[i].vector.azimuth < 1.0) &&
-                        (sensorEvents[i].vector.azimuth > -1.0) &&
-                        (sensorEvents[i].vector.pitch < 1.0) &&
-                        (sensorEvents[i].vector.pitch > -1.0)) {
+                        (sensorEvents[i].vector.azimuth < BL_SENSOR_LEVEL_THRESHOLD) &&
+                        (sensorEvents[i].vector.azimuth > -BL_SENSOR_LEVEL_THRESHOLD) &&
+                        (sensorEvents[i].vector.pitch < BL_SENSOR_LEVEL_THRESHOLD) &&
+                        (sensorEvents[i].vector.pitch > -BL_SENSOR_LEVEL_THRESHOLD)) {
                     isLevel = true;
                 }
                 break;
