@@ -32,6 +32,10 @@ TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
 ARCH_ARM_HAVE_TLS_REGISTER := true
 
+# Define kernel config for inline building
+TARGET_KERNEL_CONFIG := cyanogenmod_manta_defconfig
+TARGET_KERNEL_SOURCE := kernel/samsung/manta
+
 #Bluetooth
 BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
@@ -81,3 +85,6 @@ TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_RECOVERY_UI_LIB := librecovery_ui_manta
 TARGET_RECOVERY_UPDATER_LIBS += librecovery_updater_manta
 TARGET_RELEASETOOLS_EXTENSIONS := device/samsung/manta
+
+
+BOARD_HAS_NO_SELECT_BUTTON := true
