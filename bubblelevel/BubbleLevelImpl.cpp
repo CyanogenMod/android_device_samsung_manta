@@ -18,6 +18,7 @@
 //#define LOG_NDEBUG 0
 
 #include <utils/Log.h>
+#include <binder/IServiceManager.h>
 #include "BubbleLevelImpl.h"
 
 namespace android {
@@ -34,9 +35,23 @@ BubbleLevelImpl::BubbleLevelImpl()
       mState(BL_STATE_IDLE), mCmd(BL_CMD_NONE),
       mPollIntervalSec(BL_POLL_INTERVAL_DEFAULT_SEC), mPollCount(0), mLevelCount(0),
       mCallBack(NULL), mUserData(NULL),
-      mNumSensors(0), mAccelerometer(NULL)
-
+      mNumSensors(0), mAccelerometer(NULL),
+      mInitStatus(-ENODEV)
 {
+    init();
+}
+
+int BubbleLevelImpl::init()
+{
+    if (mInitStatus == 0) {
+        return 0;
+    }
+
+    if (defaultServiceManager()->checkService(String16("sensorservice")) == 0) {
+        ALOGW("CSTOR sensorservice not ready yet");
+        return mInitStatus;
+    }
+
     SensorManager& mgr(SensorManager::getInstance());
     Sensor const* const* sensorList;
 
@@ -44,22 +59,27 @@ BubbleLevelImpl::BubbleLevelImpl()
 
     if (mNumSensors <= 0) {
         ALOGE("CSTOR mNumSensors error %d", mNumSensors);
-        return;
+        goto exit;
     }
     mAccelerometer = mgr.getDefaultSensor(Sensor::TYPE_ACCELEROMETER);
     if (mAccelerometer == NULL) {
         ALOGE("CSTOR mAccelerometer error NULL");
-        return;
+        goto exit;
     }
 
     mSensorEventQueue = mgr.createEventQueue();
-    if (mSensorEventQueue == NULL) {
-        ALOGE("createEventQueue returned NULL");
-        return;
+    if (mSensorEventQueue == 0) {
+        ALOGE("createEventQueue returned 0");
+        goto exit;
     }
 
     mLooper = new Looper(false);
     mLooper->addFd(mSensorEventQueue->getFd(), 0, ALOOPER_EVENT_INPUT, sensor_callback, this);
+
+    mInitStatus = 0;
+
+exit:
+    return mInitStatus;
 }
 
 BubbleLevelImpl::~BubbleLevelImpl()
@@ -75,7 +95,9 @@ BubbleLevelImpl::~BubbleLevelImpl()
 
 void BubbleLevelImpl::onFirstRef()
 {
-    run("Acc Loop", ANDROID_PRIORITY_URGENT_AUDIO);
+    if (mInitStatus == 0) {
+        run("Acc Loop", ANDROID_PRIORITY_URGENT_AUDIO);
+    }
 }
 
 bool BubbleLevelImpl::threadLoop() {
@@ -169,6 +191,9 @@ bool BubbleLevelImpl::threadLoop() {
 int BubbleLevelImpl::setCallback(BubbleLevel_CallBack_t callback, void *userData)
 {
     Mutex::Autolock _l(mCallbackLock);
+    if (mInitStatus != 0) {
+        return mInitStatus;
+    }
     mCallBack = callback;
     mUserData = userData;
     return 0;
@@ -181,12 +206,18 @@ int BubbleLevelImpl::setPollInterval(unsigned int seconds)
     }
 
     Mutex::Autolock _l(mStateLock);
+    if (mInitStatus != 0) {
+        return mInitStatus;
+    }
     mPollIntervalSec = seconds;
     return 0;
 }
 int BubbleLevelImpl::startPolling()
 {
     Mutex::Autolock _l(mStateLock);
+    if (mInitStatus != 0) {
+        return mInitStatus;
+    }
     if (mCmd != BL_CMD_EXIT) {
         mCmd = BL_CMD_START_POLL;
         mCond.signal();
@@ -197,6 +228,9 @@ int BubbleLevelImpl::startPolling()
 int BubbleLevelImpl::stopPolling()
 {
     Mutex::Autolock _l(mStateLock);
+    if (mInitStatus != 0) {
+        return mInitStatus;
+    }
     if (mCmd != BL_CMD_EXIT) {
         mCmd = BL_CMD_STOP_POLL;
         mCond.signal();
@@ -207,6 +241,9 @@ int BubbleLevelImpl::stopPolling()
 int BubbleLevelImpl::pollOnce()
 {
     Mutex::Autolock _l(mStateLock);
+    if (mInitStatus != 0) {
+        return mInitStatus;
+    }
     if (mCmd != BL_CMD_EXIT) {
         mCmd = BL_CMD_POLL_ONCE;
         mCond.signal();
@@ -302,18 +339,25 @@ struct bubble_level *bubble_level_create()
 {
     bubble_level_C_impl *bl = new bubble_level_C_impl();
     bl->bubble_level = new android::BubbleLevelImpl();
+    if (bl->bubble_level->initStatus() != 0) {
+        bubble_level_release((struct bubble_level *)bl);
+        return NULL;
+    }
     bl->interface.set_callback = bl_set_callback;
     bl->interface.set_poll_interval = bl_set_poll_interval;
     bl->interface.start_polling = bl_start_polling;
     bl->interface.stop_polling = bl_stop_polling;
     bl->interface.poll_once = bl_poll_once;
 
-    return (bubble_level *)bl;
+    return (struct bubble_level *)bl;
 }
 
 void bubble_level_release(const struct bubble_level *bubble_level)
 {
     bubble_level_C_impl *bl = (bubble_level_C_impl *)bubble_level;
+
+    if (bl == NULL)
+        return;
 
     bl->bubble_level.clear();
     delete bubble_level;

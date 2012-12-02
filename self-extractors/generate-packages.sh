@@ -19,18 +19,22 @@
 # 474128 = JOO86
 # 476441 = JOO87B
 # 483070 = JOP01
+# 521994 = JOP32B
+# 524024 = JOP36
+# 526897 = JOP39B
+# 527662 = JOP40C
 # end jb-mr1-dev
 BRANCH=jb-mr1-dev
 if test $BRANCH=jb-mr1-dev
 then
-  ZIP=mantaray-ota-483070.zip
-  BUILD=jop01
-fi # jb-dev
+  ZIP=mantaray-ota-527662.zip
+  BUILD=jop40c
+fi # jb-mr1-dev
 ROOTDEVICE=manta
 DEVICE=manta
 MANUFACTURER=samsung
 
-for COMPANY in audience broadcom samsung samsung_arm
+for COMPANY in audience broadcom samsung
 do
   echo Processing files from $COMPANY
   rm -rf tmp
@@ -52,30 +56,28 @@ do
     ;;
   samsung)
     TO_EXTRACT="\
-            system/vendor/firmware/fimc_is_fw.bin \
             system/vendor/firmware/fimc_is_fw2.bin \
-            system/vendor/firmware/maxtouch.fw \
-            system/vendor/firmware/maxtouch_hv.fw \
-            system/vendor/firmware/maxtouch_nv.fw \
             system/vendor/firmware/mfc_fw.bin \
-            system/vendor/firmware/setfile.bin \
             system/vendor/firmware/setfile_4e5.bin \
             system/vendor/firmware/setfile_6a3.bin \
-            system/vendor/lib/libdrmdecrypt.so \
-            system/vendor/secapp/00060308060501020000000000000000.tlbin \
-            system/vendor/secapp/020a0000000000000000000000000000.drbin \
-            system/vendor/secapp/07060000000000000000000000000000.tlbin \
+            system/vendor/lib/egl/libGLES_mali.so \
             "
     ;;
-  samsung_arm)
+  samsung_unlicensed)
     TO_EXTRACT="\
-            system/vendor/lib/egl/libGLES_mali.so \
+            system/vendor/firmware/fimc_is_fw.bin \
+            system/vendor/firmware/maxtouch.fw \
+            system/vendor/firmware/setfile.bin \
             system/vendor/lib/libbccArm.sha1.so \
             system/vendor/lib/libbccArm.so \
             system/vendor/lib/libbcinfoArm.so \
             system/vendor/lib/libclcoreArm.bc \
             system/vendor/lib/libclcore_neonArm.bc \
+            system/vendor/lib/libdrmdecrypt.so \
             system/vendor/lib/libRSDriverArm.so \
+            system/vendor/secapp/00060308060501020000000000000000.tlbin \
+            system/vendor/secapp/020a0000000000000000000000000000.drbin \
+            system/vendor/secapp/07060000000000000000000000000000.tlbin \
             "
     ;;
   esac
