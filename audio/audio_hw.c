@@ -583,6 +583,17 @@ void bubblelevel_callback(bool is_level, void *user_data)
     pthread_mutex_unlock(&adev->lock);
 }
 
+/* must be called with hw device mutex locked */
+bool get_bubblelevel(struct audio_device *adev)
+{
+    if (!adev->bubble_level) {
+        adev->bubble_level = bubble_level_create();
+        if (adev->bubble_level)
+            adev->bubble_level->set_callback(adev->bubble_level, bubblelevel_callback, adev);
+    }
+    return (adev->bubble_level != NULL);
+}
+
 static void force_non_hdmi_out_standby(struct audio_device *adev)
 {
     enum output_type type;
@@ -650,7 +661,8 @@ static int start_output_stream(struct stream_out *out)
         set_hdmi_channels(adev, out->config.channels);
 
     /* anticipate level measurement in case we start capture later */
-    adev->bubble_level->poll_once(adev->bubble_level);
+    if (get_bubblelevel(adev))
+        adev->bubble_level->poll_once(adev->bubble_level);
 
     return 0;
 }
@@ -684,8 +696,10 @@ static int start_input_stream(struct stream_in *in)
     in->ramp_step = (uint16_t)(USHRT_MAX / in->ramp_frames);
     in->ramp_vol = 0;;
 
-    adev->bubble_level->set_poll_interval(adev->bubble_level, BL_POLL_INTERVAL_MIN_SEC);
-    adev->bubble_level->start_polling(adev->bubble_level);
+    if (get_bubblelevel(adev)) {
+        adev->bubble_level->set_poll_interval(adev->bubble_level, BL_POLL_INTERVAL_MIN_SEC);
+        adev->bubble_level->start_polling(adev->bubble_level);
+    }
 
     return 0;
 }
@@ -1204,7 +1218,8 @@ static int in_standby(struct audio_stream *stream)
         select_devices(in->dev);
         in->standby = true;
 
-        in->dev->bubble_level->stop_polling(in->dev->bubble_level);
+        if (get_bubblelevel(in->dev))
+            in->dev->bubble_level->stop_polling(in->dev->bubble_level);
     }
 
     eS305_SetActiveIoHandle(ES305_IO_HANDLE_NONE);
@@ -1686,7 +1701,8 @@ static int adev_close(hw_device_t *device)
     if (adev->hdmi_drv_fd >= 0)
         close(adev->hdmi_drv_fd);
 
-    bubble_level_release(adev->bubble_level);
+    if (adev->bubble_level)
+        bubble_level_release(adev->bubble_level);
 
     free(device);
     return 0;
@@ -1735,9 +1751,6 @@ static int adev_open(const hw_module_t* module, const char* name,
     adev->es305_mode = ES305_MODE_LEVEL;
     adev->hdmi_drv_fd = -1;
     *device = &adev->hw_device.common;
-
-    adev->bubble_level = bubble_level_create();
-    adev->bubble_level->set_callback(adev->bubble_level, bubblelevel_callback, adev);
 
     return 0;
 }
