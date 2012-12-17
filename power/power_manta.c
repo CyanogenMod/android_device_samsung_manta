@@ -115,6 +115,8 @@ static void power_init(struct power_module *module)
                 "90");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay",
                 "140000");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/boostpulse_duration",
+                "500000");
 
     init_touchscreen_power_path(manta);
 }
