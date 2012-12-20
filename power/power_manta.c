@@ -100,21 +100,20 @@ static void power_init(struct power_module *module)
     struct manta_power_module *manta = (struct manta_power_module *) module;
     struct dirent **namelist;
     int n;
-    /*
-     * cpufreq interactive governor: timer 20ms, min sample 40ms,
-     * hispeed 1G at load 90%, 140ms load burst needed to move above hispeed.
-     */
 
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/timer_rate",
+                "20000");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/timer_slack",
                 "20000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/min_sample_time",
                 "40000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/hispeed_freq",
                 "1000000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load",
-                "90");
+                "99");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/target_loads", "85 1000000:90 1100000:92 1200000:94 1300000:96 1400000:98 1500000:99");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay",
-                "140000");
+                "100000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/boostpulse_duration",
                 "500000");
 
