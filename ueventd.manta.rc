@@ -106,3 +106,6 @@
 
 # secure mem driver
 /dev/s5p-smem             0660   drm        drmrpc
+
+# G2D
+/dev/fimg2d               0660   media      media
