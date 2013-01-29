@@ -39,10 +39,9 @@
 #include <tinyalsa/asoundlib.h>
 
 #include <audio_utils/resampler.h>
+#include <audio_route/audio_route.h>
 
 #include <BubbleLevel.h>
-
-#include "audio_route.h"
 
 #include <eS305VoiceProcessing.h>
 
@@ -54,6 +53,8 @@
 #define PCM_DEVICE_DEEP 1
 #define PCM_DEVICE_VOICE 2
 #define PCM_DEVICE_SCO 3
+
+#define MIXER_CARD 0
 
 /* duration in ms of volume ramp applied when starting capture to remove plop */
 #define CAPTURE_START_RAMP_MS 100
@@ -500,7 +501,7 @@ static void select_devices(struct audio_device *adev)
     int new_route_id;
     int new_es305_preset = -1;
 
-    reset_mixer_state(adev->ar);
+    audio_route_reset(adev->ar);
 
     enable_hdmi_audio(adev, adev->out_device & AUDIO_DEVICE_OUT_AUX_DIGITAL);
 
@@ -561,7 +562,7 @@ static void select_devices(struct audio_device *adev)
         }
     }
 
-    update_mixer_state(adev->ar);
+    audio_route_update_mixer(adev->ar);
 }
 
 void bubblelevel_callback(bool is_level, void *user_data)
@@ -1741,7 +1742,7 @@ static int adev_open(const hw_module_t* module, const char* name,
     adev->hw_device.close_input_stream = adev_close_input_stream;
     adev->hw_device.dump = adev_dump;
 
-    adev->ar = audio_route_init();
+    adev->ar = audio_route_init(MIXER_CARD, NULL);
     adev->input_source = AUDIO_SOURCE_DEFAULT;
     /* adev->cur_route_id initial value is 0 and such that first device
      * selection is always applied by select_devices() */
