@@ -138,6 +138,7 @@ struct audio_device {
     int es305_mode;
     int hdmi_drv_fd;
     struct bubble_level *bubble_level;
+    audio_channel_mask_t in_channel_mask;
 
     struct stream_out *outputs[OUTPUT_TOTAL];
 };
@@ -181,6 +182,7 @@ struct stream_in {
     uint16_t ramp_vol;
     uint16_t ramp_step;
     size_t  ramp_frames;
+    audio_channel_mask_t channel_mask;
 
     struct audio_device *dev;
 };
@@ -536,6 +538,10 @@ static void select_devices(struct audio_device *adev)
             new_es305_preset =
                 route_configs[input_source_id][output_device_id]->es305_preset[adev->es305_mode];
         }
+        // disable noise suppression when capturing front and back mic for voice recognition
+        if ((adev->input_source == AUDIO_SOURCE_VOICE_RECOGNITION) &&
+                (adev->in_channel_mask != AUDIO_CHANNEL_IN_FRONT_BACK))
+            new_es305_preset = -1;
     } else {
         if (output_device_id != OUT_DEVICE_NONE) {
             output_route =
@@ -812,13 +818,15 @@ static int get_next_buffer(struct resampler_buffer_provider *buffer_provider,
         in->frames_in = pcm_config_in.period_size;
 
         /* Do stereo to mono conversion in place by discarding right channel */
-        for (i = 1; i < in->frames_in; i++)
-            in->buffer[i] = in->buffer[i * 2];
+        if (in->channel_mask == AUDIO_CHANNEL_IN_MONO)
+            for (i = 1; i < in->frames_in; i++)
+                in->buffer[i] = in->buffer[i * 2];
     }
 
     buffer->frame_count = (buffer->frame_count > in->frames_in) ?
                                 in->frames_in : buffer->frame_count;
-    buffer->i16 = in->buffer + (pcm_config_in.period_size - in->frames_in);
+    buffer->i16 = in->buffer +
+            (pcm_config_in.period_size - in->frames_in) * popcount(in->channel_mask);
 
     return in->read_status;
 
@@ -1181,7 +1189,9 @@ static int in_set_sample_rate(struct audio_stream *stream, uint32_t rate)
 
 static audio_channel_mask_t in_get_channels(const struct audio_stream *stream)
 {
-    return AUDIO_CHANNEL_IN_MONO;
+    struct stream_in *in = (struct stream_in *)stream;
+
+    return in->channel_mask;
 }
 
 
@@ -1304,11 +1314,20 @@ static void in_apply_ramp(struct stream_in *in, int16_t *buffer, size_t frames)
 
     frames = (frames < in->ramp_frames) ? frames : in->ramp_frames;
 
-    for (i = 0; i < frames; i++)
-    {
-        buffer[i] = (int16_t)((buffer[i] * vol) >> 16);
-        vol += step;
-    }
+    if (in->channel_mask == AUDIO_CHANNEL_IN_MONO)
+        for (i = 0; i < frames; i++)
+        {
+            buffer[i] = (int16_t)((buffer[i] * vol) >> 16);
+            vol += step;
+        }
+    else
+        for (i = 0; i < frames; i++)
+        {
+            buffer[2*i] = (int16_t)((buffer[2*i] * vol) >> 16);
+            buffer[2*i + 1] = (int16_t)((buffer[2*i + 1] * vol) >> 16);
+            vol += step;
+        }
+
 
     in->ramp_vol = vol;
     in->ramp_frames -= frames;
@@ -1606,7 +1625,8 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     *stream_in = NULL;
 
     /* Respond with a request for mono if a different format is given. */
-    if (config->channel_mask != AUDIO_CHANNEL_IN_MONO) {
+    if (config->channel_mask != AUDIO_CHANNEL_IN_MONO &&
+            config->channel_mask != AUDIO_CHANNEL_IN_FRONT_BACK) {
         config->channel_mask = AUDIO_CHANNEL_IN_MONO;
         return -EINVAL;
     }
@@ -1637,6 +1657,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
     in->input_source = AUDIO_SOURCE_DEFAULT;
     in->device = devices;
     in->io_handle = handle;
+    in->channel_mask = config->channel_mask;
 
     in->buffer = malloc(pcm_config_in.period_size * pcm_config_in.channels
                                                * audio_stream_frame_size(&in->stream.common));
@@ -1652,7 +1673,7 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
 
         ret = create_resampler(pcm_config_in.rate,
                                in->requested_rate,
-                               1,
+                               popcount(in->channel_mask),
                                RESAMPLER_QUALITY_DEFAULT,
                                &in->buf_provider,
                                &in->resampler);
