@@ -111,7 +111,7 @@ static void power_init(struct power_module *module)
                 "1000000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/go_hispeed_load",
                 "99");
-    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/target_loads", "70 1000000:75 1100000:75 1200000:80 1300000:90 1400000:96 1500000:99");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/target_loads", "70 1000000:75 1100000:80 1200000:90 1300000:96 1400000:98 1500000:99");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/above_hispeed_delay",
                 "80000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/boostpulse_duration",
