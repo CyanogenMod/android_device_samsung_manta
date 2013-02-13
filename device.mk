@@ -99,8 +99,6 @@ PRODUCT_COPY_FILES += \
 
 # NFC packages
 PRODUCT_PACKAGES += \
-    libnfc-nci \
-    libnfc_nci_jni \
     nfc_nci.manta \
     NfcNci \
     Tag \
