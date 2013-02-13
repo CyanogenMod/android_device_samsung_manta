@@ -168,6 +168,7 @@ PRODUCT_PROPERTY_OVERRIDES := \
     ro.sf.lcd_density=320 \
     ro.hwui.texture_cache_size=72 \
     ro.hwui.layer_cache_size=48 \
+    ro.hwui.r_buffer_cache_size=8 \
     ro.hwui.path_cache_size=16 \
     ro.hwui.shape_cache_size=4 \
     ro.hwui.gradient_cache_size=1 \
