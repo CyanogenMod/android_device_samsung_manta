@@ -31,6 +31,7 @@ TARGET_CPU_SMP := true
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
 ARCH_ARM_HAVE_TLS_REGISTER := true
+TARGET_ARCH_VARIANT_CPU := cortex-a15
 
 # Define kernel config for inline building
 TARGET_KERNEL_CONFIG := cyanogenmod_manta_defconfig
