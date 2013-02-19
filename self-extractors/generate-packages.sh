@@ -26,17 +26,18 @@
 # end jb-mr1-dev
 # start jb-mr1.1-dev
 # 551245 = JDP82
+# 573038 = JDQ39
 # end jb-mr1.1-dev
 BRANCH=jb-mr1.1-dev
-if test $BRANCH=jb-mr1-dev
+if test $BRANCH = jb-mr1-dev
 then
   ZIP=mantaray-ota-527662.zip
   BUILD=jop40c
 fi # jb-mr1-dev
-if test $BRANCH=jb-mr1.1-dev
+if test $BRANCH = jb-mr1.1-dev
 then
-  ZIP=mantaray-ota-551245
-  BUILD=jdp82
+  ZIP=mantaray-ota-573038
+  BUILD=jdq39
 fi # jb-mr1.1-dev
 ROOTDEVICE=manta
 DEVICE=manta
