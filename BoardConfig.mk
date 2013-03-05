@@ -90,5 +90,8 @@ TARGET_RECOVERY_UI_LIB := librecovery_ui_manta
 TARGET_RECOVERY_UPDATER_LIBS += librecovery_updater_manta
 TARGET_RELEASETOOLS_EXTENSIONS := device/samsung/manta
 
-
 BOARD_HAS_NO_SELECT_BUTTON := true
+
+# Support WebGL in WebKit
+ENABLE_WEBGL := true
+
