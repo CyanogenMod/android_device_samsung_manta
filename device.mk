@@ -84,12 +84,6 @@ PRODUCT_PACKAGES += libaudience_voicefx
 PRODUCT_COPY_FILES += \
     device/samsung/manta/audio_effects.conf:system/etc/audio_effects.conf
 
-# for bugmailer
-PRODUCT_PACKAGES := send_bug
-PRODUCT_COPY_FILES += \
-    system/extras/bugmailer/bugmailer.sh:system/bin/bugmailer.sh \
-    system/extras/bugmailer/send_bug:system/bin/send_bug
-
 # BCM47511 GPS
 PRODUCT_COPY_FILES += \
     device/samsung/manta/gps/gps.conf:system/etc/gps.conf \
