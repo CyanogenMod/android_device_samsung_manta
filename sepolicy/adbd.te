@@ -1,0 +1,1 @@
+allow adbd ffs:file rw_file_perms;
