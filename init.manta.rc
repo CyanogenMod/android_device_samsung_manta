@@ -34,6 +34,8 @@ on post-fs-data
 	chmod 0660 /sys/class/rfkill/rfkill0/state
 	chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
 	chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
+	restorecon /sys/class/rfkill/rfkill0/state
+	restorecon /sys/class/rfkill/rfkill0/type
 
 on boot
     # override init.rc to keep plenty of large order chunks around
@@ -60,6 +62,25 @@ on fs
     mkdir /factory 0775 radio radio
 
     mount_all /fstab.manta
+    mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory rw remount
+    restorecon /factory
+    restorecon /factory/bluetooth
+    restorecon /factory/bluetooth/bt_addr
+    restorecon /factory/FactoryApp
+    restorecon /factory/FactoryApp/
+    restorecon /factory/FactoryApp/baro_delta
+    restorecon /factory/FactoryApp/factorymode
+    restorecon /factory/FactoryApp/fdata
+    restorecon /factory/FactoryApp/hist_nv
+    restorecon /factory/FactoryApp/hw_ver
+    restorecon /factory/FactoryApp/keystr
+    restorecon /factory/FactoryApp/reset_flag
+    restorecon /factory/FactoryApp/test_nv
+    restorecon /factory/hdcp2.keys
+    restorecon /factory/wv.keys
+    restorecon /factory/wifi
+    restorecon /factory/wifi/
+    mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory ro remount
     setprop ro.crypto.fuse_sdcard true
 
 # Permissions for backlight
@@ -173,6 +194,7 @@ service battery_charger /charger
 # Set watchdog timer to 30 seconds and pet it every 10 seconds to get a 20 second margin
 service watchdogd /sbin/watchdogd 10 20
     class core
+    seclabel u:r:watchdogd:s0
 
 service gpsd /system/vendor/bin/gpsd -c /system/vendor/etc/gps.xml
     class main
