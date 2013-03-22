@@ -34,12 +34,12 @@ PRODUCT_PROPERTY_OVERRIDES := \
         net.dns2=8.8.4.4
 
 # Inherit from those products. Most specific first.
-$(call inherit-product, $(SRC_TARGET_DIR)/product/full_base.mk)
+$(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
 $(call inherit-product, device/samsung/manta/device.mk)
 
 PRODUCT_NAME := full_manta
 PRODUCT_DEVICE := manta
 PRODUCT_BRAND := Android
-PRODUCT_MODEL := Full AOSP on Manta
+PRODUCT_MODEL := AOSP on Manta
 PRODUCT_MANUFACTURER := Samsung
 PRODUCT_RESTRICT_VENDOR_FILES := owner path
