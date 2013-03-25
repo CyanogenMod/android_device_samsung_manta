@@ -116,6 +116,7 @@ static void power_init(struct power_module *module)
                 "80000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/boostpulse_duration",
                 "500000");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/io_is_busy", "1");
 
     init_touchscreen_power_path(manta);
 }
