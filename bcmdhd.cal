@@ -8,6 +8,7 @@ macaddr=00:90:4c:c5:12:38
 sromrev=9
 xtalfreq=37400
 nocrc=1
+disable_spuravoid=1
 ag0=0x2
 ag1=0x2
 ag2=0xff
