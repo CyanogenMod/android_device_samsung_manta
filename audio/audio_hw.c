@@ -159,6 +159,7 @@ struct stream_out {
     audio_channel_mask_t channel_mask;
     /* Array of supported channel mask configurations. +1 so that the last entry is always 0 */
     audio_channel_mask_t supported_channel_masks[MAX_SUPPORTED_CHANNEL_MASKS + 1];
+    bool muted;
 
     struct audio_device *dev;
 };
@@ -1101,6 +1102,14 @@ static uint32_t out_get_latency(const struct audio_stream_out *stream)
 static int out_set_volume(struct audio_stream_out *stream, float left,
                           float right)
 {
+    struct stream_out *out = (struct stream_out *)stream;
+    struct audio_device *adev = out->dev;
+
+    if (out == adev->outputs[OUTPUT_HDMI]) {
+        /* only take left channel into account: the API is for stereo anyway */
+        out->muted = (left == 0.0f);
+        return 0;
+    }
     return -ENOSYS;
 }
 
@@ -1134,6 +1143,9 @@ static ssize_t out_write(struct audio_stream_out *stream, const void* buffer,
         ret = -EPIPE;
         goto exit;
     }
+
+    if (out->muted)
+        memset((void *)buffer, 0, bytes);
 
     /* Write to all active PCMs */
     for (i = 0; i < PCM_TOTAL; i++)
@@ -1503,6 +1515,7 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
     config->sample_rate = out_get_sample_rate(&out->stream.common);
 
     out->standby = true;
+    /* out->muted = false; by calloc() */
 
     pthread_mutex_lock(&adev->lock);
     if (adev->outputs[type]) {
