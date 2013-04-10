@@ -31,6 +31,5 @@ LOCAL_SRC_FILES:= \
 LOCAL_C_INCLUDES += \
     $(call include-path-for, audio-effects)
 LOCAL_SHARED_LIBRARIES := \
-    libutils
+    libutils liblog
 include $(BUILD_SHARED_LIBRARY)
-
