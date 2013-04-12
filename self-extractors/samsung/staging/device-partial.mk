@@ -22,7 +22,7 @@ PRODUCT_PACKAGES := \
     setfile_4e5 \
     setfile_6a3 \
     libGLES_mali \
-    libbccArm.sha1 \
+    libdrmdecrypt \
     libmalicore \
     libRSDriverArm \
     libstagefright_hdcp \
