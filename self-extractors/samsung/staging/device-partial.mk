@@ -14,8 +14,20 @@
 
 # Samsung blob(s) necessary for Manta hardware
 PRODUCT_PACKAGES := \
+    fimc_is_fw \
     fimc_is_fw2 \
+    maxtouch \
     mfc_fw \
+    setfile \
     setfile_4e5 \
     setfile_6a3 \
-    libGLES_mali
+    libGLES_mali \
+    libbccArm.sha1 \
+    libmalicore \
+    libRSDriverArm \
+    libstagefright_hdcp \
+    00060308060501020000000000000000 \
+    020a0000000000000000000000000000 \
+    07060000000000000000000000000000 \
+    ffffffff000000000000000000000005 \
+
