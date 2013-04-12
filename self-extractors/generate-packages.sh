@@ -51,7 +51,7 @@ ROOTDEVICE=manta
 DEVICE=manta
 MANUFACTURER=samsung
 
-for COMPANY in audience broadcom samsung
+for COMPANY in audience broadcom # samsung
 do
   echo Processing files from $COMPANY
   rm -rf tmp
@@ -81,7 +81,7 @@ do
             system/vendor/firmware/setfile_4e5.bin \
             system/vendor/firmware/setfile_6a3.bin \
             system/vendor/lib/egl/libGLES_mali.so \
-            system/vendor/lib/libbccArm.sha1.so \
+            system/vendor/lib/libdrmdecrypt.so \
             system/vendor/lib/libmalicore.bc \
             system/vendor/lib/libRSDriverArm.so \
             system/vendor/lib/libstagefright_hdcp.so \

@@ -97,13 +97,13 @@ LOCAL_MODULE_OWNER := samsung_arm
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := libbccArm.sha1
-LOCAL_SRC_FILES := libbccArm.sha1.so
+LOCAL_MODULE := libdrmdecrypt
+LOCAL_SRC_FILES := libdrmdecrypt.so
 LOCAL_MODULE_SUFFIX := .so
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_PATH := $(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
 LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_OWNER := samsung_arm
+LOCAL_MODULE_OWNER := samsung
 include $(BUILD_PREBUILT)
 
 include $(CLEAR_VARS)
