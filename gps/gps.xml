@@ -10,7 +10,6 @@
        acNvStoDir="/data/"
 
        acLogDirectory="/data/gps/log/"
-       cLogEnabled="true"
 
        LPmode="false"
        ReAidingType="0"
