@@ -50,7 +50,6 @@
        RfType="GL_RF_47511_BRCM_EXT_LNA"
        WarmStandbyTimeout1Seconds="10"
        WarmStandbyTimeout2Seconds="15"
-       PsfNotConnected="true"
     >
   </gll>
   <gll_features
