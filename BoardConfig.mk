@@ -90,6 +90,7 @@ BOARD_SEPOLICY_UNION := \
 	genfs_contexts \
 	adbd.te \
 	app.te \
+	compatibility.te \
 	device.te \
 	domain.te \
 	gpsd.te \
