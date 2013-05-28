@@ -28,13 +28,14 @@
 # end jb-mr1.1-dev
 # start jb-mr2-dev
 # 683083 = JWR51
+# 689345 = JWR58
 # end jb-mr2-dev
 
 source ../../../common/clear-factory-images-variables.sh
-BUILD=683083
+BUILD=689345
 DEVICE=manta
 PRODUCT=mantaray
-VERSION=jwr51
+VERSION=jwr58
 #SRCPREFIX=signed-
 BOOTLOADER=mantamd03
 ERASEALL=true
