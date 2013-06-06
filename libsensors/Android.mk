@@ -28,7 +28,7 @@ LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/hw
 LOCAL_MODULE_TAGS := optional
 LOCAL_CFLAGS := -DLOG_TAG=\"Sensors\"
 LOCAL_CFLAGS += -DINVENSENSE_COMPASS_CAL
-LOCAL_C_INCLUDES += hardware/invensense/libsensors_iio
+LOCAL_C_INCLUDES += hardware/invensense/libsensors_iio hardware/invensense/60xx/libsensors_iio
 LOCAL_SRC_FILES := \
     sensors.cpp \
     IioSensorBase.cpp \
