@@ -542,7 +542,7 @@ static void select_devices(struct audio_device *adev)
         }
         // disable noise suppression when capturing front and back mic for voice recognition
         if ((adev->input_source == AUDIO_SOURCE_VOICE_RECOGNITION) &&
-                (adev->in_channel_mask != AUDIO_CHANNEL_IN_FRONT_BACK))
+                (adev->in_channel_mask == AUDIO_CHANNEL_IN_FRONT_BACK))
             new_es305_preset = -1;
     } else {
         if (output_device_id != OUT_DEVICE_NONE) {
@@ -762,6 +762,7 @@ static int start_input_stream(struct stream_in *in)
     in->frames_in = 0;
     adev->input_source = in->input_source;
     adev->in_device = in->device;
+    adev->in_channel_mask = in->channel_mask;
 
     eS305_SetActiveIoHandle(in->io_handle);
     select_devices(adev);
@@ -1252,6 +1253,7 @@ static int do_in_standby(struct stream_in *in)
 
         in->dev->input_source = AUDIO_SOURCE_DEFAULT;
         in->dev->in_device = AUDIO_DEVICE_NONE;
+        in->dev->in_channel_mask = 0;
         select_devices(adev);
         in->standby = true;
 
