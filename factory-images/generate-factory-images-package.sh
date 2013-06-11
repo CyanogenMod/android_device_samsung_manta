@@ -30,14 +30,15 @@
 # 683083 = JWR51
 # 689345 = JWR58
 # 690834 = JWR59
+# 704243 = JWR66G
 # end jb-mr2-dev
 
 source ../../../common/clear-factory-images-variables.sh
-BUILD=690834
+BUILD=704243
 DEVICE=manta
 PRODUCT=mantaray
-VERSION=jwr59
-#SRCPREFIX=signed-
+VERSION=jwr66g
+SRCPREFIX=signed-
 BOOTLOADER=mantamd03
 ERASEALL=true
 source ../../../common/generate-factory-images-common.sh
