@@ -43,6 +43,7 @@
 # 704243 = JWR66G
 # 711294 = JWR66N
 # 736095 = JWR66U
+# 737497 = JWR66V
 # end jb-mr2-dev
 BRANCH=jb-mr2-dev
 if test $BRANCH = jb-mr1-dev
@@ -57,8 +58,8 @@ then
 fi # jb-mr1.1-dev
 if test $BRANCH = jb-mr2-dev
 then
-  ZIP=mantaray-ota-736095
-  BUILD=jwr66u
+  ZIP=mantaray-ota-737497
+  BUILD=jwr66v
 fi # jb-mr2-dev
 ROOTDEVICE=manta
 DEVICE=manta
