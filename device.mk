@@ -85,13 +85,6 @@ PRODUCT_PACKAGES += \
     Tag \
     com.android.nfc_extras
 
-# NFCEE access control
-ifeq ($(TARGET_BUILD_VARIANT),user)
-    NFCEE_ACCESS_PATH := device/samsung/manta/nfc/nfcee_access.xml
-else
-    NFCEE_ACCESS_PATH := device/samsung/manta/nfc/nfcee_access_debug.xml
-endif
-
 # NFC access control + feature files + configuration
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
