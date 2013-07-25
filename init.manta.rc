@@ -45,14 +45,10 @@ on post-fs-data
 on boot
     # override init.rc to keep plenty of large order chunks around
     # to improve allocation times
-    write /proc/sys/vm/min_free_kbytes 32768
     write /proc/sys/vm/min_free_order_shift 1
 
     mount debugfs /sys/kernel/debug /sys/kernel/debug
     setprop ro.radio.noril yes
-
-    # Reduce reserved lowmem from ~48MB to ~12MB
-    write /proc/sys/vm/lowmem_reserve_ratio "128 128"
 
     # Set up kernel tracing, but disable it by default
     chmod 0222 /sys/kernel/debug/tracing/trace_marker
