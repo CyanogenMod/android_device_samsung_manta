@@ -31,7 +31,7 @@ __BEGIN_DECLS
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 
-#define ID_SAMSUNG_BASE (0x1000)
+#define ID_SAMSUNG_BASE 12
 #define ID_L  (ID_SAMSUNG_BASE)
 #define ID_PR (ID_L + 1)
 

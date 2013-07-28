@@ -39,6 +39,8 @@ on post-fs-data
 	chmod 0660 /sys/class/rfkill/rfkill0/state
 	chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
 	chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
+	restorecon /sys/class/rfkill/rfkill0/state
+	restorecon /sys/class/rfkill/rfkill0/type
 
 on boot
     # override init.rc to keep plenty of large order chunks around
@@ -65,6 +67,25 @@ on fs
     mkdir /factory 0775 radio radio
 
     mount_all /fstab.manta
+    mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory rw remount
+    restorecon /factory
+    restorecon /factory/bluetooth
+    restorecon /factory/bluetooth/bt_addr
+    restorecon /factory/FactoryApp
+    restorecon /factory/FactoryApp/
+    restorecon /factory/FactoryApp/baro_delta
+    restorecon /factory/FactoryApp/factorymode
+    restorecon /factory/FactoryApp/fdata
+    restorecon /factory/FactoryApp/hist_nv
+    restorecon /factory/FactoryApp/hw_ver
+    restorecon /factory/FactoryApp/keystr
+    restorecon /factory/FactoryApp/reset_flag
+    restorecon /factory/FactoryApp/test_nv
+    restorecon /factory/hdcp2.keys
+    restorecon /factory/wv.keys
+    restorecon /factory/wifi
+    restorecon /factory/wifi/
+    mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory ro remount
     setprop ro.crypto.fuse_sdcard true
 
 # Permissions for backlight
@@ -109,8 +130,10 @@ service sdcard /system/bin/sdcard /data/media /mnt/shell/emulated 1023 1023
 
 service p2p_supplicant /system/bin/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
+    -I/system/etc/wifi/wpa_supplicant_overlay.conf \
     -puse_multi_chan_concurrent=1 -N -ip2p0 -Dnl80211 \
     -c/data/misc/wifi/p2p_supplicant.conf \
+    -I/system/etc/wifi/wpa_supplicant_overlay.conf \
     -puse_p2p_group_interface=1use_multi_chan_concurrent=1 -e/data/misc/wifi/entropy.bin
     #   we will start as root and wpa_supplicant will switch to user wifi
     #   after setting up the capabilities required for WEXT
@@ -122,7 +145,9 @@ service p2p_supplicant /system/bin/wpa_supplicant \
     oneshot
 
 service wpa_supplicant /system/bin/wpa_supplicant \
-    -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf -e/data/misc/wifi/entropy.bin
+    -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
+    -I/system/etc/wifi/wpa_supplicant_overlay.conf \
+    -e/data/misc/wifi/entropy.bin
     #   we will start as root and wpa_supplicant will switch to user wifi
     #   after setting up the capabilities required for WEXT
     #   user wifi
@@ -147,6 +172,11 @@ service dhcpcd_eth0 /system/bin/dhcpcd -ABDKL
     disabled
     oneshot
 
+service dhcpcd_bt-pan /system/bin/dhcpcd -ABKL
+    class main
+    disabled
+    oneshot
+
 service iprenew_wlan0 /system/bin/dhcpcd -n
     class main
     disabled
@@ -157,12 +187,23 @@ service iprenew_p2p /system/bin/dhcpcd -n
     disabled
     oneshot
 
+service iprenew_eth0 /system/bin/dhcpcd -n
+    class main
+    disabled
+    oneshot
+
+service iprenew_bt-pan /system/bin/dhcpcd -n
+    class main
+    disabled
+    oneshot
+
 service battery_charger /charger
     class charger
 
 # Set watchdog timer to 30 seconds and pet it every 10 seconds to get a 20 second margin
 service watchdogd /sbin/watchdogd 10 20
     class core
+    seclabel u:r:watchdogd:s0
 
 service gpsd /system/vendor/bin/gpsd -c /system/vendor/etc/gps.xml
     class main
@@ -183,7 +224,8 @@ on property:ro.debuggable=1
     write /sys/module/fiq_debugger/parameters/kgdb_enable 1
 
 # bugreport is triggered by holding down volume down, volume up and power
-service bugreport /system/bin/bugmailer.sh -v
+service bugreport /system/bin/dumpstate -d -p -B \
+        -o /data/data/com.android.shell/files/bugreports/bugreport
     class main
     disabled
     oneshot

@@ -948,35 +948,6 @@ const struct effect_interface_s sEffectInterface = {
 //------------------------------------------------------------------------------
 // Effect Library Interface Implementation
 //------------------------------------------------------------------------------
-int adnc_query_number_effects(uint32_t *pNumEffects)
-{
-    if (pNumEffects == NULL) {
-        return -EINVAL;
-    }
-    *pNumEffects = PFX_ID_CNT;
-    return sAdncBundleInitStatus;
-}
-
-int adnc_query_effect(uint32_t index, effect_descriptor_t *pDescriptor)
-{
-    int status = 0;
-
-    pthread_mutex_lock(&sAdncBundleLock);
-
-    if (AdncBundle_Init_l() != 0) {
-        status = sAdncBundleInitStatus;
-        goto exit;
-    }
-    if (index >= PFX_ID_CNT) {
-        status = -EINVAL;
-        goto exit;
-    }
-    memcpy(pDescriptor, adnc_pfx_descriptors[index], sizeof(effect_descriptor_t));
-
-exit:
-    pthread_mutex_unlock(&sAdncBundleLock);
-    return status;
-}
 
 int adnc_create(const effect_uuid_t *uuid,
             int32_t         sessionId,
@@ -1091,8 +1062,6 @@ audio_effect_library_t AUDIO_EFFECT_LIBRARY_INFO_SYM = {
     version : EFFECT_LIBRARY_API_VERSION,
     name : "Audience Voice Preprocessing Library",
     implementor : "The Android Open Source Project",
-    query_num_effects : adnc_query_number_effects,
-    query_effect : adnc_query_effect,
     create_effect : adnc_create,
     release_effect : adnc_release,
     get_descriptor : adnc_get_descriptor

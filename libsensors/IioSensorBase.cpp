@@ -48,9 +48,9 @@ IioSensorBase::IioSensorBase(const char *dev_name,
       mHasPendingEvent(false),
       mInputReader(MAX_BUFFER_FOR_EVENT),
       mIioChanType(iio_chan_type),
-      mIioSysfsChanFp(NULL),
-      mLock(PTHREAD_MUTEX_INITIALIZER)
+      mIioSysfsChanFp(NULL)
 {
+    pthread_mutex_init(&mLock, NULL);
     ALOGV("%s(): dev_name=%s", __func__, dev_name);
     mPendingEvent.version = sizeof(sensors_event_t);
     memset(mPendingEvent.data, 0, sizeof(mPendingEvent.data));

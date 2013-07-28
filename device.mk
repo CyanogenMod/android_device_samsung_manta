@@ -68,7 +68,6 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
     frameworks/native/data/etc/android.hardware.audio.low_latency.xml:system/etc/permissions/android.hardware.audio.low_latency.xml
 
-
 PRODUCT_COPY_FILES += \
     device/samsung/manta/bcmdhd.cal:system/etc/wifi/bcmdhd.cal
 
@@ -85,12 +84,6 @@ PRODUCT_PACKAGES += libaudience_voicefx
 PRODUCT_COPY_FILES += \
     device/samsung/manta/audio_effects.conf:system/etc/audio_effects.conf
 
-# for bugmailer
-PRODUCT_PACKAGES := send_bug
-PRODUCT_COPY_FILES += \
-    system/extras/bugmailer/bugmailer.sh:system/bin/bugmailer.sh \
-    system/extras/bugmailer/send_bug:system/bin/send_bug
-
 # BCM47511 GPS
 PRODUCT_COPY_FILES += \
     device/samsung/manta/gps/gps.conf:system/etc/gps.conf \
@@ -100,8 +93,6 @@ PRODUCT_COPY_FILES += \
 
 # NFC packages
 PRODUCT_PACKAGES += \
-    libnfc-nci \
-    libnfc_nci_jni \
     nfc_nci.manta \
     NfcNci \
     Tag \
@@ -153,7 +144,8 @@ PRODUCT_PACKAGES += \
     audio.primary.manta \
     audio.a2dp.default \
     audio.usb.default \
-    libbubblelevel
+    libbubblelevel \
+    audio.r_submix.default
 
 PRODUCT_PACKAGES += \
     power.manta
@@ -167,15 +159,15 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PROPERTY_OVERRIDES := \
     wifi.interface=wlan0 \
-    ro.opengles.version=131072 \
+    ro.opengles.version=196608 \
     ro.sf.lcd_density=320 \
     ro.hwui.texture_cache_size=72 \
     ro.hwui.layer_cache_size=48 \
-    ro.hwui.path_cache_size=16 \
-    ro.hwui.shape_cache_size=4 \
+    ro.hwui.r_buffer_cache_size=8 \
+    ro.hwui.path_cache_size=32 \
     ro.hwui.gradient_cache_size=1 \
     ro.hwui.drop_shadow_cache_size=6 \
-    ro.hwui.texture_cache_flush_rate=0.4 \
+    ro.hwui.texture_cache_flushrate=0.4 \
     ro.hwui.text_small_cache_width=1024 \
     ro.hwui.text_small_cache_height=1024 \
     ro.hwui.text_large_cache_width=2048 \

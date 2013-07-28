@@ -30,11 +30,7 @@ TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_SMP := true
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
-ARCH_ARM_HAVE_TLS_REGISTER := true
-TARGET_ARCH_VARIANT_CPU := cortex-a15
-
-# Enable various prefetch optimizations
-COMMON_GLOBAL_CFLAGS += -D__ARM_USE_PLD -D__ARM_CACHE_LINE_SIZE=64
+TARGET_CPU_VARIANT := cortex-a15
 
 # Define kernel config for inline building
 TARGET_KERNEL_CONFIG := cyanogenmod_manta_defconfig
@@ -59,6 +55,7 @@ OVERRIDE_RS_DRIVER := libRSDriverArm.so
 USE_OPENGL_RENDERER := true
 NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 
+TARGET_RECOVERY_FSTAB = device/samsung/manta/fstab.manta
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_SYSTEMIMAGE_PARTITION_SIZE := 685768704
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 14273216512
@@ -78,7 +75,6 @@ BOARD_HOSTAPD_PRIVATE_LIB   := lib_driver_cmd_bcmdhd
 BOARD_WLAN_DEVICE           := bcmdhd
 WIFI_DRIVER_FW_PATH_PARAM   := "/sys/module/bcmdhd/parameters/firmware_path"
 WIFI_DRIVER_FW_PATH_STA     := "/vendor/firmware/fw_bcmdhd.bin"
-WIFI_DRIVER_FW_PATH_P2P     := "/vendor/firmware/fw_bcmdhd_p2p.bin"
 WIFI_DRIVER_FW_PATH_AP      := "/vendor/firmware/fw_bcmdhd_apsta.bin"
 
 BOARD_LIB_DUMPSTATE := libdumpstate.manta
@@ -96,3 +92,19 @@ BOARD_HAS_NO_SELECT_BUTTON := true
 # Support WebGL in WebKit
 ENABLE_WEBGL := true
 
+BOARD_SEPOLICY_DIRS := \
+	device/samsung/manta/sepolicy
+
+BOARD_SEPOLICY_UNION := \
+	file_contexts \
+	genfs_contexts \
+	adbd.te \
+	app.te \
+	compatibility.te \
+	device.te \
+	domain.te \
+	gpsd.te \
+	file.te \
+	mediaserver.te \
+	surfaceflinger.te \
+	system.te
