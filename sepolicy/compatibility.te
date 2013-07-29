@@ -65,7 +65,7 @@ allow shell sdcard_internal:dir { create rmdir };
 #allow shell system_data_file:dir { write add_name };
 #allow shell system_data_file:file { write create setattr };
 allow shell vold:unix_stream_socket connectto;
-allow shell vold_socket:sock_file write;
+#allow shell vold_socket:sock_file write;
 
 #============= surfaceflinger ==============
 allow surfaceflinger nfc:binder call;
