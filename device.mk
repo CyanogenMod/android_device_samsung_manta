@@ -26,8 +26,7 @@ PRODUCT_COPY_FILES := \
     device/samsung/manta/init.manta.usb.rc:root/init.manta.usb.rc \
     device/samsung/manta/init.recovery.manta.rc:root/init.recovery.manta.rc \
     device/samsung/manta/fstab.manta:root/fstab.manta \
-    device/samsung/manta/ueventd.manta.rc:root/ueventd.manta.rc \
-    device/samsung/manta/vold.fstab:system/etc/vold.fstab
+    device/samsung/manta/ueventd.manta.rc:root/ueventd.manta.rc
 
 # Input device files for manta
 PRODUCT_COPY_FILES += \

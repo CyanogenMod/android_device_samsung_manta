@@ -12,3 +12,5 @@
 /dev/block/platform/dw_mmc.0/by-name/recovery   /recovery           emmc      defaults                                              defaults
 /dev/block/platform/dw_mmc.0/by-name/misc       /misc               emmc      defaults                                              defaults
 /dev/block/mmcblk0boot0                         /bootloader         emmc      defaults                                              defaults
+/devices/platform/s5p-ehci                      /storage/usbdisk    auto      defaults     voldmanaged=sda:auto
+
