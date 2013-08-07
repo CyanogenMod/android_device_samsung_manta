@@ -74,6 +74,7 @@ WIFI_DRIVER_FW_PATH_STA     := "/vendor/firmware/fw_bcmdhd.bin"
 WIFI_DRIVER_FW_PATH_AP      := "/vendor/firmware/fw_bcmdhd_apsta.bin"
 
 BOARD_LIB_DUMPSTATE := libdumpstate.manta
+BOARD_LIB_HEALTHD := libhealthd.manta
 
 BOARD_CHARGER_DISABLE_INIT_BLANK := true
 
