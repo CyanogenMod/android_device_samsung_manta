@@ -137,13 +137,11 @@ PRODUCT_PACKAGES := \
     00060308060501020000000000000000 \\
     020a0000000000000000000000000000 \\
     07060000000000000000000000000000 \\
-    libbccArm.sha1 \\
-    libbccArm \\
-    libbcinfoArm \\
-    libclcoreArm \\
-    libclcore_neonArm \\
+    ffffffff000000000000000000000005 \\
+    libGLES_mali \\
+    libmalicore \\
     libRSDriverArm \\
-    libGLES_mali
+    libstagefright_hdcp
 EOF
 
 #--------------------------------------------------------------
@@ -183,6 +181,16 @@ include \$(CLEAR_VARS)
 LOCAL_MODULE := fimc_is_fw2
 LOCAL_SRC_FILES := fimc_is_fw2.bin
 LOCAL_MODULE_SUFFIX := .bin
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR)/firmware
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_OWNER := samsung
+include \$(BUILD_PREBUILT)
+
+include \$(CLEAR_VARS)
+LOCAL_MODULE := maxtouch
+LOCAL_SRC_FILES := maxtouch.fw
+LOCAL_MODULE_SUFFIX := .fw
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR)/firmware
 LOCAL_MODULE_TAGS := optional
@@ -240,48 +248,8 @@ LOCAL_MODULE_OWNER := samsung_arm
 include \$(BUILD_PREBUILT)
 
 include \$(CLEAR_VARS)
-LOCAL_MODULE := libbccArm.sha1
-LOCAL_SRC_FILES := libbccArm.sha1.so
-LOCAL_MODULE_SUFFIX := .so
-LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_OWNER := samsung_arm
-include \$(BUILD_PREBUILT)
-
-include \$(CLEAR_VARS)
-LOCAL_MODULE := libbccArm
-LOCAL_SRC_FILES := libbccArm.so
-LOCAL_MODULE_SUFFIX := .so
-LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_OWNER := samsung_arm
-include \$(BUILD_PREBUILT)
-
-include \$(CLEAR_VARS)
-LOCAL_MODULE := libbcinfoArm
-LOCAL_SRC_FILES := libbcinfoArm.so
-LOCAL_MODULE_SUFFIX := .so
-LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_OWNER := samsung_arm
-include \$(BUILD_PREBUILT)
-
-include \$(CLEAR_VARS)
-LOCAL_MODULE := libclcoreArm
-LOCAL_SRC_FILES := libclcoreArm.bc
-LOCAL_MODULE_SUFFIX := .bc
-LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
-LOCAL_MODULE_TAGS := optional
-LOCAL_MODULE_OWNER := samsung_arm
-include \$(BUILD_PREBUILT)
-
-include \$(CLEAR_VARS)
-LOCAL_MODULE := libclcore_neonArm
-LOCAL_SRC_FILES := libclcore_neonArm.bc
+LOCAL_MODULE := libmalicore
+LOCAL_SRC_FILES := libmalicore.bc
 LOCAL_MODULE_SUFFIX := .bc
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
@@ -292,6 +260,16 @@ include \$(BUILD_PREBUILT)
 include \$(CLEAR_VARS)
 LOCAL_MODULE := libRSDriverArm
 LOCAL_SRC_FILES := libRSDriverArm.so
+LOCAL_MODULE_SUFFIX := .so
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_OWNER := samsung_arm
+include \$(BUILD_PREBUILT)
+
+include \$(CLEAR_VARS)
+LOCAL_MODULE := libstagefright_hdcp
+LOCAL_SRC_FILES := libstagefright_hdcp.so
 LOCAL_MODULE_SUFFIX := .so
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
@@ -330,14 +308,15 @@ LOCAL_MODULE_OWNER := samsung
 include \$(BUILD_PREBUILT)
 
 include \$(CLEAR_VARS)
-LOCAL_MODULE := maxtouch
-LOCAL_SRC_FILES := maxtouch.fw
-LOCAL_MODULE_SUFFIX := .fw
+LOCAL_MODULE := ffffffff000000000000000000000005
+LOCAL_SRC_FILES := ffffffff000000000000000000000005.tlbin
+LOCAL_MODULE_SUFFIX := .tlbin
 LOCAL_MODULE_CLASS := ETC
-LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR)/firmware
+LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR)/secapp
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_OWNER := samsung
 include \$(BUILD_PREBUILT)
+
 
 endif
 EOF
@@ -589,11 +568,11 @@ LOCAL_MODULE_OWNER := widevine
 include \$(BUILD_PREBUILT)
 
 include \$(CLEAR_VARS)
-LOCAL_MODULE := libdrmwvmplugin
-LOCAL_SRC_FILES := libdrmwvmplugin.so
+LOCAL_MODULE := libwvdrmengine
+LOCAL_SRC_FILES := libwvdrmengine.so
 LOCAL_MODULE_SUFFIX := .so
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
-LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)/drm
+LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)/mediadrm
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_OWNER := widevine
 include \$(BUILD_PREBUILT)
@@ -604,6 +583,16 @@ LOCAL_SRC_FILES := libdrmdecrypt.so
 LOCAL_MODULE_SUFFIX := .so
 LOCAL_MODULE_CLASS := SHARED_LIBRARIES
 LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)
+LOCAL_MODULE_TAGS := optional
+LOCAL_MODULE_OWNER := widevine
+include \$(BUILD_PREBUILT)
+
+include \$(CLEAR_VARS)
+LOCAL_MODULE := libdrmwvmplugin
+LOCAL_SRC_FILES := libdrmwvmplugin.so
+LOCAL_MODULE_SUFFIX := .so
+LOCAL_MODULE_CLASS := SHARED_LIBRARIES
+LOCAL_MODULE_PATH := \$(TARGET_OUT_VENDOR_SHARED_LIBRARIES)/drm
 LOCAL_MODULE_TAGS := optional
 LOCAL_MODULE_OWNER := widevine
 include \$(BUILD_PREBUILT)
@@ -635,8 +624,8 @@ PRODUCT_PACKAGES := \\
     libWVStreamControlAPI_L1 \\
     libwvm \\
     libdrmwvmplugin \\
-    libdrmdecrypt
-
+    libdrmdecrypt \\
+    libwvdrmengine
 EOF
 
 #--------------------------------------------------------------
