@@ -121,7 +121,7 @@ on fs
     chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/aec_enable
 
 # virtual sdcard daemon running as media_rw (1023)
-service sdcard /system/bin/sdcard /data/media /mnt/shell/emulated 1023 1023
+service sdcard /system/bin/sdcard -u 1023 -g 1023 -l /data/media /mnt/shell/emulated
     class late_start
 
 service p2p_supplicant /system/bin/wpa_supplicant \
