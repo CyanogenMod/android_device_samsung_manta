@@ -17,10 +17,10 @@ on init
     symlink /storage/emulated/legacy /storage/sdcard0
     symlink /mnt/shell/emulated/0 /storage/emulated/legacy
 
-# Configure and enable KSM
+# KSM
     write /sys/kernel/mm/ksm/pages_to_scan 100
     write /sys/kernel/mm/ksm/sleep_millisecs 500
-    write /sys/kernel/mm/ksm/run 1
+#    write /sys/kernel/mm/ksm/run 1
 
 on post-fs-data
     mkdir /data/media 0770 media_rw media_rw
