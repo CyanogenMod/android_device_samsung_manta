@@ -184,7 +184,6 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 
 # for off charging mode
 PRODUCT_PACKAGES += \
-    charger \
     charger_res_images
 
 $(call inherit-product-if-exists, hardware/samsung_slsi/exynos5/exynos5.mk)
