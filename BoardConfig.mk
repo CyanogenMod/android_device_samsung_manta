@@ -97,4 +97,4 @@ BOARD_SEPOLICY_UNION := \
 	file.te \
 	mediaserver.te \
 	surfaceflinger.te \
-	system.te
+	system_server.te

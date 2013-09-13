@@ -15,7 +15,7 @@ allow adbd app_data_file:file { write create open setattr };
 allow adbd proc:file write;
 
 #============= debuggerd ==============
-allow debuggerd system:unix_stream_socket connectto;
+allow debuggerd system_server:unix_stream_socket connectto;
 allow debuggerd system_data_file:sock_file write;
 
 #============= dhcp ==============
@@ -71,10 +71,10 @@ allow shell vold_socket:sock_file write;
 allow surfaceflinger nfc:binder call;
 allow surfaceflinger platform_app:binder call;
 
-#============= system ==============
-allow system proc:file write;
-allow system unlabeled:dir { read remove_name write open add_name };
-allow system unlabeled:file { rename read create ioctl getattr unlink open append };
+#============= system_server ==============
+allow system_server proc:file write;
+allow system_server unlabeled:dir { read remove_name write open add_name };
+allow system_server unlabeled:file { rename read create ioctl getattr unlink open append };
 
 #============= system_app ==============
 allow system_app unlabeled:file { read getattr open };
