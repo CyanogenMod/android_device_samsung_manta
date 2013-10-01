@@ -166,7 +166,9 @@ static void manta_bat_check_charge_source_changed(
     struct BatteryProperties *props)
 {
     if (props->chargerUsbOnline || props->chargerAcOnline) {
-        if (manta_bat_charging_status == BATTERY_STATUS_CHARGING)
+        if (manta_bat_charging_status == BATTERY_STATUS_CHARGING ||
+            (manta_bat_charging_status == BATTERY_STATUS_FULL &&
+             manta_bat_recharging))
             return;
 
         /*
@@ -213,8 +215,8 @@ static void manta_bat_monitor(struct BatteryProperties *props)
     }
 
     if (props->batteryStatus == BATTERY_STATUS_FULL &&
-        manta_bat_charging_status == BATTERY_STATUS_CHARGING &&
-        !manta_bat_recharging) {
+        (manta_bat_charging_status == BATTERY_STATUS_CHARGING ||
+         manta_bat_recharging)) {
             manta_bat_set_full();
     }
 
