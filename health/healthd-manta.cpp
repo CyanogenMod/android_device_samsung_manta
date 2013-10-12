@@ -211,7 +211,6 @@ static void manta_bat_monitor(struct BatteryProperties *props)
          props->batteryTemperature = 42;  /* 4.2C */
          props->batteryVoltage = 4242; /* 4242mV */
          props->batteryLevel = 42;        /* 42% */
-         props->batteryCurrentNow = 42000;/* 42mA */
     }
 
     if (props->batteryStatus == BATTERY_STATUS_FULL &&
