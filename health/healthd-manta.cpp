@@ -209,7 +209,7 @@ static void manta_bat_monitor(struct BatteryProperties *props)
         manta_bat_check_temp(props);
     } else {
          props->batteryTemperature = 42;  /* 4.2C */
-         props->batteryVoltage = 4242; /* 4242mV */
+         props->batteryVoltage = 4342;    /* 4342mV */
          props->batteryLevel = 42;        /* 42% */
     }
 
