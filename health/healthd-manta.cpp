@@ -297,7 +297,7 @@ void healthd_board_init(struct healthd_config *config)
     if (access(config->batteryCurrentNowPath.string(), R_OK) == 0) {
         manta_bat_batterypresent = true;
     } else {
-        KLOG_INFO("Missing battery, using fake battery data\n");
+        KLOG_INFO(LOG_TAG, "Missing battery, using fake battery data\n");
         config->batteryCurrentNowPath.clear();
     }
 }
