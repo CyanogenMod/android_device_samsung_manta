@@ -45,7 +45,7 @@
 # 736095 = JWR66U
 # 737497 = JWR66V
 # end jb-mr2-dev
-BRANCH=jb-mr2-dev
+BRANCH=klp-dev
 if test $BRANCH = jb-mr1-dev
 then
   ZIP=mantaray-ota-527662
@@ -61,11 +61,16 @@ then
   ZIP=mantaray-ota-737497
   BUILD=jwr66v
 fi # jb-mr2-dev
+if test $BRANCH = klp-dev
+then
+  ZIP=mantaray-ota-882444
+  BUILD=882444
+fi # klp-dev
 ROOTDEVICE=manta
 DEVICE=manta
 MANUFACTURER=samsung
 
-for COMPANY in audience broadcom # samsung
+for COMPANY in audience broadcom samsung
 do
   echo Processing files from $COMPANY
   rm -rf tmp
