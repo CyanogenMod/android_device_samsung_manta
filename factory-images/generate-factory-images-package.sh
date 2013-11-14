@@ -26,13 +26,21 @@
 # 551245 = JDP82
 # 573038 = JDQ39
 # end jb-mr1.1-dev
+# start jb-mr2-dev
+# 683083 = JWR51
+# 689345 = JWR58
+# 690834 = JWR59
+# 704243 = JWR66G
+# 711294 = JWR66N
+# 737497 = JWR66V
+# end jb-mr2-dev
 
 source ../../../common/clear-factory-images-variables.sh
-BUILD=573038
+BUILD=737497
 DEVICE=manta
 PRODUCT=mantaray
-VERSION=jdq39
+VERSION=jwr66v
 SRCPREFIX=signed-
-BOOTLOADER=mantalj12
+BOOTLOADER=mantamd03
 ERASEALL=true
 source ../../../common/generate-factory-images-common.sh
