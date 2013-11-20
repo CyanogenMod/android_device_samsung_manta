@@ -97,10 +97,10 @@ BOARD_USB_AUDIO_CARD_ID := 2
 # Support WebGL in WebKit
 ENABLE_WEBGL := true
 
-BOARD_SEPOLICY_DIRS := \
+BOARD_SEPOLICY_DIRS += \
 	device/samsung/manta/sepolicy
 
-BOARD_SEPOLICY_UNION := \
+BOARD_SEPOLICY_UNION += \
 	file_contexts \
 	genfs_contexts \
 	adbd.te \
