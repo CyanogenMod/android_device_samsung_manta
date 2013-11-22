@@ -64,11 +64,11 @@ static struct sensor_t sSensorList[LOCAL_SENSORS + MPLSensor::numSensors] = {
       { "BH1721fvc Light sensor",
           "Rohm",
           1, SENSORS_LIGHT_HANDLE,
-          SENSOR_TYPE_LIGHT, 65528.0f, 1.0f, 0.20f, 16000, { } },
+          SENSOR_TYPE_LIGHT, 65528.0f, 1.0f, 0.20f, 16000, 0, 0, { } },
       { "BMP182 Pressure sensor",
           "Bosch",
           1, SENSORS_PRESSURE_HANDLE,
-          SENSOR_TYPE_PRESSURE, 1100.0f, 0.01f, 0.06f, 50000, { } },
+          SENSOR_TYPE_PRESSURE, 1100.0f, 0.01f, 0.06f, 50000, 0, 0, { } },
 };
 static int numSensors = LOCAL_SENSORS;
 
