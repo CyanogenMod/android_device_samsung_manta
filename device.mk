@@ -78,6 +78,12 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/samsung/manta/audio_policy.conf:system/etc/audio_policy.conf
 
+PRODUCT_PACKAGES := \
+    libwpa_client \
+    hostapd \
+    wpa_supplicant \
+    wpa_supplicant.conf
+
 # audio effects
 PRODUCT_PACKAGES += libaudience_voicefx
 PRODUCT_COPY_FILES += \
