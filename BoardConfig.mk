@@ -92,6 +92,7 @@ BOARD_SEPOLICY_UNION += \
 	app.te \
 	device.te \
 	domain.te \
+	healthd.te \
 	gpsd.te \
 	file.te \
 	mediaserver.te \
