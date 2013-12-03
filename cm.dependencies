@@ -1,7 +1,6 @@
 [
     {
       "repository": "android_kernel_samsung_manta",
-      "target_path": "kernel/samsung/manta",
-      "branch": "cm-10.2"
+      "target_path": "kernel/samsung/manta"
     }
 ]
