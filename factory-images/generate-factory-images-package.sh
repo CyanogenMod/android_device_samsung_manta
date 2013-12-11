@@ -36,11 +36,11 @@
 # end jb-mr2-dev
 
 source ../../../common/clear-factory-images-variables.sh
-BUILD=737497
+BUILD=937116
 DEVICE=manta
 PRODUCT=mantaray
-VERSION=jwr66v
+VERSION=kot49h
 SRCPREFIX=signed-
-BOOTLOADER=mantamd03
+BOOTLOADER=mantamf01
 ERASEALL=true
 source ../../../common/generate-factory-images-common.sh
