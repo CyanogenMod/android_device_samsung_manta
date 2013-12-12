@@ -1,6 +1,4 @@
-# label graphics device with a new type, we need
-# to allow write operation from appdomain
-/dev/mali0              u:object_r:mali_device:s0
+/dev/mali0              u:object_r:gpu_device:s0
 
 /dev/bcm2079x           u:object_r:nfc_device:s0
 /dev/ttySAC0            u:object_r:hci_attach_dev:s0
