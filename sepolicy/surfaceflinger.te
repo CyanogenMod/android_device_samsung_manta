@@ -1,2 +1,0 @@
-allow surfaceflinger appdomain:fd use;
-allow surfaceflinger mali_device:chr_file rw_file_perms;
