@@ -183,6 +183,5 @@
 
     <bool name="config_enableWifiDisplay">true</bool>
 
-    <!-- Translucent status & navigation bars perform poorly on this device -->
-    <bool name="config_enableTranslucentDecor">false</bool>
+    <bool name="config_enableTranslucentDecor">true</bool>
 </resources>
