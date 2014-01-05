@@ -14,3 +14,4 @@
 /dev/block/mmcblk0boot0                         /bootloader         emmc      defaults                                              defaults
 /devices/platform/s5p-ehci                      /storage/usbdisk    auto      defaults     voldmanaged=sda:auto
 
+/dev/block/zram0                                none                swap      defaults     zramsize=134217728    
