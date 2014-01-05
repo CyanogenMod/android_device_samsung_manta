@@ -21,10 +21,11 @@ on init
     mkdir /storage/usbdisk 0666 system system
     symlink /storage/usbdisk /mnt/usbdisk
     symlink /mnt/usbdisk /usbdisk
-# KSM
+
+    # KSM
     write /sys/kernel/mm/ksm/pages_to_scan 100
     write /sys/kernel/mm/ksm/sleep_millisecs 500
-#    write /sys/kernel/mm/ksm/run 1
+    write /sys/kernel/mm/ksm/run 1
 
 on post-fs-data
     mkdir /data/media 0770 media_rw media_rw
@@ -67,6 +68,11 @@ on fs
     mkdir /factory 0775 radio radio
 
     mount_all /fstab.manta
+
+    # Enable ZRAM
+    swapon_all /fstab.manta
+    write /proc/sys/vm/page-cluster 0
+
     mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory rw remount
     restorecon /factory
     restorecon /factory/bluetooth
