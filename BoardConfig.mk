@@ -91,6 +91,7 @@ BOARD_SEPOLICY_UNION += \
 	adbd.te \
 	device.te \
 	domain.te \
+	drmserver.te \
 	healthd.te \
 	gpsd.te \
 	file.te \
