@@ -117,8 +117,8 @@ static void power_init(struct power_module *module)
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/boostpulse_duration",
                 "500000");
     sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/io_is_busy", "1");
-    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/sync_freq", "1000000");
-    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/sync_freq_load_threshold", "80");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/sync_freq", "1400000");
+    sysfs_write("/sys/devices/system/cpu/cpufreq/interactive/up_threshold_any_cpu_load", "80");
 
     init_touchscreen_power_path(manta);
 }
@@ -138,8 +138,6 @@ static void power_set_interactive(struct power_module *module, int on)
     sysfs_write("/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq",
                 on ? "1700000" : "800000");
 
-
-    sysfs_write("/dev/cpuctl/apps/cpu.notify_on_migrate", on ? "1" : "0");
 
     sysfs_write(manta->touchscreen_power_path, on ? "Y" : "N");
 
