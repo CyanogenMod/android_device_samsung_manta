@@ -24,6 +24,7 @@ on init
 
 on post-fs-data
     mkdir /data/media 0770 media_rw media_rw
+    restorecon_recursive /data/media
 
     setprop vold.post_fs_data_done 1
     mkdir /data/misc/wifi 0770 wifi wifi
@@ -39,8 +40,6 @@ on post-fs-data
 	chmod 0660 /sys/class/rfkill/rfkill0/state
 	chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
 	chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
-	restorecon /sys/class/rfkill/rfkill0/state
-	restorecon /sys/class/rfkill/rfkill0/type
 
 on boot
     # override init.rc to keep plenty of large order chunks around
@@ -64,23 +63,7 @@ on fs
 
     mount_all /fstab.manta
     mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory rw remount
-    restorecon /factory
-    restorecon /factory/bluetooth
-    restorecon /factory/bluetooth/bt_addr
-    restorecon /factory/FactoryApp
-    restorecon /factory/FactoryApp/
-    restorecon /factory/FactoryApp/baro_delta
-    restorecon /factory/FactoryApp/factorymode
-    restorecon /factory/FactoryApp/fdata
-    restorecon /factory/FactoryApp/hist_nv
-    restorecon /factory/FactoryApp/hw_ver
-    restorecon /factory/FactoryApp/keystr
-    restorecon /factory/FactoryApp/reset_flag
-    restorecon /factory/FactoryApp/test_nv
-    restorecon /factory/hdcp2.keys
-    restorecon /factory/wv.keys
-    restorecon /factory/wifi
-    restorecon /factory/wifi/
+    restorecon_recursive /factory
     mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory ro remount
     setprop ro.crypto.fuse_sdcard true
 
@@ -99,6 +82,7 @@ on fs
 # NFC: create data/nfc for nv storage
     mkdir /data/nfc 770 nfc nfc
     mkdir /data/nfc/param 770 nfc nfc
+    restorecon_recursive /data/nfc
 
 # audio: permissions for voice processing
     # global switch for voice processing effects
