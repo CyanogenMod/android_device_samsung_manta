@@ -26,9 +26,6 @@ on post-fs-data
     mkdir /data/media 0770 media_rw media_rw
     restorecon_recursive /data/media
 
-    # Remove old socket so that it is re-created in the right context.
-    rm /data/app/tlcd_sock
-
     setprop vold.post_fs_data_done 1
     mkdir /data/misc/wifi 0770 wifi wifi
     mkdir /data/misc/wifi/sockets 0770 wifi wifi
