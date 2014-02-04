@@ -1,8 +1,1 @@
 allow drmserver secmem_device:chr_file rw_file_perms;
-
-# /data/app/tlcd_sock socket file.
-# Clearly, /data/app is the most logical place to create a socket.  Not.
-type drmserver_socket, file_type;
-allow drmserver apk_data_file:dir rw_dir_perms;
-type_transition drmserver apk_data_file:sock_file drmserver_socket;
-allow drmserver drmserver_socket:sock_file create_file_perms;
