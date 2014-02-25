@@ -69,6 +69,9 @@ struct as3668_led_info {
 	enum LED_STATE state;
 };
 
+static struct as3668_led_info g_leds[3]; // For battery, notifications, and attention.
+static int g_cur_led = -1;          // Presently showing LED of the above.
+
 static int write_int(char const *path, int value)
 {
 	int fd;
@@ -222,6 +225,15 @@ static int write_leds(struct as3668_led_info *leds)
 
 	pthread_mutex_lock(&g_lock);
 
+	/* clear any existing blink state */
+	err = led_sysfs_write(buf, LED_BRIGHTNESS_FILE, "%d", LED_BRIGHTNESS_OFF);
+
+	/* if we're just turning off exit now */
+	if (!leds || leds->state == OFF) {
+		pthread_mutex_unlock(&g_lock);
+		return err;
+	}
+
 	err = led_sysfs_write(buf, LED_SLOPE_UP_FILE, "%u", leds->slope_up);
 	if (err)
 		goto err_write_fail;
@@ -230,10 +242,6 @@ static int write_leds(struct as3668_led_info *leds)
 		goto err_write_fail;
 
 	switch(leds->state) {
-	case OFF:
-		err = led_sysfs_write(buf, LED_BRIGHTNESS_FILE, "%d",
-			LED_BRIGHTNESS_OFF);
-		break;
 	case BLINK:
 		err = led_sysfs_write(buf, LED_TRIGGER_FILE, "%s", "timer");
 		if (err)
@@ -264,66 +272,124 @@ err_write_fail:
 
 static int set_light_leds(struct light_state_t const *state, int type)
 {
-	struct as3668_led_info leds;
-	unsigned int color;
+	struct as3668_led_info *leds;
+	unsigned int color = state -> color & COLOR_MASK;
+	int err = 0;
 
-	memset(&leds, 0, sizeof(leds));
-	leds.slope_up = LED_SLOPE_UP_DEFAULT;
-	leds.slope_down = LED_SLOPE_DOWN_DEFAULT;
+	if (type < 0 || (unsigned int)type >= sizeof(g_leds)/sizeof(g_leds[0]))
+		return -EINVAL;
+
+	/* type is one of:
+	 *   0. battery
+	 *   1. notifications
+	 *   2. attention
+	 * which are multiplexed onto the same physical LED in the above order. */
+	leds = &g_leds[type];
+
+	memset(leds, 0, sizeof(*leds));
+	leds->slope_up = LED_SLOPE_UP_DEFAULT;
+	leds->slope_down = LED_SLOPE_DOWN_DEFAULT;
+	if (state->flashOnMS < 0 || state->flashOffMS < 0)
+		return -EINVAL;
+	leds->delay_on = state->flashOnMS;
+	leds->delay_off = state->flashOffMS;
 
 	switch (state->flashMode) {
 	case LIGHT_FLASH_NONE:
-		leds.state = OFF;
-		break;
+		leds->delay_on = 1;
+		leds->delay_off = 0;
 	case LIGHT_FLASH_TIMED:
 	case LIGHT_FLASH_HARDWARE:
-		if (state->flashOnMS < 0 || state->flashOffMS < 0)
-			return -EINVAL;
-
-		leds.delay_off = state->flashOffMS;
-		leds.delay_on = state->flashOnMS;
-		if (leds.delay_on <= leds.slope_up + leds.slope_down)
-			leds.delay_on = 1;
+		if (leds->delay_on <= leds->slope_up + leds->slope_down)
+			leds->delay_on = 1;
 		else
-			leds.delay_on -= leds.slope_up + leds.slope_down;
+			leds->delay_on -= leds->slope_up + leds->slope_down;
 
-		if (!(state->color & ALPHA_MASK)) {
-			leds.state = OFF;
-			break;
-		}
-
-		color = state->color & COLOR_MASK;
 		if (color == 0) {
-			leds.state = OFF;
+			leds->state = OFF;
 			break;
 		}
 
-		set_led_colors(color, &leds);
+		set_led_colors(color, leds);
 
-		if (leds.delay_on == 0)
-			leds.state = OFF;
-		else if (leds.delay_off)
-			leds.state = BLINK;
+		if (leds->delay_on == 0)
+			leds->state = OFF;
+		else if (leds->delay_off)
+			leds->state = BLINK;
 		else
-			leds.state = ON;
+			leds->state = ON;
 		break;
 	default:
 		return -EINVAL;
 	}
 
-	return write_leds(&leds);
+	if (leds->state != OFF) {
+		/* This LED is lit. */
+		if (type >= g_cur_led) {
+			/* And it has the highest priority, so show it. */
+			err = write_leds(leds);
+			g_cur_led = type;
+		}
+	} else {
+		/* This LED is not (any longer) lit. */
+		if (type == g_cur_led) {
+			/* But it is currently showing,
+			 * switch to a lower-priority LED. */
+			int i;
+
+			for (i = type-1; i >= 0; i--) {
+				if (g_leds[i].state != OFF) {
+					g_cur_led = i;
+					break;
+				}
+			}
+			if (i >= 0) {
+				/* Found a lower-priority LED to switch to. */
+				err = write_leds(&g_leds[i]);
+			} else {
+				/* No LEDs are lit, turn off. */
+				err = write_leds(NULL);
+			}
+			g_cur_led = i;
+		}
+	}
+
+	return err;
 }
 
-static int set_light_leds_notifications(struct light_device_t *dev,
+static int set_light_leds_battery(struct light_device_t *dev,
 			struct light_state_t const *state)
 {
 	return set_light_leds(state, 0);
 }
 
-static int set_light_leds_attention(struct light_device_t *dev,
+static int set_light_leds_notifications(struct light_device_t *dev,
 			struct light_state_t const *state)
 {
 	return set_light_leds(state, 1);
+}
+
+static int set_light_leds_attention(struct light_device_t *dev,
+			struct light_state_t const *state)
+{
+	struct light_state_t fixed;
+	memcpy(&fixed, state, sizeof(fixed));
+	/* The framework does odd things with the attention lights, fix them up to
+	 * do something sensible here. */
+	switch (fixed.flashMode) {
+	case LIGHT_FLASH_NONE:
+		/* LightsService.Light::stopFlashing calls with non-zero color. */
+		fixed.color = 0;
+		 break;
+	case LIGHT_FLASH_HARDWARE:
+		/* PowerManagerService::setAttentionLight calls with onMS=3, offMS=0,
+		 * which just makes for a slightly-dimmer LED. */
+		if (fixed.flashOnMS > 0 && fixed.flashOffMS == 0)
+			fixed.flashMode = LIGHT_FLASH_NONE;
+		break;
+	}
+
+	return set_light_leds(&fixed, 2);
 }
 
 static int open_lights(const struct hw_module_t *module, char const *name,
@@ -338,6 +404,8 @@ static int open_lights(const struct hw_module_t *module, char const *name,
 		set_light = set_light_leds_notifications;
 	else if (strcmp(LIGHT_ID_ATTENTION, name) == 0)
 		set_light = set_light_leds_attention;
+	else if (strcmp(LIGHT_ID_BATTERY, name) == 0)
+		set_light = set_light_leds_battery;
 	else
 		return -EINVAL;
 
