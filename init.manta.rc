@@ -24,7 +24,6 @@ on init
 
 on post-fs-data
     mkdir /data/media 0770 media_rw media_rw
-    restorecon_recursive /data/media
 
     setprop vold.post_fs_data_done 1
 
@@ -78,7 +77,6 @@ on fs
 # NFC: create data/nfc for nv storage
     mkdir /data/nfc 770 nfc nfc
     mkdir /data/nfc/param 770 nfc nfc
-    restorecon_recursive /data/nfc
 
 # audio: permissions for voice processing
     # global switch for voice processing effects
