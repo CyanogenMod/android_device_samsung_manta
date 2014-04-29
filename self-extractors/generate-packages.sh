@@ -63,8 +63,8 @@ then
 fi # jb-mr2-dev
 if test $BRANCH = klp-dev
 then
-  ZIP=mantaray-ota-882444
-  BUILD=882444
+  ZIP=mantaray-ota-937116
+  BUILD=kot49h
 fi # klp-dev
 ROOTDEVICE=manta
 DEVICE=manta
