@@ -14,6 +14,7 @@ system/vendor/lib/egl/libGLES_mali.so:samsung
 system/vendor/lib/libdrmdecrypt.so:samsung
 system/vendor/lib/libmalicore.bc:samsung
 system/vendor/lib/libRSDriverArm.so:samsung
+system/vendor/lib/libbccArm.so:samsung
 system/vendor/lib/libstagefright_hdcp.so:samsung
 system/vendor/secapp/00060308060501020000000000000000.tlbin:samsung
 system/vendor/secapp/020a0000000000000000000000000000.drbin:samsung

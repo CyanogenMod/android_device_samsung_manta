@@ -103,6 +103,7 @@ do
             system/vendor/lib/libdrmdecrypt.so \
             system/vendor/lib/libmalicore.bc \
             system/vendor/lib/libRSDriverArm.so \
+            system/vendor/lib/libbccArm.so \
             system/vendor/lib/libstagefright_hdcp.so \
             system/vendor/secapp/00060308060501020000000000000000.tlbin \
             system/vendor/secapp/020a0000000000000000000000000000.drbin \
