@@ -93,3 +93,5 @@ BOARD_SEPOLICY_UNION += \
 	file.te \
 	mediaserver.te \
 	system_server.te
+
+MALLOC_IMPL := dlmalloc
