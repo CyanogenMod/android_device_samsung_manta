@@ -252,15 +252,10 @@ static void manta_power_hint(struct power_module *module, power_hint_t hint,
 
     case POWER_HINT_LOW_POWER:
         pthread_mutex_lock(&manta->lock);
-        if (data) {
+        if (data)
             sysfs_write(CPU_MAX_FREQ_PATH, LOW_POWER_MAX_FREQ);
-            // reduces the refresh rate
-            system("service call SurfaceFlinger 1016 i32 1");
-        } else {
+        else
             sysfs_write(CPU_MAX_FREQ_PATH, NORMAL_MAX_FREQ);
-            // restores the refresh rate
-            system("service call SurfaceFlinger 1016 i32 0");
-        }
         low_power_mode = data;
         pthread_mutex_unlock(&manta->lock);
         break;
