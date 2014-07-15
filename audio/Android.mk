@@ -27,6 +27,7 @@ LOCAL_C_INCLUDES += \
 	device/samsung/manta/voicefx \
 	$(call include-path-for, audio-utils) \
 	$(call include-path-for, audio-route)
+LOCAL_CFLAGS := -Wno-unused-parameter
 LOCAL_SHARED_LIBRARIES := liblog libcutils libtinyalsa libaudioutils libbubblelevel \
 	libaudience_voicefx libaudioroute
 LOCAL_MODULE_TAGS := optional
