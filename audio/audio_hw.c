@@ -431,6 +431,7 @@ static int do_out_standby(struct stream_out *out);
 
 /* Helper functions */
 
+/* must be called with hw device mutex locked */
 static int open_hdmi_driver(struct audio_device *adev)
 {
     if (adev->hdmi_drv_fd < 0) {
@@ -461,7 +462,10 @@ static int enable_hdmi_audio(struct audio_device *adev, int enable)
     return ret;
 }
 
-/* must be called with hw device mutex locked */
+/* must be called with hw device mutex locked
+ * Called from adev_open_output_stream with no stream lock,
+ * but this is OK because stream is not yet visible
+ */
 static int read_hdmi_channel_masks(struct audio_device *adev, struct stream_out *out) {
     int ret;
     struct v4l2_control ctrl;
@@ -507,6 +511,7 @@ static int set_hdmi_channels(struct audio_device *adev, int channels) {
     return ret;
 }
 
+/* must be called with hw device mutex locked */
 static void select_devices(struct audio_device *adev)
 {
     int output_device_id = get_output_device_id(adev->out_device);
@@ -584,6 +589,7 @@ static void select_devices(struct audio_device *adev)
     audio_route_update_mixer(adev->ar);
 }
 
+/* must be called with hw device mutex unlocked */
 void bubblelevel_callback(bool is_level, void *user_data)
 {
     struct audio_device *adev = (struct audio_device *)user_data;
@@ -614,6 +620,9 @@ bool get_bubblelevel(struct audio_device *adev)
     return (adev->bubble_level != NULL);
 }
 
+/* Must be called with HDMI out stream and hw device mutexes locked,
+ * and all other out stream mutexes unlocked.
+ */
 static void force_non_hdmi_out_standby(struct audio_device *adev)
 {
     enum output_type type;
@@ -977,6 +986,7 @@ static audio_devices_t output_devices(struct stream_out *out)
     return devices;
 }
 
+/* must be called with out stream and hw device mutex locked */
 static int do_out_standby(struct stream_out *out)
 {
     struct audio_device *adev = out->dev;
@@ -1294,6 +1304,7 @@ static int in_set_format(struct audio_stream *stream, audio_format_t format)
     return -ENOSYS;
 }
 
+/* must be called with in stream and hw device mutex locked */
 static int do_in_standby(struct stream_in *in)
 {
     struct audio_device *adev = in->dev;
