@@ -71,8 +71,8 @@ on fs
     chmod 0664 /sys/class/gps/bcm475x/GPS_PWR_EN/value
     chown root system /sys/class/gps/bcm475x/GPS_nRST/value
     chmod 0664 /sys/class/gps/bcm475x/GPS_nRST/value
-    mkdir /data/gps 771 system system
-    chown system system /data/gps
+    mkdir /data/gps 771 gps system
+    chown gps system /data/gps
 
 # NFC: create data/nfc for nv storage
     mkdir /data/nfc 770 nfc nfc
