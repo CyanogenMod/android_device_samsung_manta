@@ -99,7 +99,7 @@ PRODUCT_COPY_FILES += \
     device/samsung/manta/gps/gps.conf:system/etc/gps.conf \
     device/samsung/manta/gps/gpsd:system/vendor/bin/gpsd \
     device/samsung/manta/gps/gps.xml:system/vendor/etc/gps.xml \
-    device/samsung/manta/gps/gps.exynos5.so:system/lib/hw/gps.exynos5.so
+    device/samsung/manta/gps/gps.manta.so:system/lib/hw/gps.manta.so
 
 # NFC packages
 PRODUCT_PACKAGES += \

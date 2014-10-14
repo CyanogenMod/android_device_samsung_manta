@@ -7,7 +7,7 @@
        gpioNStdbyPath="/sys/class/gps/bcm475x/GPS_PWR_EN/value"
        gpioNResetPath="/sys/class/gps/bcm475x/GPS_nRST/value"
        gpioDelayMs="250"
-       acNvStoDir="/data/"
+       acNvStoDir="/data/gps/"
 
        acLogDirectory="/data/gps/log/"
 
