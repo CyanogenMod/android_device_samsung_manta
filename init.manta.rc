@@ -57,7 +57,6 @@ on fs
     mkdir /factory 0775 radio radio
 
     mount_all /fstab.manta
-    mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory rw remount
     restorecon_recursive /factory
     mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory ro remount
     setprop ro.crypto.fuse_sdcard true
