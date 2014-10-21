@@ -51,3 +51,4 @@
 /dev/block/platform/dw_mmc\.0/by-name/recovery		       u:object_r:recovery_block_device:s0
 /dev/block/platform/dw_mmc\.0/by-name/cache		           u:object_r:cache_block_device:s0
 /dev/block/platform/dw_mmc\.0/by-name/userdata		       u:object_r:userdata_block_device:s0
+/dev/block/platform/dw_mmc\.0/by-name/metadata		       u:object_r:metadata_block_device:s0
