@@ -85,8 +85,6 @@ BOARD_HAL_STATIC_LIBRARIES := libhealthd.manta libdumpstate.manta
 
 BOARD_CHARGER_DISABLE_INIT_BLANK := true
 
-TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
-TARGET_RECOVERY_UI_LIB := librecovery_ui_manta
 TARGET_RECOVERY_UPDATER_LIBS += librecovery_updater_manta
 TARGET_RELEASETOOLS_EXTENSIONS := device/samsung/manta
 BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_23x41.h\"
@@ -100,18 +98,18 @@ BOARD_USB_AUDIO_CARD_ID := 2
 # Support WebGL in WebKit
 ENABLE_WEBGL := true
 
-BOARD_SEPOLICY_DIRS := \
+BOARD_SEPOLICY_DIRS += \
 	device/samsung/manta/sepolicy
 
-BOARD_SEPOLICY_UNION := \
+BOARD_SEPOLICY_UNION += \
 	file_contexts \
-	genfs_contexts \
-	adbd.te \
-	app.te \
 	device.te \
 	domain.te \
+	drmserver.te \
+	healthd.te \
 	gpsd.te \
 	file.te \
 	mediaserver.te \
-	surfaceflinger.te \
-	system.te
+	system_server.te
+
+MALLOC_IMPL := dlmalloc

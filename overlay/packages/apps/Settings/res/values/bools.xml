@@ -15,7 +15,6 @@
 -->
 
 <resources>
-    <!-- No powercontrol widget for tablets -->
+    <!-- PowerControl is deprecated, but it was shipped with this device -->
     <bool name="has_powercontrol_widget">true</bool>
-
 </resources>

@@ -1,1 +1,1 @@
-type ffs, fs_type;
+type sysfs_charge_enabled, fs_type, sysfs_type;

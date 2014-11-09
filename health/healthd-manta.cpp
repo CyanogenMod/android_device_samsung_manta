@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <healthd.h>
+#include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 #include <batteryservice/BatteryService.h>
@@ -25,10 +26,14 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+/* Nominal voltage for ENERGY_COUNTER computation */
+#define VOLTAGE_NOMINAL 3.7
+
 #define POWER_SUPPLY_SUBSYSTEM "power_supply"
 #define POWER_SUPPLY_SYSFS_PATH "/sys/class/" POWER_SUPPLY_SUBSYSTEM
 
 #define DS2784_PATH POWER_SUPPLY_SYSFS_PATH "/ds2784-fuelgauge"
+#define CHARGE_COUNTER_EXT_PATH DS2784_PATH "/charge_counter_ext"
 
 using namespace android;
 
@@ -209,9 +214,8 @@ static void manta_bat_monitor(struct BatteryProperties *props)
         manta_bat_check_temp(props);
     } else {
          props->batteryTemperature = 42;  /* 4.2C */
-         props->batteryVoltage = 4242; /* 4242mV */
+         props->batteryVoltage = 4342;    /* 4342mV */
          props->batteryLevel = 42;        /* 42% */
-         props->batteryCurrentNow = 42000;/* 42mA */
     }
 
     if (props->batteryStatus == BATTERY_STATUS_FULL &&
@@ -285,6 +289,45 @@ int healthd_board_battery_update(struct BatteryProperties *props)
     return 0;
 }
 
+static int read_sysfs(const char *path, char *buf, size_t size) {
+    char *cp = NULL;
+
+    int fd = open(path, O_RDONLY, 0);
+    if (fd == -1) {
+        KLOG_ERROR(LOG_TAG, "Could not open '%s'\n", path);
+        return -1;
+    }
+
+    ssize_t count = TEMP_FAILURE_RETRY(read(fd, buf, size));
+    if (count > 0)
+            cp = (char *)memrchr(buf, '\n', count);
+
+    if (cp)
+        *cp = '\0';
+    else
+        buf[0] = '\0';
+
+    close(fd);
+    return count;
+}
+
+static int64_t get_int64_field(const char *path) {
+    const int SIZE = 21;
+    char buf[SIZE];
+
+    int64_t value = 0;
+    if (read_sysfs(path, buf, SIZE) > 0) {
+        value = strtoll(buf, NULL, 0);
+    }
+    return value;
+}
+
+static int manta_energy_counter(int64_t *energy)
+{
+    *energy = get_int64_field(CHARGE_COUNTER_EXT_PATH) * VOLTAGE_NOMINAL;
+    return 0;
+}
+
 void healthd_board_init(struct healthd_config *config)
 {
     charge_enabled_fd = open(POWER_SUPPLY_SYSFS_PATH
@@ -298,7 +341,9 @@ void healthd_board_init(struct healthd_config *config)
     if (access(config->batteryCurrentNowPath.string(), R_OK) == 0) {
         manta_bat_batterypresent = true;
     } else {
-        KLOG_INFO("Missing battery, using fake battery data\n");
+        KLOG_INFO(LOG_TAG, "Missing battery, using fake battery data\n");
         config->batteryCurrentNowPath.clear();
     }
+
+    config->energyCounter = manta_energy_counter;
 }

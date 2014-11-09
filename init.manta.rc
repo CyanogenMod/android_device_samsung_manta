@@ -33,10 +33,6 @@ on post-fs-data
     mkdir /data/media 0770 media_rw media_rw
 
     setprop vold.post_fs_data_done 1
-    mkdir /data/misc/wifi 0770 wifi wifi
-    mkdir /data/misc/wifi/sockets 0770 wifi wifi
-    mkdir /data/misc/dhcp 0770 dhcp dhcp
-    chown dhcp dhcp /data/misc/dhcp
 
 # permissions for bluetooth.
 	setprop ro.bt.bdaddr_path "/factory/bluetooth/bt_addr"
@@ -46,8 +42,6 @@ on post-fs-data
 	chmod 0660 /sys/class/rfkill/rfkill0/state
 	chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
 	chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
-	restorecon /sys/class/rfkill/rfkill0/state
-	restorecon /sys/class/rfkill/rfkill0/type
 
 on boot
     # override init.rc to keep plenty of large order chunks around
@@ -70,24 +64,7 @@ on fs
     mkdir /factory 0775 radio radio
 
     mount_all /fstab.manta
-    mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory rw remount
-    restorecon /factory
-    restorecon /factory/bluetooth
-    restorecon /factory/bluetooth/bt_addr
-    restorecon /factory/FactoryApp
-    restorecon /factory/FactoryApp/
-    restorecon /factory/FactoryApp/baro_delta
-    restorecon /factory/FactoryApp/factorymode
-    restorecon /factory/FactoryApp/fdata
-    restorecon /factory/FactoryApp/hist_nv
-    restorecon /factory/FactoryApp/hw_ver
-    restorecon /factory/FactoryApp/keystr
-    restorecon /factory/FactoryApp/reset_flag
-    restorecon /factory/FactoryApp/test_nv
-    restorecon /factory/hdcp2.keys
-    restorecon /factory/wv.keys
-    restorecon /factory/wifi
-    restorecon /factory/wifi/
+    restorecon_recursive /factory
     mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory ro remount
     setprop ro.crypto.fuse_sdcard true
 
@@ -100,8 +77,8 @@ on fs
     chmod 0664 /sys/class/gps/bcm475x/GPS_PWR_EN/value
     chown root system /sys/class/gps/bcm475x/GPS_nRST/value
     chmod 0664 /sys/class/gps/bcm475x/GPS_nRST/value
-    mkdir /data/gps 771 system system
-    chown system system /data/gps
+    mkdir /data/gps 771 gps system
+    chown gps system /data/gps
 
 # NFC: create data/nfc for nv storage
     mkdir /data/nfc 770 nfc nfc
@@ -137,12 +114,10 @@ service fuse_usbdisk /system/bin/sdcard -u 1023 -g 1023 /mnt/media_rw/usbdisk /s
 
 service p2p_supplicant /system/bin/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
-    -I/system/etc/wifi/wpa_supplicant_overlay.conf \
-    -O/data/misc/wifi/sockets \
-    -puse_multi_chan_concurrent=1 -N -ip2p0 -Dnl80211 \
-    -c/data/misc/wifi/p2p_supplicant.conf \
+    -I/system/etc/wifi/wpa_supplicant_overlay.conf -N \
+    -ip2p0 -Dnl80211 -c/data/misc/wifi/p2p_supplicant.conf \
     -I/system/etc/wifi/p2p_supplicant_overlay.conf \
-    -puse_p2p_group_interface=1use_multi_chan_concurrent=1 \
+    -puse_p2p_group_interface=1 \
     -e/data/misc/wifi/entropy.bin -g@android:wpa_wlan0
     #   we will start as root and wpa_supplicant will switch to user wifi
     #   after setting up the capabilities required for WEXT
@@ -156,7 +131,6 @@ service p2p_supplicant /system/bin/wpa_supplicant \
 service wpa_supplicant /system/bin/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
     -I/system/etc/wifi/wpa_supplicant_overlay.conf \
-    -O/data/misc/wifi/sockets \
     -e/data/misc/wifi/entropy.bin -g@android:wpa_wlan0
     #   we will start as root and wpa_supplicant will switch to user wifi
     #   after setting up the capabilities required for WEXT
@@ -209,6 +183,8 @@ service iprenew_bt-pan /system/bin/dhcpcd -n
 
 service battery_charger /charger
     class charger
+    critical
+    seclabel u:r:healthd:s0
 
 # Set watchdog timer to 30 seconds and pet it every 10 seconds to get a 20 second margin
 service watchdogd /sbin/watchdogd 10 20
