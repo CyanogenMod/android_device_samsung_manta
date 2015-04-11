@@ -23,5 +23,5 @@ PRODUCT_MANUFACTURER := samsung
 
 PRODUCT_BUILD_PROP_OVERRIDES += \
     PRODUCT_NAME=mantaray \
-    BUILD_FINGERPRINT=google/mantaray/manta:5.0.2/LRX22G/1649326:user/release-keys \
-    PRIVATE_BUILD_DESC="mantaray-user 5.0.2 LRX22G 1649326 release-keys"
+    BUILD_FINGERPRINT=google/mantaray/manta:5.1.0/LMY47D/1743759:user/release-keys \
+    PRIVATE_BUILD_DESC="mantaray-user 5.1.0 LMY47D 1743759 release-keys"
