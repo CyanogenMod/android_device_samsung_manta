@@ -115,3 +115,5 @@ BOARD_SEPOLICY_UNION += \
 	system_server.te
 
 MALLOC_IMPL := dlmalloc
+
+BOARD_INV_LIBMLLITE_FROM_SOURCE := true
