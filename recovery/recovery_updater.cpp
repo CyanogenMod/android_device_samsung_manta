@@ -179,7 +179,7 @@ Value* WriteBootloaderFn(const char* name, State* state, int argc, Expr* argv[])
       return ErrorAbort(state, "%s(): argument types are incorrect", name);
     }
 
-    result = update_bootloader(img->data, img->size,
+    result = update_bootloader(reinterpret_cast<unsigned char*>(img->data), img->size,
                                block_loc->data, force_ro_loc->data);
     FreeValue(img);
     FreeValue(block_loc);
@@ -187,7 +187,7 @@ Value* WriteBootloaderFn(const char* name, State* state, int argc, Expr* argv[])
     return StringValue(strdup(result == 0 ? "t" : ""));
 }
 
-void Register_librecovery_updater_manta() {
+extern "C" void Register_librecovery_updater_manta() {
     fprintf(stderr, "installing samsung.manta updater extensions\n");
 
     RegisterFunction("samsung.manta.write_bootloader", WriteBootloaderFn);
