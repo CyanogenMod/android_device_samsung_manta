@@ -179,7 +179,7 @@ Value* WriteBootloaderFn(const char* name, State* state, int argc, Expr* argv[])
       return ErrorAbort(state, "%s(): argument types are incorrect", name);
     }
 
-    result = update_bootloader(img->data, img->size,
+    result = update_bootloader(reinterpret_cast<unsigned char*>(img->data), img->size,
                                block_loc->data, force_ro_loc->data);
     FreeValue(img);
     FreeValue(block_loc);
