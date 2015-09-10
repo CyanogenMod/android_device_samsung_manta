@@ -39,6 +39,11 @@ on boot
 # Set Mali power policy as Coarse demand
     write /sys/devices/platform/mali.0/power_policy coarse_demand
 
+    # Assign TCP buffer thresholds to be ceiling value of technology maximums
+    # Increased technology maximums should be reflected here.
+    write /proc/sys/net/core/rmem_max  8388608
+    write /proc/sys/net/core/wmem_max  8388608
+
 on fs
     mkdir /factory 0775 radio radio
 
