@@ -134,10 +134,6 @@ PRODUCT_PACKAGES += \
     libion
 
 PRODUCT_PACKAGES += \
-    librs_jni \
-    com.android.future.usb.accessory
-
-PRODUCT_PACKAGES += \
     audio.primary.manta \
     audio.a2dp.default \
     audio.usb.default \
