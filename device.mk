@@ -129,6 +129,13 @@ PRODUCT_PACKAGES += \
     lights.manta \
     sensors.manta
 
+# We need to build the GPS interposition library for the GPS to work, also M removes
+# libstlport, but some of our binary-only prebuilts need it, so we'll add it back in
+# in source and here
+PRODUCT_PACKAGES += \
+    libdmitry \
+    libstlport
+
 PRODUCT_AAPT_CONFIG := xlarge hdpi xhdpi
 PRODUCT_AAPT_PREF_CONFIG := xhdpi
 

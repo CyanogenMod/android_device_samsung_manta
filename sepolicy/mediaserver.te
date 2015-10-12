@@ -1,5 +1,8 @@
 allow mediaserver system_server:unix_stream_socket { read write setopt };
 
+allow mediaserver sensorservice_service:service_manager { find } ;
+allow mediaserver healthd_service:service_manager { find } ;
+
 # Playback DRM protected content
 allow mediaserver secmem_device:chr_file rw_file_perms;
 r_dir_file(mediaserver, efs_file)

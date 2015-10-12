@@ -52,7 +52,7 @@ int BubbleLevelImpl::init()
         return mInitStatus;
     }
 
-    SensorManager& mgr(SensorManager::getInstance());
+    SensorManager mgr(String16("com.samsung.bubblelevel"));
     Sensor const* const* sensorList;
 
     mNumSensors = mgr.getSensorList(&sensorList);

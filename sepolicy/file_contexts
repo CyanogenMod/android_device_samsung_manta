@@ -27,8 +27,11 @@
 /dev/video44            u:object_r:camera_device:s0
 /dev/media2             u:object_r:camera_device:s0
 
-/data/\.gps\.interface\.pipe\.to_gpsd	u:object_r:gps_data_file:s0
-/data/\.gps\.interface\.pipe\.to_jni	u:object_r:gps_data_file:s0
+/data/gps/gps\.interface\.pipe\.to_gpsd	u:object_r:gps_data_file:s0
+/data/gps/gps\.interface\.pipe\.to_jni	u:object_r:gps_data_file:s0
+/data/gps/ctrlpipe	u:object_r:gps_data_file:s0
+/data/gps/.gpslogd.pipe	u:object_r:gps_data_file:s0
+/data/gps/nmeapipe	u:object_r:gps_data_file:s0
 
 /data/app/tlcd_sock     u:object_r:drmserver_socket:s0
 
@@ -38,7 +41,12 @@
 /factory/bluetooth(/.*)?        u:object_r:bluetooth_efs_file:s0
 
 /system/bin/mcDriverDaemon  --  u:object_r:tee_exec:s0
+/system/lib/hw/gps.manta.so   u:object_r:gps_data_file:s0
 
 /sys/devices/platform/bcm43241_bluetooth/rfkill/rfkill0/state -- u:object_r:sysfs_bluetooth_writable:s0
 /sys/devices/platform/bcm43241_bluetooth/rfkill/rfkill0/type -- u:object_r:sysfs_bluetooth_writable:s0
 /sys/devices/virtual/power_supply/manta-battery/charge_enabled u:object_r:sysfs_charge_enabled:s0
+
+
+/dev/block/platform/dw_mmc\.0/by-name/userdata     u:object_r:userdata_block_device:s0
+/dev/block/platform/dw_mmc\.0/by-name/cache        u:object_r:cache_block_device:s0
