@@ -1,1 +1,2 @@
 allow healthd sysfs_charge_enabled:file rw_file_perms;
+
