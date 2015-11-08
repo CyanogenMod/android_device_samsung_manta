@@ -182,7 +182,6 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # set default USB configuration
 PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
-    persist.sys.usb.config=mtp \
     persist.sys.isUsbOtgEnabled=true
 
 # for off charging mode
