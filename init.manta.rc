@@ -1,5 +1,8 @@
 import init.manta.usb.rc
 
+on early-init
+    mount debugfs /sys/kernel/debug /sys/kernel/debug mode=755
+
 on init
     start watchdogd
 
@@ -31,12 +34,7 @@ on boot
     # to improve allocation times
     write /proc/sys/vm/min_free_order_shift 1
 
-    mount debugfs /sys/kernel/debug /sys/kernel/debug
     setprop ro.radio.noril yes
-
-    # Set up kernel tracing, but disable it by default
-    chmod 0222 /sys/kernel/debug/tracing/trace_marker
-    write /sys/kernel/debug/tracing/tracing_on 0
 
     chmod 0444 /sys/kernel/debug/smb347-regs
 
