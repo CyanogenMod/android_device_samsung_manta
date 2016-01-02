@@ -49,7 +49,6 @@ on fs
     mount_all /fstab.manta
     restorecon_recursive /factory
     mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory ro remount
-    setprop ro.crypto.fuse_sdcard true
 
 # Permissions for backlight
     chmod 0660 /sys/class/backlight/pwm-backlight.0/brightness
