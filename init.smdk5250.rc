@@ -1,19 +1,9 @@
 import init.smdk5250.usb.rc
 
 on init
-    # See storage config details at http://source.android.com/tech/storage/
-    mkdir /mnt/shell/emulated 0700 shell shell
-    mkdir /storage/emulated 0555 root root
-
-    export EXTERNAL_STORAGE /storage/emulated/legacy
-    export EMULATED_STORAGE_SOURCE /mnt/shell/emulated
-    export EMULATED_STORAGE_TARGET /storage/emulated
-
     # Support legacy paths
-    symlink /storage/emulated/legacy /sdcard
-    symlink /storage/emulated/legacy /mnt/sdcard
-    symlink /storage/emulated/legacy /storage/sdcard0
-    symlink /mnt/shell/emulated/0 /storage/emulated/legacy
+    symlink /sdcard /mnt/sdcard
+    symlink /sdcard /storage/sdcard0
 
 on post-fs-data
     mkdir /data/media 0770 media_rw media_rw
@@ -34,7 +24,6 @@ on boot
 
 on fs
     mount_all /fstab.smdk5250
-    setprop ro.crypto.fuse_sdcard true
 
 # Permissions for backlight
     chmod 0666 /sys/class/backlight/pwm-backlight.0/brightness
@@ -51,7 +40,3 @@ service setup_fs /system/bin/setup_fs \
     user root
     group root
     oneshot
-
-# virtual sdcard daemon running as media_rw (1023)
-service sdcard /system/bin/sdcard -u 1023 -g 1023 -l /data/media /mnt/shell/emulated
-    class late_start
