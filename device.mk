@@ -187,6 +187,10 @@ PRODUCT_PROPERTY_OVERRIDES := \
     ro.hwui.disable_scissor_opt=true \
     af.fast_track_multiplier=1
 
+PRODUCT_PROPERTY_OVERRIDES += \
+    dalvik.vm.dex2oat-filter=speed \
+    dalvik.vm.dex2oat-swap=false
+
 # setup dalvik vm configs.
 $(call inherit-product, frameworks/native/build/tablet-10in-xhdpi-2048-dalvik-heap.mk)
 
