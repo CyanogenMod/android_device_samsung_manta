@@ -1,4 +1,5 @@
 # Resolution values for bootanimation
+TARGET_BOOTANIMATION_HALF_RES := true
 TARGET_SCREEN_HEIGHT := 1600
 TARGET_SCREEN_WIDTH := 2560
 
