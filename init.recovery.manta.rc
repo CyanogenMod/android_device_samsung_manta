@@ -1,6 +1,10 @@
 on init
     start watchdogd
 
+# These symlinks are needed for the battery percentage and charging status to be shown in TWRP
+    symlink /sys/class/power_supply/smb347-battery/status /status
+    symlink /sys/class/power_supply/ds2784-fuelgauge/capacity /capacity
+
 # Set watchdog timer to 30 seconds and pet it every 10 seconds to get a 20 second margin
 service watchdogd /sbin/watchdogd 10 20
     class core

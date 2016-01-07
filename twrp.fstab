@@ -1,0 +1,12 @@
+# TWRP defaults Crypto_Key_Location="footer", so no need to add flags=encryptable=footer to /data
+
+# device                                          mount_point     fstype  mount_flags                             fs_flags    twrp_flags
+/dev/block/mmcblk0boot0                          /bootloader      emmc    defaults                                defaults
+/dev/block/platform/dw_mmc.0/by-name/boot        /boot            emmc    defaults                                defaults
+/dev/block/platform/dw_mmc.0/by-name/cache       /cache           ext4    noatime,nosuid,nodev,noauto_da_alloc    defaults
+/dev/block/platform/dw_mmc.0/by-name/userdata    /data            ext4    noatime,nosuid,nodev,noauto_da_alloc    encryptable=/dev/block/platform/dw_mmc.0/by-name/metadata
+/dev/block/platform/dw_mmc.0/by-name/efs         /factory         ext4    noatime,nosuid,nodev                    defaults
+/dev/block/platform/dw_mmc.0/by-name/misc        /misc            emmc    defaults                                defaults
+/dev/block/platform/dw_mmc.0/by-name/recovery    /recovery        emmc    defaults                                defaults
+/dev/block/platform/dw_mmc.0/by-name/system      /system          ext4    defaults                                defaults
+

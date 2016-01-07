@@ -40,7 +40,8 @@ PRODUCT_COPY_FILES += \
     device/samsung/manta/init.smdk5250.rc:root/init.smdk5250.rc \
     device/samsung/manta/init.smdk5250.usb.rc:root/init.smdk5250.usb.rc \
     device/samsung/manta/fstab.smdk5250:root/fstab.smdk5250 \
-    device/samsung/manta/ueventd.smdk5250.rc:root/ueventd.smdk5250.rc
+    device/samsung/manta/ueventd.smdk5250.rc:root/ueventd.smdk5250.rc \
+    device/samsung/manta/twrp.fstab:recovery/root/etc/twrp.fstab
 
 # Input device files for smdk5250
 PRODUCT_COPY_FILES += \
