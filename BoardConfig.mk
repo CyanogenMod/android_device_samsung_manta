@@ -87,8 +87,6 @@ BOARD_HAL_STATIC_LIBRARIES := libhealthd.manta libdumpstate.manta
 BOARD_CHARGER_DISABLE_INIT_BLANK := true
 BOARD_CHARGER_SHOW_PERCENTAGE := true
 
-BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_23x41.h\"
-
 # Default card id for USB audio
 BOARD_USB_AUDIO_CARD_ID := 2
 
