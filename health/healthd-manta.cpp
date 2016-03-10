@@ -17,7 +17,7 @@
 #define LOG_TAG "healthd-manta"
 #include <errno.h>
 #include <fcntl.h>
-#include <healthd.h>
+#include <healthd/healthd.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
