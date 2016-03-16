@@ -1,9 +1,8 @@
 
 type batteryproperties, domain;
-type batteryproperties_service,           service_manager_type;
 
 binder_use(batteryproperties)
-binder_service(batteryproperties)
+binder_service(batteryproperties_service)
 binder_call(batteryproperties, system_server)
 
-allow batteryproperties healthd_service:service_manager { find } ;
+allow batteryproperties batteryproperties_service:service_manager { find } ;
