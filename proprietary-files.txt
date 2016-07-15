@@ -1,0 +1,42 @@
+# Bluetooth firmware
+vendor/firmware/bcm2079x_firmware.ncd
+vendor/firmware/bcm2079x_pre_firmware.ncd
+vendor/firmware/bcm43241.hcd
+
+# Camera firmware
+vendor/firmware/fimc_is_fw.bin
+vendor/firmware/fimc_is_fw2.bin
+vendor/firmware/setfile.bin
+vendor/firmware/setfile_4e5.bin
+vendor/firmware/setfile_6a3.bin
+
+# DRM
+vendor/lib/libstagefright_hdcp.so
+
+# Graphics
+vendor/lib/egl/libGLES_mali.so
+vendor/lib/libRSDriverArm.so
+vendor/lib/libmalicore.bc
+
+# Media firmware
+vendor/firmware/mfc_fw.bin
+
+# Mobicore Trustzone
+vendor/secapp/00060308060501020000000000000000.tlbin
+vendor/secapp/020a0000000000000000000000000000.drbin
+vendor/secapp/07060000000000000000000000000000.tlbin
+vendor/secapp/ffffffff000000000000000000000005.tlbin
+
+# TP firmware
+vendor/firmware/maxtouch.fw
+
+# VoiceFX firmware
+vendor/firmware/es305_fw.bin
+
+# Widevine
+vendor/lib/drm/libdrmwvmplugin.so
+vendor/lib/mediadrm/libwvdrmengine.so
+vendor/lib/libWVStreamControlAPI_L1.so
+vendor/lib/libdrmdecrypt.so
+vendor/lib/libwvdrm_L1.so
+vendor/lib/libwvm.so
