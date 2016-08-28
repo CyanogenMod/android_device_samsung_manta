@@ -101,3 +101,6 @@ BOARD_SEPOLICY_DIRS += \
 MALLOC_SVELTE := true
 
 BOARD_INV_LIBMLLITE_FROM_SOURCE := true
+
+# Seccomp filters
+BOARD_SECCOMP_POLICY += device/samsung/manta/seccomp
