@@ -114,6 +114,4 @@ ENABLE_WEBGL := true
 BOARD_SEPOLICY_DIRS += \
 	device/samsung/manta/sepolicy
 
-MALLOC_IMPL := dlmalloc
-
 BOARD_INV_LIBMLLITE_FROM_SOURCE := true
