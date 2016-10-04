@@ -30,13 +30,9 @@ BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/samsung/manta/bluetooth
 
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
-TARGET_CPU_SMP := true
 TARGET_ARCH := arm
 TARGET_ARCH_VARIANT := armv7-a-neon
 TARGET_CPU_VARIANT := cortex-a15
-
-# Enable QC's libm optimizations
-TARGET_USE_QCOM_BIONIC_OPTIMIZATION := true
 
 # Define kernel config for inline building
 TARGET_KERNEL_CONFIG := cyanogenmod_manta_defconfig
@@ -59,9 +55,6 @@ BOARD_EGL_CFG := device/samsung/manta/egl.cfg
 
 OVERRIDE_RS_DRIVER := libRSDriverArm.so
 
-#BOARD_USES_HGL := true
-#BOARD_USES_OVERLAY := true
-USE_OPENGL_RENDERER := true
 NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 
 TARGET_RECOVERY_FSTAB = device/samsung/manta/fstab.manta
@@ -78,9 +71,6 @@ BOARD_FLASH_BLOCK_SIZE := 4096
 WITH_DEXPREOPT_BOOT_IMG_ONLY ?= false
 WITH_DEXPREOPT := false
 DONT_DEXPREOPT_PREBUILTS := true
-
-#TARGET_PROVIDES_INIT_RC := true
-#TARGET_USERIMAGES_SPARSE_EXT_DISABLED := true
 
 # Wifi related defines
 BOARD_WPA_SUPPLICANT_DRIVER := NL80211
@@ -101,15 +91,9 @@ BOARD_CHARGER_SHOW_PERCENTAGE := true
 TARGET_RECOVERY_UPDATER_LIBS += librecovery_updater_manta
 TARGET_RELEASETOOLS_EXTENSIONS := device/samsung/manta
 BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_23x41.h\"
-BOARD_RECOVERY_SWIPE := true
-
-BOARD_HAS_NO_SELECT_BUTTON := true
 
 # Default card id for USB audio
 BOARD_USB_AUDIO_CARD_ID := 2
-
-# Support WebGL in WebKit
-ENABLE_WEBGL := true
 
 BOARD_SEPOLICY_DIRS += \
 	device/samsung/manta/sepolicy
