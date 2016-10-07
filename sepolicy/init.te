@@ -1,0 +1,2 @@
+allow init debugfs:dir mounton;
+allow init tmpfs:lnk_file create;
