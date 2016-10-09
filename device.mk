@@ -34,20 +34,6 @@ PRODUCT_COPY_FILES += \
     device/samsung/manta/manta-keypad.kl:system/usr/keylayout/manta-keypad.kl \
     device/samsung/manta/manta-keypad.kcm:system/usr/keychars/manta-keypad.kcm
 
-
-# Init files for booting smdk5250 with a manta image
-PRODUCT_COPY_FILES += \
-    device/samsung/manta/init.smdk5250.rc:root/init.smdk5250.rc \
-    device/samsung/manta/init.smdk5250.usb.rc:root/init.smdk5250.usb.rc \
-    device/samsung/manta/fstab.smdk5250:root/fstab.smdk5250 \
-    device/samsung/manta/ueventd.smdk5250.rc:root/ueventd.smdk5250.rc
-
-# Input device files for smdk5250
-PRODUCT_COPY_FILES += \
-    device/samsung/manta/egalax_i2c.idc:system/usr/idc/egalax_i2c.idc \
-    device/samsung/manta/smdk5250-keypad.kl:system/usr/keylayout/smdk5250-keypad.kl \
-    device/samsung/manta/smdk5250-keypad.kcm:system/usr/keychars/smdk5250-keypad.kcm
-
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/tablet_core_hardware.xml:system/etc/permissions/tablet_core_hardware.xml \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
