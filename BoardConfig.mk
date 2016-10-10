@@ -21,7 +21,6 @@ WITH_CM_CHARGER := false
 # by BoardConfigVendor.mk
 BOARD_USES_GENERIC_AUDIO := true
 
-# Default values, possibly overridden by BoardConfigVendor.mk
 TARGET_BOARD_INFO_FILE := device/samsung/manta/board-info.txt
 BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/samsung/manta/bluetooth
 
@@ -43,6 +42,7 @@ BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
 BCM_BLUETOOTH_MANTA_BUG := true
 
+# build/core/Makefile
 TARGET_NO_BOOTLOADER := true
 
 USE_CLANG_PLATFORM_BUILD := true
