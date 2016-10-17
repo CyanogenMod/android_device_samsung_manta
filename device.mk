@@ -119,8 +119,13 @@ PRODUCT_PACKAGES += \
     libdmitry \
     libstlport
 
-PRODUCT_AAPT_CONFIG := xlarge hdpi xhdpi
+# /platform/build/core/product.mk
+# https://android.googlesource.com/platform/build/+/83ee6d790f007beaefcc5f997b15952ed6d7d840
+PRODUCT_AAPT_CONFIG := xlarge
+# https://android.googlesource.com/platform/build/+/a0f464a8e7f006177db084df7e925bbb8e5ffed3
 PRODUCT_AAPT_PREF_CONFIG := xhdpi
+# https://android.googlesource.com/platform/build/+/60686586a5f9c8f78b9ad16e19782da85e89a760
+PRODUCT_AAPT_PREBUILT_DPI := hdpi mdpi
 
 PRODUCT_CHARACTERISTICS := tablet,nosdcard
 
