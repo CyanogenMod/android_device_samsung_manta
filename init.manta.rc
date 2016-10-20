@@ -1,54 +1,34 @@
 import init.manta.usb.rc
 
-on init
-    start watchdogd
+on early-init
+    mount debugfs /sys/kernel/debug /sys/kernel/debug mode=755
 
-    # Support legacy paths
-    symlink /sdcard /mnt/sdcard
+on init
     symlink /sdcard /storage/sdcard0
 
-# KSM
-    write /sys/kernel/mm/ksm/pages_to_scan 100
-    write /sys/kernel/mm/ksm/sleep_millisecs 500
-#    write /sys/kernel/mm/ksm/run 1
-
-on post-fs-data
-    mkdir /data/media 0770 media_rw media_rw
-
-    setprop vold.post_fs_data_done 1
-
-# permissions for bluetooth.
-	setprop ro.bt.bdaddr_path "/factory/bluetooth/bt_addr"
-	chown bluetooth net_bt_stack ro.bt.bdaddr_path
-	chown bluetooth net_bt_stack /dev/ttySAC0
-	chmod 0660 /dev/ttySAC0
-	chmod 0660 /sys/class/rfkill/rfkill0/state
-	chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
-	chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
-
-on boot
-    # override init.rc to keep plenty of large order chunks around
-    # to improve allocation times
-    write /proc/sys/vm/min_free_order_shift 1
-
-    mount debugfs /sys/kernel/debug /sys/kernel/debug
     setprop ro.radio.noril yes
 
-    # Set up kernel tracing, but disable it by default
-    chmod 0222 /sys/kernel/debug/tracing/trace_marker
-    write /sys/kernel/debug/tracing/tracing_on 0
+    start watchdogd
 
-    chmod 0444 /sys/kernel/debug/smb347-regs
+on late-init
 
-# Set Mali power policy as Coarse demand
-    write /sys/devices/platform/mali.0/power_policy coarse_demand
+on early-boot
 
-on fs
-    mkdir /factory 0775 radio radio
+# Set watchdog timer to 30 seconds and pet it every 10 seconds to get a 20 second margin
+service watchdogd /sbin/watchdogd 10 20
+    class core
+    seclabel u:r:watchdogd:s0
 
-    mount_all /fstab.manta
-    restorecon_recursive /factory
-    mount ext4 /dev/block/platform/dw_mmc.0/by-name/efs /factory ro remount
+on post-fs
+    # Turn on swap
+    swapon_all /fstab.manta
+
+    # Swap in only 1 page at a time
+    write /proc/sys/vm/page-cluster 0
+
+on post-fs-data
+
+mkdir /factory 0775 radio radio
 
 # Permissions for backlight
     chmod 0660 /sys/class/backlight/pwm-backlight.0/brightness
@@ -86,6 +66,35 @@ on fs
     chown root audio /sys/class/i2c-dev/i2c-4/device/4-003e/aec_enable
     chmod 0660 /sys/class/i2c-dev/i2c-4/device/4-003e/aec_enable
 
+# permissions for bluetooth.
+    setprop ro.bt.bdaddr_path "/factory/bluetooth/bt_addr"
+    chown bluetooth net_bt_stack ro.bt.bdaddr_path
+    chown bluetooth net_bt_stack /dev/ttySAC0
+    chmod 0660 /dev/ttySAC0
+    chmod 0660 /sys/class/rfkill/rfkill0/state
+    chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/state
+    chown bluetooth net_bt_stack /sys/class/rfkill/rfkill0/type
+
+    setprop vold.post_fs_data_done 1
+
+on boot
+    chmod 0444 /sys/kernel/debug/smb347-regs
+
+# Set Mali power policy as Coarse demand
+    write /sys/devices/platform/mali.0/power_policy coarse_demand
+
+on fs   
+    mount_all fstab.manta
+
+service battery_charger /charger
+    class charger
+    critical
+    seclabel u:r:healthd:s0
+
+service fuse_usbdisk /system/bin/sdcard -u 1023 -g 1023 /mnt/media_rw/usbdisk /storage/usbdisk
+    class late_start
+    disabled
+
 service p2p_supplicant /system/bin/wpa_supplicant \
     -iwlan0 -Dnl80211 -c/data/misc/wifi/wpa_supplicant.conf \
     -I/system/etc/wifi/wpa_supplicant_overlay.conf -N \
@@ -115,56 +124,6 @@ service wpa_supplicant /system/bin/wpa_supplicant \
     disabled
     oneshot
 
-service dhcpcd_wlan0 /system/bin/dhcpcd -aABDKL
-    class main
-    disabled
-    oneshot
-
-service dhcpcd_p2p /system/bin/dhcpcd -aABKL
-    class main
-    disabled
-    oneshot
-
-service dhcpcd_eth0 /system/bin/dhcpcd -ABDKL
-    class main
-    disabled
-    oneshot
-
-service dhcpcd_bt-pan /system/bin/dhcpcd -ABKL
-    class main
-    disabled
-    oneshot
-
-service iprenew_wlan0 /system/bin/dhcpcd -n
-    class main
-    disabled
-    oneshot
-
-service iprenew_p2p /system/bin/dhcpcd -n
-    class main
-    disabled
-    oneshot
-
-service iprenew_eth0 /system/bin/dhcpcd -n
-    class main
-    disabled
-    oneshot
-
-service iprenew_bt-pan /system/bin/dhcpcd -n
-    class main
-    disabled
-    oneshot
-
-service battery_charger /charger
-    class charger
-    critical
-    seclabel u:r:healthd:s0
-
-# Set watchdog timer to 30 seconds and pet it every 10 seconds to get a 20 second margin
-service watchdogd /sbin/watchdogd 10 20
-    class core
-    seclabel u:r:watchdogd:s0
-
 service gpsd /system/vendor/bin/gpsd -c /system/vendor/etc/gps.xml
     class main
     socket gps seqpacket 0660 gps system
@@ -184,8 +143,8 @@ on property:ro.debuggable=1
     write /sys/module/fiq_debugger/parameters/kgdb_enable 1
 
 # bugreport is triggered by holding down volume down, volume up and power
-service bugreport /system/bin/dumpstate -d -p -B \
-        -o /data/data/com.android.shell/files/bugreports/bugreport
+service bugreport /system/bin/dumpstate -d -p -B -z \
+        -o /data/user_de/0/com.android.shell/files/bugreports/bugreport
     class main
     disabled
     oneshot
