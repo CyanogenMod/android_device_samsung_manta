@@ -44,8 +44,6 @@ PRODUCT_COPY_FILES += \
     frameworks/av/media/libstagefright/data/media_codecs_google_video.xml:system/etc/media_codecs_google_video.xml \
     device/samsung/manta/media_codecs.xml:system/etc/media_codecs.xml \
     device/samsung/manta/media_profiles.xml:system/etc/media_profiles.xml \
-    frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:system/etc/permissions/android.hardware.camera.flash-autofocus.xml \
-    frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml \
     frameworks/native/data/etc/android.hardware.usb.accessory.xml:system/etc/permissions/android.hardware.usb.accessory.xml \
     frameworks/native/data/etc/android.hardware.usb.host.xml:system/etc/permissions/android.hardware.usb.host.xml \
     frameworks/native/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
@@ -148,9 +146,6 @@ PRODUCT_PACKAGES += \
 
 PRODUCT_PACKAGES += \
     power.manta
-
-PRODUCT_PACKAGES += \
-    camera.exynos5
 
 # Filesystem management tools
 PRODUCT_PACKAGES += \
