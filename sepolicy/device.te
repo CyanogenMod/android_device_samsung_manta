@@ -1,3 +1,9 @@
+type bootloader_block_device, dev_type;
+type efs_block_device, dev_type;
+type param_block_device, dev_type;
 type secmem_device, dev_type;
-# Unified Memory Management device
-type ump_device, dev_type;
+type rfkill_device, dev_type;
+type cpu_device, dev_type;
+type loop-control_device, dev_type;
+type psaux_device, dev_type;
+type tracebuf_device, dev_type;

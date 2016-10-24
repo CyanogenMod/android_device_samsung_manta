@@ -1,1 +1,0 @@
-allow vold efs_file:dir {read};
