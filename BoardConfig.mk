@@ -97,8 +97,6 @@ BOARD_USB_AUDIO_CARD_ID := 2
 BOARD_SEPOLICY_DIRS += \
 	device/samsung/manta/sepolicy
 
-MALLOC_SVELTE := true
-
 BOARD_INV_LIBMLLITE_FROM_SOURCE := true
 
 # Bootanimation
