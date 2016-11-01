@@ -36,9 +36,12 @@
 /factory/bluetooth(/.*)?                                         u:object_r:bluetooth_efs_file:s0
 
 # Camera related
+
 # s5p-jpeg
 /dev/video11                                                     u:object_r:camera_device:s0
 /dev/video12                                                     u:object_r:camera_device:s0
+/dev/media2                                                      u:object_r:camera_device:s0
+
 # s5p-mfc decoder
 /dev/video6                                                      u:object_r:video_device:s0
 # s5p-mfc encoder
@@ -51,12 +54,22 @@
 /dev/video18                                                     u:object_r:video_device:s0
 /dev/video19                                                     u:object_r:video_device:s0
 
-/dev/video40                                                     u:object_r:camera_device:s0
-/dev/video41                                                     u:object_r:camera_device:s0
-/dev/video42                                                     u:object_r:camera_device:s0
-/dev/video43                                                     u:object_r:camera_device:s0
-/dev/video44                                                     u:object_r:camera_device:s0
-/dev/media2                                                      u:object_r:camera_device:s0
+/dev/video23                                                     u:object_r:video_device:s0
+/dev/video24                                                     u:object_r:video_device:s0
+/dev/video25                                                     u:object_r:video_device:s0
+/dev/video26                                                     u:object_r:video_device:s0
+/dev/video27                                                     u:object_r:video_device:s0
+/dev/video28                                                     u:object_r:video_device:s0
+/dev/video29                                                     u:object_r:video_device:s0
+/dev/video30                                                     u:object_r:video_device:s0
+/dev/video31                                                     u:object_r:video_device:s0
+/dev/video32                                                     u:object_r:video_device:s0
+/dev/video33                                                     u:object_r:video_device:s0
+/dev/video34                                                     u:object_r:video_device:s0
+/dev/video40                                                     u:object_r:video_device:s0
+/dev/video41                                                     u:object_r:video_device:s0
+/dev/video42                                                     u:object_r:video_device:s0
+/dev/video44                                                     u:object_r:video_device:s0
 
 /dev/v4l-subdev[0-9]*                                            u:object_r:video_device:s0
 /dev/media[0-1]*                                                 u:object_r:video_device:s0
