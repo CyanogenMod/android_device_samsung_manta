@@ -33,16 +33,22 @@
 /sys/devices/platform/bcm43241_bluetooth/rfkill/rfkill0/state -- u:object_r:sysfs_bluetooth_writable:s0
 /sys/devices/platform/bcm43241_bluetooth/rfkill/rfkill0/type --  u:object_r:sysfs_bluetooth_writable:s0
 
-# Camera related
-/dev/video6                                                      u:object_r:video_device:s0
-/dev/video7                                                      u:object_r:video_device:s0
+
+#/dev/video6                                                      u:object_r:video_device:s0
+#/dev/video7                                                      u:object_r:video_device:s0
+
+# JPEG
 /dev/video11                                                     u:object_r:video_device:s0
 /dev/video12                                                     u:object_r:video_device:s0
-# this is the hdmi audio mixer
+
+# hdmi mixer
+# video16 is the audio mixer
 /dev/video16                                                     u:object_r:audio_device:s0
 /dev/video17                                                     u:object_r:video_device:s0
 /dev/video18                                                     u:object_r:video_device:s0
 /dev/video19                                                     u:object_r:video_device:s0
+
+# gscalers
 /dev/video23                                                     u:object_r:video_device:s0
 /dev/video24                                                     u:object_r:video_device:s0
 /dev/video25                                                     u:object_r:video_device:s0
@@ -55,13 +61,16 @@
 /dev/video32                                                     u:object_r:video_device:s0
 /dev/video33                                                     u:object_r:video_device:s0
 /dev/video34                                                     u:object_r:video_device:s0
-/dev/video40                                                     u:object_r:video_device:s0
-/dev/video41                                                     u:object_r:video_device:s0
-/dev/video42                                                     u:object_r:video_device:s0
-/dev/video44                                                     u:object_r:video_device:s0
+
+# Camera
+/dev/video40                                                     u:object_r:camera_device:s0
+/dev/video41                                                     u:object_r:camera_device:s0
+/dev/video42                                                     u:object_r:camera_device:s0
+/dev/video44                                                     u:object_r:camera_device:s0
+/dev/media2                                                      u:object_r:camera_device:s0
 
 /dev/v4l-subdev[0-9]*                                            u:object_r:video_device:s0
-/dev/media[0-2]*                                                 u:object_r:video_device:s0
+/dev/media[0-1]*                                                 u:object_r:video_device:s0
 /dev/memory_throughput                                           u:object_r:video_device:s0
 
 # GPS
