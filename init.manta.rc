@@ -4,6 +4,8 @@ on early-init
     mount debugfs /sys/kernel/debug /sys/kernel/debug mode=755
 
 on init
+export LD_SHIM_LIBS "/system/vendor/lib/libwvm.so|widevine_shim.so"
+
     symlink /sdcard /storage/sdcard0
 
     setprop ro.radio.noril yes

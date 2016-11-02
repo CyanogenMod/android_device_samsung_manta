@@ -116,7 +116,8 @@ PRODUCT_PACKAGES += \
 # in source and here
 PRODUCT_PACKAGES += \
     libdmitry \
-    libstlport
+    libstlport \
+    widevine_shim
 
 PRODUCT_AAPT_CONFIG := xlarge
 PRODUCT_AAPT_PREF_CONFIG := xhdpi
