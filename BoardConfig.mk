@@ -87,8 +87,6 @@ BOARD_HAL_STATIC_LIBRARIES := libhealthd.manta libdumpstate.manta
 BOARD_CHARGER_DISABLE_INIT_BLANK := true
 BOARD_CHARGER_SHOW_PERCENTAGE := true
 
-TARGET_RECOVERY_UPDATER_LIBS += librecovery_updater_manta
-TARGET_RELEASETOOLS_EXTENSIONS := device/samsung/manta
 BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_23x41.h\"
 
 # Default card id for USB audio
