@@ -27,10 +27,6 @@ vendor/secapp/020a0000000000000000000000000000.drbin
 vendor/secapp/07060000000000000000000000000000.tlbin
 vendor/secapp/ffffffff000000000000000000000005.tlbin
 
-# SoundFX
-etc/fmas_eq.dat
-etc/soundfx/libfmas.so
-
 # TP firmware
 vendor/firmware/maxtouch.fw
 
