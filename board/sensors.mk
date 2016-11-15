@@ -1,0 +1,2 @@
+# Sensors
+BOARD_INV_LIBMLLITE_FROM_SOURCE := true
