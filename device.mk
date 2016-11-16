@@ -147,10 +147,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     power.manta
 
-# Filesystem management tools
-PRODUCT_PACKAGES += \
-    e2fsck
-
 PRODUCT_PROPERTY_OVERRIDES := \
     wifi.interface=wlan0 \
     ro.opengles.version=196609 \
