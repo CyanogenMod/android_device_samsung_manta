@@ -9,9 +9,6 @@ PRODUCT_RELEASE_NAME := Nexus10
 # Inherit some common CM stuff.
 $(call inherit-product, vendor/cm/config/common_mini_tablet_wifionly.mk)
 
-# Enhanced NFC
-$(call inherit-product, vendor/cm/config/nfc_enhanced.mk)
-
 # Inherit device configuration
 $(call inherit-product, device/samsung/manta/full_manta.mk)
 
