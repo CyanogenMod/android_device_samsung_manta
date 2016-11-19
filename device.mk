@@ -194,7 +194,6 @@ PRODUCT_PACKAGES += \
     Gello
 
 $(call inherit-product-if-exists, hardware/samsung_slsi/exynos5/exynos5.mk)
-$(call inherit-product-if-exists, vendor/samsung_slsi/exynos5/exynos5-vendor.mk)
 $(call inherit-product-if-exists, vendor/samsung/manta/device-vendor.mk)
 
 $(call inherit-product-if-exists, hardware/broadcom/wlan/bcmdhd/firmware/bcm4324/device-bcm.mk)
