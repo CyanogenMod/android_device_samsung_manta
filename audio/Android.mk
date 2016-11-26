@@ -20,13 +20,19 @@ LOCAL_MODULE := audio.primary.manta
 LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_SRC_FILES := \
 	audio_hw.c
+
 LOCAL_C_INCLUDES += \
+	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr/include \
 	external/tinyalsa/include \
 	hardware/samsung_slsi/exynos5/include \
 	device/samsung/manta/bubblelevel \
 	device/samsung/manta/voicefx \
 	$(call include-path-for, audio-utils) \
 	$(call include-path-for, audio-route)
+
+LOCAL_ADDITIONAL_DEPENDENCIES := \
+	$(TARGET_OUT_INTERMEDIATES)/KERNEL_OBJ/usr
+
 LOCAL_CFLAGS := -Wno-unused-parameter
 LOCAL_SHARED_LIBRARIES := liblog libcutils libtinyalsa libaudioutils libbubblelevel \
 	libaudience_voicefx libaudioroute
